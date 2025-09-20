@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Volunteer Dashboard</title>
+     <style>
+        body { font-family: sans-serif; padding: 2em; }
+        .dashboard-container { display: flex; gap: 2em; }
+        .section { flex: 1; border: 1px solid #ccc; padding: 1em; }
+        button { padding: 5px 10px; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    </style>
+</head>
+<body>
+    <h1>Volunteer Dashboard</h1>
+    <h2>Welcome, {{ user.volunteer_profile.full_name }}!</h2>
+    <a href="{% url 'logout' %}"><button>Logout</button></a>
+    <hr>
+
+    <div class="dashboard-container">
+        <div class="section">
+            <h3>Register with an NGO</h3>
+            <table>
+                <thead>
+                    <tr><th>NGO Name</th><th>Action</th></tr>
+                </thead>
+                <tbody>
+                    {% for ngo in available_ngos %}
+                    <tr>
+                        <td>{{ ngo.ngo_name }}</td>
+                        <td>
+                            <a href="{% url 'register_with_ngo' ngo.pk %}"><button>Register</button></a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="2">There are no new NGOs to register with.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h3>My Registered NGOs</h3>
+            <ul>
+                {% for ngo in registered_ngos %}
+                <li>{{ ngo.ngo_name }}</li>
+                {% empty %}
+                <li>You have not registered with any NGOs yet.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    
+    <div class="section" style="margin-top: 2em;">
+        <h3>Available Donation Camps</h3>
+        <table>
+            <thead>
+                <tr><th>Camp Name</th><th>NGO</th><th>Location</th><th>Starts</th></tr>
+            </thead>
+            <tbody>
+                {% for camp in camps %}
+                <tr>
+                    <td>{{ camp.name }}</td>
+                    <td>{{ camp.ngo.ngo_name }}</td>
+                    <td>{{ camp.location_address }}</td>
+                    <td>{{ camp.start_time|date:"d M Y, H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4">There are no active camps from your registered NGOs.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>

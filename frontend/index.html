@@ -3,10 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connect2Give</title>
+    <title>Connect2Give - Home</title>
+    <style>
+        body { font-family: sans-serif; padding: 2em; line-height: 1.6; }
+        button { padding: 10px 15px; font-size: 16px; cursor: pointer; margin-right: 10px; }
+    </style>
 </head>
 <body>
-    <h1>Welcome to Connect2Give</h1>
-    <p>If you can see this, your Django project is successfully configured to render HTML files!</p>
+
+    {% if user.is_authenticated %}
+        {# This content is shown ONLY to logged-in users #}
+        
+        <h1>Welcome back, {{ user.username }}!</h1>
+        <p>You are logged in as a: <strong>{{ user.get_user_type_display }}</strong>.</p>
+        
+        {# Display the correct dashboard link based on the user's role #}
+        {% if user.user_type == 'RESTAURANT' %}
+            <a href="{% url 'restaurant_dashboard' %}"><button>Go to My Dashboard</button></a>
+        {% elif user.user_type == 'NGO' %}
+            <a href="{% url 'ngo_dashboard' %}"><button>Go to My Dashboard</button></a>
+        {% elif user.user_type == 'VOLUNTEER' %}
+            <a href="{% url 'volunteer_dashboard' %}"><button>Go to My Dashboard</button></a>
+        {% endif %}
+        
+        <br><br>
+        <hr>
+        <br>
+        <a href="{% url 'logout' %}"><button>Logout</button></a>
+
+    {% else %}
+        {# This content is shown ONLY to guests (not logged-in users) #}
+
+        <h1>Welcome to Connect2Give</h1>
+        <p>The platform connecting restaurants with surplus food to NGOs and volunteers who can deliver it to those in need.</p>
+        <br>
+        <a href="{% url 'login_page' %}"><button>Login</button></a>
+        <a href="{% url 'register_page' %}"><button>Register</button></a>
+    {% endif %}
+
 </body>
 </html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NGO Dashboard</title>
+    <style>
+        body { font-family: sans-serif; padding: 2em; }
+        .dashboard-container { display: flex; gap: 2em; }
+        .section { flex: 1; border: 1px solid #ccc; padding: 1em; }
+        .form-group { margin-bottom: 1em; }
+        label { display: block; }
+        input, textarea { width: 95%; padding: 0.5em; }
+        button { padding: 10px 15px; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    </style>
+</head>
+<body>
+    <h1>NGO Dashboard</h1>
+    <h2>Welcome, {{ user.ngo_profile.ngo_name }}!</h2>
+    <a href="{% url 'logout' %}"><button>Logout</button></a>
+    <hr>
+
+    <div class="dashboard-container">
+        <div class="section">
+            <h3>Create a New Donation Camp</h3>
+            <form method="POST" action="{% url 'ngo_dashboard' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    {{ form.name.label_tag }}
+                    {{ form.name }}
+                </div>
+                <div class="form-group">
+                    {{ form.location_address.label_tag }}
+                    {{ form.location_address }}
+                </div>
+                <div class="form-group">
+                    {{ form.start_time.label_tag }}
+                    {{ form.start_time }}
+                </div>
+                <div class="form-group">
+                    {{ form.end_time.label_tag }}
+                    {{ form.end_time }}
+                </div>
+                <button type="submit">Create Camp</button>
+            </form>
+        </div>
+
+        <div class="section">
+            <h3>My Active Camps</h3>
+            <table>
+                <thead>
+                    <tr><th>Name</th><th>Location</th><th>Starts</th></tr>
+                </thead>
+                <tbody>
+                    {% for camp in camps %}
+                    <tr>
+                        <td>{{ camp.name }}</td>
+                        <td>{{ camp.location_address }}</td>
+                        <td>{{ camp.start_time|date:"d M Y, H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3">You have not created any camps yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h3>My Registered Volunteers</h3>
+            <ul>
+                {% for volunteer in volunteers %}
+                <li>{{ volunteer.full_name }} ({{ volunteer.user.email }})</li>
+                {% empty %}
+                <li>No volunteers have registered with you yet.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

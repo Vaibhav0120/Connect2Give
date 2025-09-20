@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Dashboard</title>
+</head>
+<body>
+    <h1>Restaurant Dashboard</h1>
+    <h2>Welcome, {{ user.restaurant_profile.restaurant_name }}!</h2>
+    <p>This is your space to post new food donations and manage existing ones.</p>
+    <br>
+    <a href="{% url 'logout' %}"><button>Logout</button></a>
+</body>
+</html>

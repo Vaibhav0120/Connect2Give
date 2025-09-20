@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -19,7 +19,7 @@
         <div class="form-group">
             <label for="user_type">I am a:</label>
             <select name="user_type" id="user_type" onchange="toggleProfileFields()">
-                <option value="DONOR">Donor</option>
+                <option value="RESTAURANT">Restaurant (Donor)</option>
                 <option value="NGO">NGO</option>
                 <option value="VOLUNTEER">Volunteer</option>
             </select>
@@ -35,6 +35,24 @@
         <div class="form-group">
             <label for="password">Password:</label>
             <input type="password" name="password" required>
+        </div>
+
+        <!-- Restaurant Specific Fields -->
+        <div id="restaurant-fields" class="hidden">
+            <hr>
+            <h3>Restaurant Information</h3>
+            <div class="form-group">
+                <label for="restaurant_name">Restaurant Name:</label>
+                <input type="text" name="restaurant_name">
+            </div>
+             <div class="form-group">
+                <label for="address">Address:</label>
+                <textarea name="restaurant_address" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="phone_number">Phone Number:</label>
+                <input type="text" name="restaurant_phone_number">
+            </div>
         </div>
 
         <!-- NGO Specific Fields -->
@@ -61,7 +79,7 @@
 
         <!-- Volunteer Specific Fields -->
         <div id="volunteer-fields" class="hidden">
-            <hr>
+           <hr>
             <h3>Volunteer Information</h3>
             <div class="form-group">
                 <label for="full_name">Full Name:</label>
@@ -82,18 +100,41 @@
     <script>
         function toggleProfileFields() {
             const userType = document.getElementById('user_type').value;
+            
+            // Get all the field sections
+            const restaurantFields = document.getElementById('restaurant-fields');
             const ngoFields = document.getElementById('ngo-fields');
             const volunteerFields = document.getElementById('volunteer-fields');
             
-            ngoFields.classList.add('hidden');
-            volunteerFields.classList.add('hidden');
+            // Get all the inputs within those sections
+            const restaurantInputs = restaurantFields.querySelectorAll('input, textarea');
+            const ngoInputs = ngoFields.querySelectorAll('input, textarea');
+            const volunteerInputs = volunteerFields.querySelectorAll('input, textarea');
 
-            if (userType === 'NGO') {
+            // First, hide all sections and make their fields NOT required
+            restaurantFields.classList.add('hidden');
+            restaurantInputs.forEach(input => input.required = false);
+
+            ngoFields.classList.add('hidden');
+            ngoInputs.forEach(input => input.required = false);
+
+            volunteerFields.classList.add('hidden');
+            volunteerInputs.forEach(input => input.required = false);
+
+            // Now, show the correct section and make its fields required
+            if (userType === 'RESTAURANT') {
+                restaurantFields.classList.remove('hidden');
+                restaurantInputs.forEach(input => input.required = true);
+            } else if (userType === 'NGO') {
                 ngoFields.classList.remove('hidden');
+                ngoInputs.forEach(input => input.required = true);
             } else if (userType === 'VOLUNTEER') {
                 volunteerFields.classList.remove('hidden');
+                volunteerInputs.forEach(input => input.required = true);
             }
         }
+        // Run the function when the page loads to set the correct initial state
+        toggleProfileFields();
     </script>
 </body>
 </html>

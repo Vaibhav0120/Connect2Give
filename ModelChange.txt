@@ -1,0 +1,10 @@
+CRITICAL NEXT STEPS: Database Reset
+Because the model relationships have changed, you must reset your database.
+
+Delete Old Migrations: In your portal/migrations/ folder, delete all files except __init__.py.
+
+Drop Database: In MySQL Workbench, run DROP DATABASE connect2give_db;.
+
+Re-create Database: In MySQL Workbench, run CREATE DATABASE connect2give_db;.
+
+Make and Run New Migrations: In your terminal, run python manage.py makemigrations portal and then python manage.py migrate.

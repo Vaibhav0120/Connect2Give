@@ -9,10 +9,28 @@
         .form-group { margin-bottom: 1em; }
         label { display: block; margin-bottom: 0.5em; }
         input { width: 100%; padding: 0.5em; max-width: 400px; box-sizing: border-box; }
+        /* New style for the error message */
+        .error-message {
+            color: #D8000C; /* Red color for errors */
+            background-color: #FFD2D2; /* Light red background */
+            border: 1px solid #D8000C;
+            padding: 10px;
+            margin-bottom: 1em;
+            border-radius: 5px;
+            max-width: 400px;
+        }
     </style>
 </head>
 <body>
     <h1>Login to Your Account</h1>
+
+    {# THIS IS THE NEW LOGIC #}
+    {% if error %}
+        <div class="error-message">
+            <strong>Error:</strong> {{ error }}
+        </div>
+    {% endif %}
+
     <form action="/login/" method="POST">
         {% csrf_token %}
         <div class="form-group">
