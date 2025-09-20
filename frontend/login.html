@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Connect2Give</title>
+     <style>
+        body { font-family: sans-serif; padding: 2em; }
+        .form-group { margin-bottom: 1em; }
+        label { display: block; margin-bottom: 0.5em; }
+        input { width: 100%; padding: 0.5em; max-width: 400px; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+    <h1>Login to Your Account</h1>
+    <form action="/login/" method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" name="username" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" name="password" required>
+        </div>
+        <button type="submit">Login</button>
+    </form>
+</body>
+</html>

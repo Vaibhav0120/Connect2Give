@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Third-party apps
     'rest_framework',
+    'rest_framework.authtoken',
     'corsheaders',
     'channels',
     # Your local apps
@@ -112,3 +113,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # CORS Settings for development
 CORS_ALLOW_ALL_ORIGINS = True
 
+# Tell Django to use the custom User model from the 'portal' app
+AUTH_USER_MODEL = 'portal.User'

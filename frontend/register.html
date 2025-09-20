@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Connect2Give</title>
+    <style>
+        body { font-family: sans-serif; padding: 2em; }
+        .form-group { margin-bottom: 1em; }
+        label { display: block; margin-bottom: 0.5em; }
+        input, select, textarea { width: 100%; padding: 0.5em; max-width: 400px; box-sizing: border-box; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <h1>Register a New Account</h1>
+    <form action="/register/" method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="user_type">I am a:</label>
+            <select name="user_type" id="user_type" onchange="toggleProfileFields()">
+                <option value="DONOR">Donor</option>
+                <option value="NGO">NGO</option>
+                <option value="VOLUNTEER">Volunteer</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="username">Username:</label>
+            <input type="text" name="username" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" name="password" required>
+        </div>
+
+        <!-- NGO Specific Fields -->
+        <div id="ngo-fields" class="hidden">
+            <hr>
+            <h3>NGO Information</h3>
+            <div class="form-group">
+                <label for="ngo_name">NGO Name:</label>
+                <input type="text" name="ngo_name">
+            </div>
+            <div class="form-group">
+                <label for="registration_number">Registration Number:</label>
+                <input type="text" name="registration_number">
+            </div>
+            <div class="form-group">
+                <label for="address">Address:</label>
+                <textarea name="address" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="contact_person">Contact Person:</label>
+                <input type="text" name="contact_person">
+            </div>
+        </div>
+
+        <!-- Volunteer Specific Fields -->
+        <div id="volunteer-fields" class="hidden">
+            <hr>
+            <h3>Volunteer Information</h3>
+            <div class="form-group">
+                <label for="full_name">Full Name:</label>
+                <input type="text" name="full_name">
+            </div>
+            <div class="form-group">
+                <label for="phone_number">Phone Number:</label>
+                <input type="text" name="phone_number">
+            </div>
+            <div class="form-group">
+                <label for="skills">Skills (e.g., Driving, Cooking):</label>
+                <input type="text" name="skills">
+            </div>
+        </div>
+        <button type="submit">Register</button>
+    </form>
+
+    <script>
+        function toggleProfileFields() {
+            const userType = document.getElementById('user_type').value;
+            const ngoFields = document.getElementById('ngo-fields');
+            const volunteerFields = document.getElementById('volunteer-fields');
+            
+            ngoFields.classList.add('hidden');
+            volunteerFields.classList.add('hidden');
+
+            if (userType === 'NGO') {
+                ngoFields.classList.remove('hidden');
+            } else if (userType === 'VOLUNTEER') {
+                volunteerFields.classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
