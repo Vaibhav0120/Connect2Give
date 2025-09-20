@@ -1,0 +1,22 @@
+# Django Framework
+django==4.2.5
+
+# Pure Python MySQL Database Connector (replaces mysqlclient)
+PyMySQL==1.1.0
+
+# Django REST Framework for creating APIs
+djangorestframework==3.14.0
+
+# For handling real-time features like chat (WebSockets)
+channels==4.0.0
+channels-redis==4.1.0
+
+# For handling Cross-Origin Resource Sharing (CORS)
+django-cors-headers==4.3.1
+
+# For geospatial calculations
+geopy==2.4.1
+
+# For managing environment variables from a .env file
+python-dotenv==1.0.0
+django-environ==0.11.2
