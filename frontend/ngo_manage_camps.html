@@ -2,157 +2,398 @@
 
 {% block title %}Manage Camps - {{ block.super }}{% endblock %}
 
+{% block page_title %}Manage Camps{% endblock %}
+{% block page_description %}Create new camps and manage your existing ones{% endblock %}
+
 {% block head %}
     {{ block.super }}
+    <!-- Added modern tabbed interface styling -->
     <style>
-        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 2em;}
-        .section { border: 1px solid #ccc; padding: 1em; margin-bottom: 2em; background-color: white; border-radius: 8px;}
-        .form-group { margin-bottom: 1em; }
-        label { display: block; font-weight: bold; }
-        input, textarea, select { width: 100%; padding: 0.8em; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-        .action-button { padding: 5px 10px; font-size: 14px; }
-        #camp-map {
-            height: 350px;
-            margin-top: 1em;
-            margin-bottom: 1em;
-            border-radius: 5px;
-            border: 1px solid #ccc;
+        .camps-container {
+            max-width: 1200px;
         }
+
+        /* Tab navigation styling */
+        .tab-navigation {
+            display: flex;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 0.5rem;
+            margin-bottom: 2rem;
+            gap: 0.5rem;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 0.875rem 1.5rem;
+            background-color: transparent;
+            border: none;
+            border-radius: calc(var(--radius) - 2px);
+            color: var(--text-secondary);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .tab-button:hover {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .tab-button.active {
+            background-color: var(--accent-blue);
+            color: white;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+        }
+
+        /* Tab content styling */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .content-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.875rem;
+            border-radius: var(--radius);
+            transition: all 0.2s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
         .address-group {
             display: flex;
+            gap: 1rem;
             align-items: flex-end;
-            gap: 10px;
         }
+
         .address-group textarea {
-            flex-grow: 1;
+            flex: 1;
         }
+
         .address-group button {
-            width: auto;
             flex-shrink: 0;
+            height: fit-content;
+        }
+
+        #camp-map {
+            height: 350px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            margin: 1rem 0;
+        }
+
+        /* Modern table styling */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--bg-card);
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .data-table th {
+            background-color: var(--bg-secondary);
+            color: var(--text-secondary);
+            font-weight: 600;
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tr:hover {
+            background-color: var(--bg-secondary);
+        }
+
+        .action-button {
+            background-color: var(--accent-green);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: calc(var(--radius) - 2px);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-button:hover {
+            background-color: #059669;
+            transform: translateY(-1px);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 3rem;
+            font-style: italic;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .tab-navigation {
+                flex-direction: column;
+            }
+            
+            .address-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .data-table {
+                font-size: 0.875rem;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 0.75rem 0.5rem;
+            }
         }
     </style>
 {% endblock %}
 
 {% block ngo_content %}
-    <h2>Manage Donation Camps</h2>
-    <p>Use this page to create new camps and manage your existing ones.</p>
+    <div class="camps-container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="success-message">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
 
-    <div class="section">
-        <h3>Create a New Donation Camp</h3>
-        <form method="POST" action="{% url 'ngo_manage_camps' %}">
-            {% csrf_token %}
-            
-            {{ form.latitude }}
-            {{ form.longitude }}
+        <!-- Added tabbed navigation interface -->
+        <div class="tab-navigation">
+            <button class="tab-button active" onclick="switchTab('create-camp')">Create Camp</button>
+            <button class="tab-button" onclick="switchTab('camps-history')">Camps History</button>
+            <button class="tab-button" onclick="switchTab('donation-verification')">Donation Verification</button>
+        </div>
 
-            <div class="form-group">
-                {{ form.name.label_tag }}
-                {{ form.name }}
+        <!-- Create Camp Tab -->
+        <div id="create-camp" class="tab-content active">
+            <div class="content-card">
+                <h3 style="margin-bottom: 1.5rem; color: var(--text-primary);">Create a New Donation Camp</h3>
+                <form method="POST" action="{% url 'ngo_manage_camps' %}">
+                    {% csrf_token %}
+                    
+                    {{ form.latitude }}
+                    {{ form.longitude }}
+
+                    <div class="form-group">
+                        {{ form.name.label_tag }}
+                        {{ form.name }}
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ form.location_address.label_tag }}
+                        <div class="address-group">
+                            {{ form.location_address }}
+                            <button type="button" onclick="findAddressOnMap()">Find Location</button>
+                        </div>
+                    </div>
+
+                    <div id="camp-map"></div>
+                    <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.5rem;">
+                        Type an address and click "Find Location", or click on the map to set the location.
+                    </p>
+
+                    <div class="form-group">
+                        {{ form.start_time.label_tag }}
+                        {{ form.start_time }}
+                    </div>
+                    
+                    <div style="text-align: right;">
+                        <button type="submit">Create Camp</button>
+                    </div>
+                </form>
             </div>
-            
-            <div class="form-group">
-                {{ form.location_address.label_tag }}
-                <div class="address-group">
-                    {{ form.location_address }}
-                    <button type="button" onclick="findAddressOnMap()">Find</button>
-                </div>
+        </div>
+
+        <!-- Camps History Tab -->
+        <div id="camps-history" class="tab-content">
+            <div class="content-card">
+                <h3 style="margin-bottom: 1.5rem; color: var(--text-primary);">Active Camps</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Camp Name</th>
+                            <th>Location</th>
+                            <th>Start Time</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for camp in active_camps %}
+                        <tr>
+                            <td><strong>{{ camp.name }}</strong></td>
+                            <td>{{ camp.location_address }}</td>
+                            <td>{{ camp.start_time|date:"d M Y, H:i" }}</td>
+                            <td><span style="color: var(--accent-green); font-weight: 500;">Active</span></td>
+                            <td>
+                                <form action="{% url 'mark_camp_as_completed' camp.pk %}" method="POST" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="action-button">Mark as Completed</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="empty-state">You have no active camps at the moment.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
 
-            <div id="camp-map"></div>
-            <small>Type an address and click "Find", or click on the map to set the location.</small>
-
-            <div class="form-group" style="margin-top: 1em;">
-                {{ form.start_time.label_tag }}
-                {{ form.start_time }}
+            <div class="content-card">
+                <h3 style="margin-bottom: 1.5rem; color: var(--text-primary);">Completed Camps</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Camp Name</th>
+                            <th>Location</th>
+                            <th>Completed At</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for camp in completed_camps %}
+                        <tr>
+                            <td><strong>{{ camp.name }}</strong></td>
+                            <td>{{ camp.location_address }}</td>
+                            <td>{{ camp.completed_at|date:"d M Y, H:i" }}</td>
+                            <td><span style="color: var(--text-muted); font-weight: 500;">Completed</span></td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="empty-state">You have no completed camps yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-            <button type="submit">Create Camp</button>
-        </form>
-    </div>
+        </div>
 
-    <div class="section">
-        <h3>Donations Pending Verification</h3>
-        <table>
-            <thead>
-                <tr><th>From</th><th>Food</th><th>Volunteer</th><th>Delivered To</th><th>Action</th></tr>
-            </thead>
-            <tbody>
-                {% for donation in donations_to_verify %}
-                <tr>
-                    <td>{{ donation.restaurant.restaurant_name }}</td>
-                    <td>{{ donation.food_description }}</td>
-                    <td>{{ donation.assigned_volunteer.full_name }}</td>
-                    <td>{{ donation.target_camp.name }}</td>
-                    <td>
-                        <form action="{% url 'confirm_delivery' donation.pk %}" method="POST" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="action-button">Confirm Delivery</button>
-                        </form>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="5">There are no deliveries awaiting your verification.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <div class="section">
-        <h3>My Active Camps</h3>
-        <table>
-            <thead>
-                <tr><th>Name</th><th>Location</th><th>Starts</th><th>Action</th></tr>
-            </thead>
-            <tbody>
-                {% for camp in active_camps %}
-                <tr>
-                    <td>{{ camp.name }}</td>
-                    <td>{{ camp.location_address }}</td>
-                    <td>{{ camp.start_time|date:"d M Y, H:i" }}</td>
-                    <td>
-                        <form action="{% url 'mark_camp_as_completed' camp.pk %}" method="POST" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="action-button">Mark as Completed</button>
-                        </form>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="4">You have no active camps.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <div class="section">
-        <h3>My Completed Camps</h3>
-        <table>
-            <thead>
-                <tr><th>Name</th><th>Location</th><th>Completed At</th></tr>
-            </thead>
-            <tbody>
-                {% for camp in completed_camps %}
-                <tr>
-                    <td>{{ camp.name }}</td>
-                    <td>{{ camp.location_address }}</td>
-                    <td>{{ camp.completed_at|date:"d M Y, H:i" }}</td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="3">You have no completed camps yet.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <!-- Donation Verification Tab -->
+        <div id="donation-verification" class="tab-content">
+            <div class="content-card">
+                <h3 style="margin-bottom: 1.5rem; color: var(--text-primary);">Donations Pending Verification</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Restaurant</th>
+                            <th>Food Description</th>
+                            <th>Volunteer</th>
+                            <th>Delivered To</th>
+                            <th>Delivered At</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for donation in donations_to_verify %}
+                        <tr>
+                            <td><strong>{{ donation.restaurant.restaurant_name }}</strong></td>
+                            <td>{{ donation.food_description }}</td>
+                            <td>{{ donation.assigned_volunteer.full_name }}</td>
+                            <td>{{ donation.target_camp.name }}</td>
+                            <td>{{ donation.delivered_at|date:"d M Y, H:i" }}</td>
+                            <td>
+                                <form action="{% url 'confirm_delivery' donation.pk %}" method="POST" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="action-button">Confirm Delivery</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="empty-state">There are no deliveries awaiting your verification.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 {% endblock %}
 
-
 {% block scripts %}
     {{ block.super }}
+    <!-- Added tab switching functionality and map initialization -->
     <script>
+        // Tab switching functionality
+        function switchTab(tabId) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Remove active class from all tab buttons
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => button.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById(tabId).classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+            
+            // Reinitialize map if switching to create camp tab
+            if (tabId === 'create-camp') {
+                setTimeout(() => {
+                    if (map) {
+                        map.invalidateSize();
+                    }
+                }, 100);
+            }
+        }
+
         // Initialize map centered on Delhi
-        const map = L.map('camp-map').setView([28.6306, 77.2762], 12); // Centered on Laxmi Nagar
+        const map = L.map('camp-map').setView([28.6306, 77.2762], 12);
         let marker = null;
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap'
+            attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 
         const latField = document.getElementById('id_latitude');

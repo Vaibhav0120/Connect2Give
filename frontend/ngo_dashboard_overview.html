@@ -2,57 +2,317 @@
 
 {% block title %}Dashboard Overview - {{ block.super }}{% endblock %}
 
+{% block page_title %}Dashboard Overview{% endblock %}
+{% block page_description %}Summary of your organization's activity on Connect2Give{% endblock %}
+
 {% block head %}
-    {{ block.super }} {# This inherits the styles from ngo_base.html #}
+    {{ block.super }}
+    <!-- Updated styling for light theme and added chart containers -->
     <style>
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5em;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
+
         .stat-card {
-            background-color: #ffffff;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 1.5em;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow);
         }
+
+        .stat-card:hover {
+            background-color: var(--bg-card-hover);
+            border-color: var(--border-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-green));
+        }
+
         .stat-card h3 {
-            margin-top: 0;
-            color: #555;
-            font-size: 1em;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 600;
             text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+            margin-top: 0;
         }
-        .stat-card .stat-number {
-            font-size: 2.5em;
-            font-weight: bold;
-            color: #007bff;
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+            line-height: 1;
+        }
+
+        .stat-card:nth-child(1) .stat-number { color: var(--accent-blue); }
+        .stat-card:nth-child(2) .stat-number { color: var(--accent-green); }
+        .stat-card:nth-child(3) .stat-number { color: var(--accent-orange); }
+        .stat-card:nth-child(4) .stat-number { color: var(--accent-purple); }
+
+        .stat-card:nth-child(1)::before { background: var(--accent-blue); }
+        .stat-card:nth-child(2)::before { background: var(--accent-green); }
+        .stat-card:nth-child(3)::before { background: var(--accent-orange); }
+        .stat-card:nth-child(4)::before { background: var(--accent-purple); }
+
+        /* Added chart container styles */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-container {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .chart-container h3 {
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+        }
+
+        .chart-canvas {
+            max-height: 300px;
+        }
+
+        .recent-activity {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .recent-activity h3 {
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+        }
+
+        .activity-item {
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            border: 1px solid var(--border);
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-time {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+            
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 {% endblock %}
 
-
 {% block ngo_content %}
-    <h2>Dashboard Overview</h2>
-    <p>Here is a summary of your organization's activity on the Connect2Give platform.</p>
-
     <div class="stats-grid">
         <div class="stat-card">
             <h3>Active Camps</h3>
-            <p class="stat-number">{{ stats.active_camps }}</p>
+            <p class="stat-number">{{ stats.active_camps|default:"0" }}</p>
         </div>
         <div class="stat-card">
             <h3>Registered Volunteers</h3>
-            <p class="stat-number">{{ stats.total_volunteers }}</p>
+            <p class="stat-number">{{ stats.total_volunteers|default:"0" }}</p>
         </div>
         <div class="stat-card">
             <h3>Deliveries to Verify</h3>
-            <p class="stat-number">{{ stats.donations_to_verify }}</p>
+            <p class="stat-number">{{ stats.donations_to_verify|default:"0" }}</p>
         </div>
         <div class="stat-card">
             <h3>Total Donations Received</h3>
-            <p class="stat-number">{{ stats.total_donations_received }}</p>
+            <p class="stat-number">{{ stats.total_donations_received|default:"0" }}</p>
         </div>
     </div>
+
+    <!-- Added interactive charts section -->
+    <div class="charts-grid">
+        <div class="chart-container">
+            <h3>Monthly Donations Trend</h3>
+            <canvas id="donationsChart" class="chart-canvas"></canvas>
+        </div>
+        <div class="chart-container">
+            <h3>Donation Status Distribution</h3>
+            <canvas id="statusChart" class="chart-canvas"></canvas>
+        </div>
+    </div>
+
+    <div class="recent-activity">
+        <h3>Recent Activity</h3>
+        <div class="activity-item">
+            <div class="activity-icon">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/>
+                </svg>
+            </div>
+            <div class="activity-content">
+                <div class="activity-title">New volunteer registered</div>
+                <div class="activity-time">2 hours ago</div>
+            </div>
+        </div>
+        <div class="activity-item">
+            <div class="activity-icon">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h12v8H4V6z"/>
+                </svg>
+            </div>
+            <div class="activity-content">
+                <div class="activity-title">Donation camp created</div>
+                <div class="activity-time">5 hours ago</div>
+            </div>
+        </div>
+        <div class="activity-item">
+            <div class="activity-icon">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </div>
+            <div class="activity-content">
+                <div class="activity-title">Donation delivery verified</div>
+                <div class="activity-time">1 day ago</div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <!-- Added Chart.js initialization for dashboard graphs -->
+    <script>
+        // Monthly Donations Trend Chart
+        const donationsCtx = document.getElementById('donationsChart').getContext('2d');
+        new Chart(donationsCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Donations Received',
+                    data: [12, 19, 15, 25, 22, 30],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#e2e8f0'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: '#e2e8f0'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Donation Status Distribution Chart
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Pending', 'Accepted', 'Delivered', 'Verified'],
+                datasets: [{
+                    data: [15, 25, 35, 25],
+                    backgroundColor: [
+                        '#f59e0b',
+                        '#3b82f6',
+                        '#10b981',
+                        '#8b5cf6'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    }
+                }
+            }
+        });
+    </script>
 {% endblock %}
