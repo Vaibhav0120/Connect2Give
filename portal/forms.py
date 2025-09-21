@@ -3,7 +3,7 @@ from .models import DonationCamp, Donation
 
 class DonationCampForm(forms.ModelForm):
     """
-    UPDATED: Simplified by removing the end_time field.
+    UPDATED: Now includes hidden fields for coordinates.
     """
     start_time = forms.DateTimeField(
         widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
@@ -12,10 +12,16 @@ class DonationCampForm(forms.ModelForm):
 
     class Meta:
         model = DonationCamp
-        fields = ['name', 'location_address', 'start_time'] # end_time removed
+        fields = ['name', 'location_address', 'start_time', 'latitude', 'longitude']
         labels = {
             'name': 'Camp Name',
             'location_address': 'Camp Location Address',
+        }
+        # This makes the coordinate fields hidden in the HTML,
+        # so they can be controlled by JavaScript.
+        widgets = {
+            'latitude': forms.HiddenInput(),
+            'longitude': forms.HiddenInput(),
         }
 
 class DonationForm(forms.ModelForm):
