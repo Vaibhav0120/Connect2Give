@@ -1,23 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Volunteer Dashboard</title>
-     <style>
-        body { font-family: sans-serif; padding: 2em; }
+{% extends 'base.html' %}
+
+{% block title %}Volunteer Dashboard - Connect2Give{% endblock %}
+
+{% block head %}
+    <style>
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 2em; }
-        .section { border: 1px solid #ccc; padding: 1em; margin-bottom: 2em; }
-        button { padding: 5px 10px; cursor: pointer; }
-        table { width: 100%; border-collapse: collapse; margin-top: 1em; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .section { border: 1px solid #ccc; padding: 1em; margin-bottom: 2em; background-color: white; border-radius: 8px;}
+        #map { height: 500px; margin-bottom: 2em; border: 1px solid #ccc; border-radius: 8px; }
+        h1, h2, h3 { color: #333; }
     </style>
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
     <h1>Volunteer Dashboard</h1>
     <h2>Welcome, {{ user.volunteer_profile.full_name }}!</h2>
     <a href="{% url 'logout' %}"><button>Logout</button></a>
-    <hr>
+    <hr style="margin-top: 1em; margin-bottom: 2em;">
+
+    <h3>Donations and Camps Map</h3>
+    <div id="map"></div>
 
     <div class="section">
         <h3>My Active Deliveries</h3>
@@ -33,9 +34,9 @@
                     <td>{{ donation.get_status_display }}</td>
                     <td>
                         {% if donation.status == 'ACCEPTED' %}
-                            <a href="{% url 'mark_as_collected' donation.pk %}"><button>Mark as Collected</button></a>
+                            <a href="{% url 'mark_as_collected' donation.pk %}"><button class="action-button">Mark as Collected</button></a>
                         {% elif donation.status == 'COLLECTED' %}
-                            <a href="{% url 'select_delivery_camp' donation.pk %}"><button>Deliver to Camp</button></a>
+                            <a href="{% url 'select_delivery_camp' donation.pk %}"><button class="action-button">Deliver to Camp</button></a>
                         {% endif %}
                     </td>
                 </tr>
@@ -59,7 +60,7 @@
                     <td>{{ donation.food_description }}</td>
                     <td>{{ donation.pickup_address }}</td>
                     <td>
-                        <a href="{% url 'accept_donation' donation.pk %}"><button>Claim for Pickup</button></a>
+                        <a href="{% url 'accept_donation' donation.pk %}"><button class="action-button">Claim for Pickup</button></a>
                     </td>
                 </tr>
                 {% empty %}
@@ -81,7 +82,7 @@
                     <tr>
                         <td>{{ ngo.ngo_name }}</td>
                         <td>
-                            <a href="{% url 'register_with_ngo' ngo.pk %}"><button>Register</button></a>
+                            <a href="{% url 'register_with_ngo' ngo.pk %}"><button class="action-button">Register</button></a>
                         </td>
                     </tr>
                     {% empty %}
@@ -123,7 +124,6 @@
         </table>
     </div>
 
-    <!-- NEW SECTION FOR DELIVERY HISTORY -->
     <div class="section">
         <h3>My Delivery History</h3>
         <table>
@@ -144,6 +144,58 @@
             </tbody>
         </table>
     </div>
+{% endblock %}
 
-</body>
-</html>
+{% block scripts %}
+<script>
+    // Initialize the map and set its view to your location, Delhi
+    const map = L.map('map').setView([28.644800, 77.216721], 11);
+
+    // Add a tile layer from OpenStreetMap (free to use)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // Parse the data passed from the Django view
+    // The |safe filter is crucial to prevent Django from escaping the JSON string
+    const donations = JSON.parse('{{ donations_map_data|safe }}');
+    const camps = JSON.parse('{{ camps_map_data|safe }}');
+
+    // Create custom icons for better visual distinction
+    const restaurantIcon = L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/3448/3448609.png',
+        iconSize: [38, 38],
+        iconAnchor: [19, 38],
+        popupAnchor: [0, -38]
+    });
+
+    const campIcon = L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/931/931949.png',
+        iconSize: [38, 38],
+        iconAnchor: [19, 38],
+        popupAnchor: [0, -38]
+    });
+
+    // Add Donation Markers to the Map
+    donations.forEach(donation => {
+        const marker = L.marker([donation.lat, donation.lon], { icon: restaurantIcon }).addTo(map);
+        marker.bindPopup(
+            `<b>${donation.name}</b><br>` +
+            `Food: ${donation.food}<br>` +
+            `Address: ${donation.pickup_address}<br>` +
+            `<br><a href="/donation/accept/${donation.id}/"><button class='action-button'>Claim for Pickup</button></a>`
+        );
+    });
+
+    // Add Camp Markers to the Map
+    camps.forEach(camp => {
+        const marker = L.marker([camp.lat, camp.lon], { icon: campIcon }).addTo(map);
+        marker.bindPopup(
+            `<b>Camp: ${camp.name}</b><br>` +
+            `NGO: ${camp.ngo}<br>` +
+            `Address: ${camp.address}`
+        );
+    });
+
+</script>
+{% endblock %}

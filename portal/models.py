@@ -21,6 +21,9 @@ class RestaurantProfile(models.Model):
     restaurant_name = models.CharField(max_length=255)
     address = models.TextField()
     phone_number = models.CharField(max_length=15)
+    # NEW FIELDS FOR MAPS
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -32,6 +35,9 @@ class VolunteerProfile(models.Model):
     full_name = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     skills = models.CharField(max_length=255, blank=True, null=True, help_text="e.g., Driving, Cooking, Medical")
+    # NEW FIELDS FOR MAPS
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -43,6 +49,9 @@ class NGOProfile(models.Model):
     ngo_name = models.CharField(max_length=255)
     registration_number = models.CharField(max_length=100, unique=True)
     address = models.TextField()
+    # NEW FIELDS FOR MAPS
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
     contact_person = models.CharField(max_length=100)
     volunteers = models.ManyToManyField('VolunteerProfile', through='NGOVolunteer', related_name='registered_ngos')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -65,29 +74,25 @@ class NGOVolunteer(models.Model):
         return f"{self.volunteer.full_name} is a volunteer for {self.ngo.ngo_name}"
 
 class DonationCamp(models.Model):
-    """
-    SIMPLIFIED: Removed end_time, added completed_at.
-    """
     ngo = models.ForeignKey(NGOProfile, on_delete=models.CASCADE, related_name='camps')
     name = models.CharField(max_length=255)
     location_address = models.TextField()
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
     start_time = models.DateTimeField()
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(null=True, blank=True) # New field
+    completed_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.name} by {self.ngo.ngo_name}"
 
 class Donation(models.Model):
-    """
-    UPDATED: Added a new status for NGO verification.
-    """
     class DonationStatus(models.TextChoices):
         PENDING = 'PENDING', 'Pending Pickup'
         ACCEPTED = 'ACCEPTED', 'On its Way'
         COLLECTED = 'COLLECTED', 'Collected by Volunteer'
-        VERIFYING = 'VERIFYING', 'Pending Verification' # New status
+        VERIFYING = 'VERIFYING', 'Pending Verification'
         DELIVERED = 'DELIVERED', 'Delivered & Verified'
 
     restaurant = models.ForeignKey(RestaurantProfile, on_delete=models.CASCADE, related_name='donations')

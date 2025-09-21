@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+
+{% block title %}Register (Step 2 of 2) - Connect2Give{% endblock %}
+
+{% block head %}
+    <style>
+        .form-container { max-width: 500px; margin: 2em auto; padding: 2em; background-color: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 1em; }
+        label { display: block; margin-bottom: 0.5em; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 0.8em; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        .location-group button { width: auto; margin-top: 10px; background-color: #28a745; }
+        #location-status { margin-top: 10px; font-style: italic; color: green; }
+        .error-message { color: #dc3545; }
+        /* IMPROVED MINI-MAP STYLES */
+        #mini-map { 
+            height: 300px; /* Increased height to be more square */
+            width: 100%;
+            max-width: 450px; /* Adjusted width */
+            margin-top: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .hidden { display: none; }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="form-container">
+        <h1>Complete Your Profile</h1>
+        <p>Step 2 of 2: Profile Information</p>
+        <hr>
+
+        <form action="{% url 'register_step_2' %}" method="POST">
+            {% csrf_token %}
+            
+            <!-- Hidden fields to store coordinates -->
+            <input type="hidden" name="latitude" id="latitude-field">
+            <input type="hidden" name="longitude" id="longitude-field">
+
+            <!-- Django template logic to show the correct form section -->
+            {% if user_type == 'RESTAURANT' %}
+                <h3>Restaurant Information</h3>
+                <div class="form-group">
+                    <label for="restaurant_name">Restaurant Name:</label>
+                    <input type="text" name="restaurant_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="restaurant_address">Address:</label>
+                    <textarea name="restaurant_address" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="restaurant_phone_number">Phone Number:</label>
+                    <input type="text" name="restaurant_phone_number" required>
+                </div>
+            {% elif user_type == 'NGO' %}
+                <h3>NGO Information</h3>
+                <div class="form-group">
+                    <label for="ngo_name">NGO Name:</label>
+                    <input type="text" name="ngo_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="registration_number">Registration Number:</label>
+                    <input type="text" name="registration_number" required>
+                </div>
+                <div class="form-group">
+                    <label for="address">Address:</label>
+                    <textarea name="address" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="contact_person">Contact Person:</label>
+                    <input type="text" name="contact_person" required>
+                </div>
+            {% elif user_type == 'VOLUNTEER' %}
+                <h3>Volunteer Information</h3>
+                <div class="form-group">
+                    <label for="full_name">Full Name:</label>
+                    <input type="text" name="full_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone_number">Phone Number:</label>
+                    <input type="text" name="phone_number">
+                </div>
+                <div class="form-group">
+                    <label for="skills">Skills (e.g., Driving, Cooking):</label>
+                    <input type="text" name="skills">
+                </div>
+            {% endif %}
+
+            <div class="form-group location-group">
+                <hr>
+                <label>Set Your Location (Optional)</label>
+                <p>We need your location to show relevant information on the map.</p>
+                <button type="button" onclick="getLocation()">Get My Current Location</button>
+                <p id="location-status"></p>
+                <div id="mini-map" class="hidden"></div>
+            </div>
+
+            <button type="submit">Complete Registration</button>
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let map = null;
+    let marker = null;
+
+    function getLocation() {
+        const status = document.getElementById('location-status');
+        const latField = document.getElementById('latitude-field');
+        const lonField = document.getElementById('longitude-field');
+        const miniMapDiv = document.getElementById('mini-map');
+
+        status.textContent = 'Getting location...';
+        status.classList.remove('error-message');
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+                    
+                    latField.value = latitude;
+                    lonField.value = longitude;
+                    status.textContent = `Location captured: Lat ${latitude.toFixed(4)}, Lon ${longitude.toFixed(4)}`;
+
+                    miniMapDiv.classList.remove('hidden');
+
+                    if (!map) {
+                        map = L.map('mini-map').setView([latitude, longitude], 15);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '&copy; OpenStreetMap'
+                        }).addTo(map);
+                    } else {
+                        map.setView([latitude, longitude], 15);
+                    }
+
+                    if (!marker) {
+                        marker = L.marker([latitude, longitude]).addTo(map);
+                    } else {
+                        marker.setLatLng([latitude, longitude]);
+                    }
+                    // REMOVED .openPopup() to prevent the popup from showing
+                },
+                () => {
+                    status.textContent = 'Unable to retrieve your location. You can add it later from your profile.';
+                    status.classList.add('error-message');
+                    miniMapDiv.classList.add('hidden');
+                }
+            );
+        } else {
+            status.textContent = 'Geolocation is not supported by your browser.';
+            status.classList.add('error-message');
+            miniMapDiv.classList.add('hidden');
+        }
+    }
+</script>
+{% endblock %}

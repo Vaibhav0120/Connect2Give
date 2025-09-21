@@ -4,7 +4,14 @@ from . import views
 urlpatterns = [
     # Web page URLs
     path('', views.index, name='index'),
-    path('register/', views.register_page, name='register_page'),
+    
+    # OLD REGISTRATION URL (REMOVED)
+    # path('register/', views.register_page, name='register_page'), 
+    
+    # NEW MULTI-STEP REGISTRATION URLS
+    path('register/step-1/', views.register_step_1, name='register_step_1'),
+    path('register/step-2/', views.register_step_2, name='register_step_2'),
+
     path('login/', views.login_page, name='login_page'),
     path('logout/', views.logout_view, name='logout'),
     
@@ -20,8 +27,6 @@ urlpatterns = [
     path('donation/deliver/<int:donation_id>/', views.select_delivery_camp, name='select_delivery_camp'),
     path('donation/deliver/<int:donation_id>/to/<int:camp_id>/', views.mark_as_delivered, name='mark_as_delivered'),
     path('camp/complete/<int:camp_id>/', views.mark_camp_as_completed, name='mark_camp_as_completed'),
-
-    # NEW VERIFICATION URL
     path('donation/confirm_delivery/<int:donation_id>/', views.confirm_delivery, name='confirm_delivery'),
 
     # API URLs
