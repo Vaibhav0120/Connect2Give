@@ -14,18 +14,12 @@ from .serializers import UserSerializer
 from .models import User, RestaurantProfile, NGOProfile, VolunteerProfile, DonationCamp, Donation
 from .forms import DonationCampForm, DonationForm
 
-# --- Helper Function for Redirection ---
+# --- (Helper function, index, and auth views are unchanged) ---
 def get_user_dashboard_redirect(user):
-    if user.user_type == User.UserType.RESTAURANT:
-        return redirect('restaurant_dashboard')
-    elif user.user_type == User.UserType.NGO:
-        return redirect('ngo_dashboard')
-    elif user.user_type == User.UserType.VOLUNTEER:
-        return redirect('volunteer_dashboard')
-    else:
-        return redirect('index')
-
-# --- Web Page Views ---
+    if user.user_type == User.UserType.RESTAURANT: return redirect('restaurant_dashboard')
+    elif user.user_type == User.UserType.NGO: return redirect('ngo_dashboard')
+    elif user.user_type == User.UserType.VOLUNTEER: return redirect('volunteer_dashboard')
+    else: return redirect('index')
 def index(request):
     active_camps = DonationCamp.objects.filter(is_active=True).select_related('ngo')
     all_restaurants = RestaurantProfile.objects.filter(latitude__isnull=False, longitude__isnull=False)
@@ -33,47 +27,39 @@ def index(request):
     restaurants_map_data = [{"lat": r.latitude, "lon": r.longitude, "name": r.restaurant_name, "address": r.address} for r in all_restaurants]
     context = {'camps_map_data': json.dumps(camps_map_data), 'restaurants_map_data': json.dumps(restaurants_map_data)}
     return render(request, 'index.html', context)
-
 def register_step_1(request):
-    if request.user.is_authenticated:
-        return get_user_dashboard_redirect(request.user)
+    if request.user.is_authenticated: return get_user_dashboard_redirect(request.user)
     if request.method == 'POST':
         username = request.POST.get('username')
         email = request.POST.get('email')
-        if User.objects.filter(username=username).exists():
-            return render(request, 'register_step_1.html', {'error': 'Username already exists.'})
-        if User.objects.filter(email=email).exists():
-            return render(request, 'register_step_1.html', {'error': 'Email already registered.'})
+        if User.objects.filter(username=username).exists(): return render(request, 'register_step_1.html', {'error': 'Username already exists.'})
+        if User.objects.filter(email=email).exists(): return render(request, 'register_step_1.html', {'error': 'Email already registered.'})
         request.session['registration_data'] = {'username': username, 'email': email, 'password': request.POST.get('password'), 'user_type': request.POST.get('user_type')}
         return redirect('register_step_2')
     return render(request, 'register_step_1.html')
-
 def register_step_2(request):
-    if request.user.is_authenticated:
-        return get_user_dashboard_redirect(request.user)
+    if request.user.is_authenticated: return get_user_dashboard_redirect(request.user)
     registration_data = request.session.get('registration_data')
-    if not registration_data:
-        return redirect('register_step_1')
+    if not registration_data: return redirect('register_step_1')
     user_type = registration_data.get('user_type')
     if request.method == 'POST':
         latitude = request.POST.get('latitude') or None
         longitude = request.POST.get('longitude') or None
+        address = request.POST.get('address')
         user = User.objects.create_user(username=registration_data['username'], email=registration_data['email'], password=registration_data['password'], user_type=user_type)
         if user_type == User.UserType.RESTAURANT:
-            RestaurantProfile.objects.create(user=user, restaurant_name=request.POST.get('restaurant_name'), address=request.POST.get('restaurant_address'), phone_number=request.POST.get('restaurant_phone_number'), latitude=latitude, longitude=longitude)
+            RestaurantProfile.objects.create(user=user, restaurant_name=request.POST.get('restaurant_name'), address=address, phone_number=request.POST.get('restaurant_phone_number'), latitude=latitude, longitude=longitude)
         elif user_type == User.UserType.NGO:
-            NGOProfile.objects.create(user=user, ngo_name=request.POST.get('ngo_name'), registration_number=request.POST.get('registration_number'), address=request.POST.get('address'), contact_person=request.POST.get('contact_person'), latitude=latitude, longitude=longitude)
+            NGOProfile.objects.create(user=user, ngo_name=request.POST.get('ngo_name'), registration_number=request.POST.get('registration_number'), address=address, contact_person=request.POST.get('contact_person'), latitude=latitude, longitude=longitude)
         elif user_type == User.UserType.VOLUNTEER:
-            VolunteerProfile.objects.create(user=user, full_name=request.POST.get('full_name'), phone_number=request.POST.get('phone_number'), skills=request.POST.get('skills'), latitude=latitude, longitude=longitude)
+            VolunteerProfile.objects.create(user=user, full_name=request.POST.get('full_name'), phone_number=request.POST.get('phone_number'), skills=request.POST.get('skills'), address=address, latitude=latitude, longitude=longitude)
         del request.session['registration_data']
         messages.success(request, 'Registration successful! Please log in.')
         return redirect('login_page')
     context = {'user_type': user_type}
     return render(request, 'register_step_2.html', context)
-
 def login_page(request):
-    if request.user.is_authenticated:
-        return get_user_dashboard_redirect(request.user)
+    if request.user.is_authenticated: return get_user_dashboard_redirect(request.user)
     if request.method == 'POST':
         user = authenticate(request, username=request.POST.get('username'), password=request.POST.get('password'))
         if user is not None:
@@ -82,15 +68,18 @@ def login_page(request):
         else:
             return render(request, 'login.html', {'error': 'Invalid username or password.'})
     return render(request, 'login.html')
-
 def logout_view(request):
     logout(request)
     return redirect('index')
 
+# --- Dashboard Views ---
 @login_required(login_url='login_page')
 def restaurant_dashboard(request):
-    if request.user.user_type != 'RESTAURANT': return redirect('index')
+    if request.user.user_type != 'RESTAURANT':
+        return redirect('index')
+
     restaurant_profile = request.user.restaurant_profile
+
     if request.method == 'POST':
         form = DonationForm(request.POST)
         if form.is_valid():
@@ -99,11 +88,17 @@ def restaurant_dashboard(request):
             donation.save()
             return redirect('restaurant_dashboard')
     else:
-        form = DonationForm()
+        # THE FIX IS HERE: Pre-populate the form with the restaurant's address
+        form = DonationForm(initial={'pickup_address': restaurant_profile.address})
+
     donations = Donation.objects.filter(restaurant=restaurant_profile).order_by('-created_at')
-    context = {'form': form, 'donations': donations}
+    context = {
+        'form': form,
+        'donations': donations
+    }
     return render(request, 'restaurant_dashboard.html', context)
 
+# --- (The rest of your views.py file is unchanged) ---
 @login_required(login_url='login_page')
 def ngo_dashboard(request):
     if request.user.user_type != 'NGO': return redirect('index')
@@ -123,7 +118,6 @@ def ngo_dashboard(request):
     donations_to_verify = Donation.objects.filter(target_camp__ngo=ngo_profile, status='VERIFYING').order_by('delivered_at')
     context = {'form': form, 'active_camps': active_camps, 'completed_camps': completed_camps, 'volunteers': registered_volunteers, 'donations_to_verify': donations_to_verify}
     return render(request, 'ngo_dashboard.html', context)
-
 @login_required(login_url='login_page')
 def volunteer_dashboard(request):
     if request.user.user_type != 'VOLUNTEER': return redirect('index')
@@ -139,7 +133,6 @@ def volunteer_dashboard(request):
     camps_map_data = [{"lat": c.latitude, "lon": c.longitude, "name": c.name, "ngo": c.ngo.ngo_name, "address": c.location_address} for c in upcoming_camps if c.latitude and c.longitude]
     context = {'registered_ngos': registered_ngos, 'available_ngos': NGOProfile.objects.exclude(pk__in=[n.pk for n in registered_ngos]), 'camps': upcoming_camps, 'available_donations': available_donations, 'my_active_donations': my_active_donations, 'delivery_history': delivery_history, 'donations_map_data': json.dumps(donations_map_data), 'camps_map_data': json.dumps(camps_map_data)}
     return render(request, 'volunteer_dashboard.html', context)
-
 @login_required(login_url='login_page')
 def register_with_ngo(request, ngo_id):
     if request.user.user_type != 'VOLUNTEER': return redirect('index')
@@ -147,7 +140,6 @@ def register_with_ngo(request, ngo_id):
     volunteer = request.user.volunteer_profile
     ngo.volunteers.add(volunteer)
     return redirect('volunteer_dashboard')
-
 @login_required(login_url='login_page')
 def accept_donation(request, donation_id):
     if request.user.user_type != 'VOLUNTEER': return redirect('index')
@@ -159,7 +151,6 @@ def accept_donation(request, donation_id):
         donation.accepted_at = timezone.now()
         donation.save()
     return redirect('volunteer_dashboard')
-
 @login_required(login_url='login_page')
 def mark_as_collected(request, donation_id):
     if request.user.user_type != 'VOLUNTEER': return redirect('index')
@@ -168,7 +159,6 @@ def mark_as_collected(request, donation_id):
     donation.collected_at = timezone.now()
     donation.save()
     return redirect('select_delivery_camp', donation_id=donation.pk)
-
 @login_required(login_url='login_page')
 def select_delivery_camp(request, donation_id):
     if request.user.user_type != 'VOLUNTEER': return redirect('index')
@@ -178,7 +168,6 @@ def select_delivery_camp(request, donation_id):
     active_camps = DonationCamp.objects.filter(ngo__in=registered_ngos, is_active=True).order_by('start_time')
     context = {'donation': donation, 'camps': active_camps}
     return render(request, 'select_camp.html', context)
-
 @login_required(login_url='login_page')
 def mark_as_delivered(request, donation_id, camp_id):
     if request.user.user_type != 'VOLUNTEER': return redirect('index')
@@ -189,7 +178,6 @@ def mark_as_delivered(request, donation_id, camp_id):
     donation.delivered_at = timezone.now()
     donation.save()
     return redirect('volunteer_dashboard')
-
 @login_required(login_url='login_page')
 def mark_camp_as_completed(request, camp_id):
     if request.user.user_type != 'NGO': return redirect('index')
@@ -199,7 +187,6 @@ def mark_camp_as_completed(request, camp_id):
         camp.completed_at = timezone.now()
         camp.save()
     return redirect('ngo_dashboard')
-
 @login_required(login_url='login_page')
 def confirm_delivery(request, donation_id):
     if request.user.user_type != 'NGO': return redirect('index')
@@ -208,8 +195,6 @@ def confirm_delivery(request, donation_id):
         donation.status = 'DELIVERED'
         donation.save()
     return redirect('ngo_dashboard')
-
-# --- API Views (for future JavaScript frontend) ---
 class RegisterAPIView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer

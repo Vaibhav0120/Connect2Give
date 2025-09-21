@@ -1,26 +1,34 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurant Dashboard</title>
+{% extends 'base.html' %}
+
+{% block title %}Restaurant Dashboard - Connect2Give{% endblock %}
+
+{% block head %}
     <style>
-        body { font-family: sans-serif; padding: 2em; }
         .dashboard-container { display: flex; gap: 2em; }
-        .section { flex: 1; border: 1px solid #ccc; padding: 1em; }
+        .section { flex: 1; border: 1px solid #ccc; padding: 1em; background-color: white; border-radius: 8px; }
         .form-group { margin-bottom: 1em; }
-        label { display: block; }
-        input, textarea { width: 95%; padding: 0.5em; }
-        button { padding: 10px 15px; cursor: pointer; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input, textarea { width: 100%; padding: 0.8em; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        .address-group { position: relative; }
+        .address-group button {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: auto;
+            background-color: #28a745;
+            font-size: 12px;
+            padding: 8px 12px;
+        }
+        #location-status { font-size: 12px; margin-top: 5px; color: #28a745;}
     </style>
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
     <h1>Restaurant Dashboard</h1>
     <h2>Welcome, {{ user.restaurant_profile.restaurant_name }}!</h2>
     <a href="{% url 'logout' %}"><button>Logout</button></a>
-    <hr>
+    <hr style="margin-top: 1em; margin-bottom: 2em;">
 
     <div class="dashboard-container">
         <div class="section">
@@ -37,7 +45,11 @@
                 </div>
                 <div class="form-group">
                     {{ form.pickup_address.label_tag }}
-                    {{ form.pickup_address }}
+                    <div class="address-group">
+                        {{ form.pickup_address }}
+                        <button type="button" onclick="useCurrentLocation()">Use Current Location</button>
+                    </div>
+                    <p id="location-status"></p>
                 </div>
                 <button type="submit">Post Donation</button>
             </form>
@@ -63,5 +75,44 @@
             </table>
         </div>
     </div>
-</body>
-</html>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function useCurrentLocation() {
+        const addressField = document.getElementById('id_pickup_address');
+        const status = document.getElementById('location-status');
+
+        status.textContent = 'Fetching location...';
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+
+                    // Use Nominatim to get address from coordinates
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data && data.display_name) {
+                                addressField.value = data.display_name;
+                                status.textContent = 'Address updated from your current location!';
+                            } else {
+                                status.textContent = 'Could not find a valid address for your location.';
+                            }
+                        })
+                        .catch(() => {
+                            status.textContent = 'Error looking up address.';
+                        });
+                },
+                () => {
+                    status.textContent = 'Unable to retrieve your location.';
+                }
+            );
+        } else {
+            status.textContent = 'Geolocation is not supported by your browser.';
+        }
+    }
+</script>
+{% endblock %}
