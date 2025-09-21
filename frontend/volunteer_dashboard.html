@@ -6,10 +6,10 @@
     <title>Volunteer Dashboard</title>
      <style>
         body { font-family: sans-serif; padding: 2em; }
-        .dashboard-container { display: flex; gap: 2em; }
-        .section { flex: 1; border: 1px solid #ccc; padding: 1em; }
+        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 2em; }
+        .section { border: 1px solid #ccc; padding: 1em; margin-bottom: 2em; }
         button { padding: 5px 10px; cursor: pointer; }
-        table { width: 100%; border-collapse: collapse; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1em; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
     </style>
 </head>
@@ -19,10 +19,60 @@
     <a href="{% url 'logout' %}"><button>Logout</button></a>
     <hr>
 
-    <div class="dashboard-container">
+    <div class="section">
+        <h3>My Active Deliveries</h3>
+        <table>
+            <thead>
+                <tr><th>From</th><th>Food</th><th>Status</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+                {% for donation in my_active_donations %}
+                <tr>
+                    <td>{{ donation.restaurant.restaurant_name }}</td>
+                    <td>{{ donation.food_description }}</td>
+                    <td>{{ donation.get_status_display }}</td>
+                    <td>
+                        {% if donation.status == 'ACCEPTED' %}
+                            <a href="{% url 'mark_as_collected' donation.pk %}"><button>Mark as Collected</button></a>
+                        {% elif donation.status == 'COLLECTED' %}
+                            <a href="{% url 'select_delivery_camp' donation.pk %}"><button>Deliver to Camp</button></a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4">You have no active deliveries.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>Available Donations for Pickup</h3>
+        <table>
+            <thead>
+                <tr><th>From</th><th>Food</th><th>Address</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+                {% for donation in available_donations %}
+                <tr>
+                    <td>{{ donation.restaurant.restaurant_name }}</td>
+                    <td>{{ donation.food_description }}</td>
+                    <td>{{ donation.pickup_address }}</td>
+                    <td>
+                        <a href="{% url 'accept_donation' donation.pk %}"><button>Claim for Pickup</button></a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4">There are no pending donations right now.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="grid-container">
         <div class="section">
             <h3>Register with an NGO</h3>
-            <table>
+             <table>
                 <thead>
                     <tr><th>NGO Name</th><th>Action</th></tr>
                 </thead>
@@ -40,7 +90,6 @@
                 </tbody>
             </table>
         </div>
-
         <div class="section">
             <h3>My Registered NGOs</h3>
             <ul>
@@ -53,8 +102,8 @@
         </div>
     </div>
     
-    <div class="section" style="margin-top: 2em;">
-        <h3>Available Donation Camps</h3>
+    <div class="section">
+        <h3>Available Donation Camps from My NGOs</h3>
         <table>
             <thead>
                 <tr><th>Camp Name</th><th>NGO</th><th>Location</th><th>Starts</th></tr>
@@ -69,6 +118,28 @@
                 </tr>
                 {% empty %}
                 <tr><td colspan="4">There are no active camps from your registered NGOs.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- NEW SECTION FOR DELIVERY HISTORY -->
+    <div class="section">
+        <h3>My Delivery History</h3>
+        <table>
+            <thead>
+                <tr><th>From</th><th>Food</th><th>Delivered To</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+                {% for donation in delivery_history %}
+                <tr>
+                    <td>{{ donation.restaurant.restaurant_name }}</td>
+                    <td>{{ donation.food_description }}</td>
+                    <td>{{ donation.target_camp.name }}</td>
+                    <td>{{ donation.get_status_display }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4">You have not completed any deliveries yet.</td></tr>
                 {% endfor %}
             </tbody>
         </table>

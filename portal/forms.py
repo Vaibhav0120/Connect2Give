@@ -1,24 +1,35 @@
 from django import forms
-from .models import DonationCamp
+from .models import DonationCamp, Donation
 
 class DonationCampForm(forms.ModelForm):
     """
-    A form for creating and updating DonationCamp instances.
+    UPDATED: Simplified by removing the end_time field.
     """
-    # Using specific input types for a better user experience in the browser
     start_time = forms.DateTimeField(
         widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
         label="Camp Start Time"
     )
-    end_time = forms.DateTimeField(
-        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
-        label="Camp End Time"
-    )
 
     class Meta:
         model = DonationCamp
-        fields = ['name', 'location_address', 'start_time', 'end_time']
+        fields = ['name', 'location_address', 'start_time'] # end_time removed
         labels = {
             'name': 'Camp Name',
             'location_address': 'Camp Location Address',
+        }
+
+class DonationForm(forms.ModelForm):
+    """
+    A form for Restaurants to create new food Donations.
+    """
+    class Meta:
+        model = Donation
+        fields = ['food_description', 'quantity', 'pickup_address']
+        labels = {
+            'food_description': 'Food Description (e.g., 20 veg thalis, 5kg rice)',
+            'quantity': 'Quantity (e.g., number of meals)',
+            'pickup_address': 'Pickup Address'
+        }
+        widgets = {
+            'pickup_address': forms.Textarea(attrs={'rows': 3}),
         }
