@@ -1,0 +1,76 @@
+{% extends 'ngo_base.html' %}
+
+{% block title %}Manage Volunteers - {{ block.super }}{% endblock %}
+
+{% block head %}
+    {{ block.super }}
+    <style>
+        .section { 
+            border: 1px solid #ccc; 
+            padding: 1.5em; 
+            margin-bottom: 2em; 
+            background-color: white; 
+            border-radius: 8px;
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 1em; 
+        }
+        th, td { 
+            border: 1px solid #ddd; 
+            padding: 12px; 
+            text-align: left; 
+        }
+        th { 
+            background-color: #f2f2f2; 
+        }
+        .status-active {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .status-idle {
+            color: #6c757d;
+        }
+    </style>
+{% endblock %}
+
+
+{% block ngo_content %}
+    <h2>Manage Volunteers</h2>
+    <p>View and manage all the volunteers who have registered with your organization.</p>
+
+    <div class="section">
+        <h3>My Registered Volunteers List</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Skills</th>
+                    <th>Current Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for volunteer in volunteers %}
+                <tr>
+                    <td>{{ volunteer.full_name }}</td>
+                    <td>{{ volunteer.user.email }}</td>
+                    <td>{{ volunteer.skills|default:"Not specified" }}</td>
+                    <td>
+                        {% if volunteer.active_deliveries > 0 %}
+                            <span class="status-active">Handling {{ volunteer.active_deliveries }} deliver{{ volunteer.active_deliveries|pluralize:"y,ies" }}</span>
+                        {% else %}
+                            <span class="status-idle">Idle / Available</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4">You have no registered volunteers yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

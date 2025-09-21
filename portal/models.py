@@ -20,6 +20,8 @@ class RestaurantProfile(models.Model):
     phone_number = models.CharField(max_length=15)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
+    # NEW IMAGE FIELD
+    profile_picture = models.ImageField(upload_to='profile_pictures/restaurants/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
@@ -29,11 +31,12 @@ class VolunteerProfile(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True, related_name='volunteer_profile')
     full_name = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
-    # NEW FIELD
     address = models.TextField(blank=True, null=True)
     skills = models.CharField(max_length=255, blank=True, null=True, help_text="e.g., Driving, Cooking, Medical")
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
+    # NEW IMAGE FIELD
+    profile_picture = models.ImageField(upload_to='profile_pictures/volunteers/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
@@ -47,6 +50,9 @@ class NGOProfile(models.Model):
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     contact_person = models.CharField(max_length=100)
+    # NEW IMAGE FIELDS
+    profile_picture = models.ImageField(upload_to='profile_pictures/ngos/', null=True, blank=True)
+    banner_image = models.ImageField(upload_to='banner_images/ngos/', null=True, blank=True)
     volunteers = models.ManyToManyField('VolunteerProfile', through='NGOVolunteer', related_name='registered_ngos')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

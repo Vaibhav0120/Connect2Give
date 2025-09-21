@@ -1,5 +1,5 @@
 from django import forms
-from .models import DonationCamp, Donation
+from .models import DonationCamp, Donation, NGOProfile
 
 class DonationCampForm(forms.ModelForm):
     """
@@ -36,4 +36,34 @@ class DonationForm(forms.ModelForm):
         }
         widgets = {
             'pickup_address': forms.Textarea(attrs={'rows': 3}),
+        }
+
+# --- NEW FORM FOR NGO PROFILE ---
+class NGOProfileForm(forms.ModelForm):
+    """
+    A form for NGOs to edit their profile information, including images.
+    """
+    class Meta:
+        model = NGOProfile
+        fields = [
+            'ngo_name', 
+            'address', 
+            'contact_person', 
+            'latitude', 
+            'longitude', 
+            'profile_picture', 
+            'banner_image'
+        ]
+        # We don't include registration_number as it shouldn't be editable.
+        labels = {
+            'ngo_name': 'Organization Name',
+            'address': 'Primary Address',
+            'contact_person': 'Contact Person Name',
+            'profile_picture': 'Profile Picture (Logo)',
+            'banner_image': 'Banner Image (for your public page)',
+        }
+        widgets = {
+            'latitude': forms.HiddenInput(),
+            'longitude': forms.HiddenInput(),
+            'address': forms.Textarea(attrs={'rows': 3}),
         }

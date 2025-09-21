@@ -30,7 +30,8 @@
             {% if user.user_type == 'RESTAURANT' %}
                 <a href="{% url 'restaurant_dashboard' %}"><button>Go to My Dashboard</button></a>
             {% elif user.user_type == 'NGO' %}
-                <a href="{% url 'ngo_dashboard' %}"><button>Go to My Dashboard</button></a>
+                <!-- THE FIX IS HERE: Point to the new overview page -->
+                <a href="{% url 'ngo_dashboard_overview' %}"><button>Go to My Dashboard</button></a>
             {% elif user.user_type == 'VOLUNTEER' %}
                 <a href="{% url 'volunteer_dashboard' %}"><button>Go to My Dashboard</button></a>
             {% else %} {# For Admins #}
@@ -63,44 +64,32 @@
     {% if not user.is_authenticated %}
         <script>
             // This script will only run for logged-out users who can see the map div
-
-            // Initialize the map and set its view to your location, Delhi
             const map = L.map('home-map').setView([28.644800, 77.216721], 11);
-
-            // Add a tile layer from OpenStreetMap
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(map);
 
-            // Parse the data passed from the Django view
             const camps = JSON.parse('{{ camps_map_data|safe }}');
+            const restaurants = JSON.parse('{{ restaurants_map_data|safe }}');
 
-            // Create a custom icon for camps
             const campIcon = L.icon({
                 iconUrl: 'https://cdn-icons-png.flaticon.com/512/931/931949.png',
-                iconSize: [38, 38],
-                iconAnchor: [19, 38],
-                popupAnchor: [0, -38]
+                iconSize: [38, 38], iconAnchor: [19, 38], popupAnchor: [0, -38]
+            });
+            const restaurantIcon = L.icon({
+                iconUrl: 'https://cdn-icons-png.flaticon.com/512/3448/3448609.png',
+                iconSize: [38, 38], iconAnchor: [19, 38], popupAnchor: [0, -38]
             });
 
-            // Add Camp Markers to the Map
-            if (camps.length > 0) {
-                 camps.forEach(camp => {
-                    const marker = L.marker([camp.lat, camp.lon], { icon: campIcon }).addTo(map);
-                    marker.bindPopup(
-                        `<b>Camp: ${camp.name}</b><br>` +
-                        `NGO: ${camp.ngo}<br>` +
-                        `Address: ${camp.address}<br>` +
-                        `Starts: ${camp.start}`
-                    );
-                });
-            } else {
-                // Optionally, add a marker for Delhi if no camps are active
-                L.marker([28.644800, 77.216721])
-                    .addTo(map)
-                    .bindPopup('Connect2Give is active in Delhi! No camps in the last 24 hours.')
-                    .openPopup();
-            }
+            restaurants.forEach(r => {
+                const marker = L.marker([r.lat, r.lon], { icon: restaurantIcon }).addTo(map);
+                marker.bindPopup(`<b>${r.name}</b><br>${r.address}`);
+            });
+
+            camps.forEach(camp => {
+                const marker = L.marker([camp.lat, camp.lon], { icon: campIcon }).addTo(map);
+                marker.bindPopup(`<b>Camp: ${camp.name}</b><br>NGO: ${camp.ngo}<br>Address: ${camp.address}<br>Starts: ${camp.start}`);
+            });
         </script>
     {% endif %}
 {% endblock %}

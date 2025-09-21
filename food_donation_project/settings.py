@@ -6,7 +6,6 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Initialize environ and read .env file
-# This is the new, more explicit way to define your environment variables.
 env = environ.Env(
     # set casting, default value
     DEBUG=(bool, True),
@@ -14,13 +13,10 @@ env = environ.Env(
 )
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-
 # SECURITY WARNING: keep the secret key used in production secret!
-# The value is now read from .env or uses the default defined above.
 SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# The value is read from .env and cast to a boolean. Default is True if not found.
 DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = []
@@ -71,7 +67,6 @@ TEMPLATES = [
     },
 ]
 
-# CORRECTED PATHS
 WSGI_APPLICATION = 'food_donation_project.wsgi.application'
 ASGI_APPLICATION = 'food_donation_project.asgi.application'
 
@@ -110,8 +105,15 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Tell Django to use the custom User model from the 'portal' app
+AUTH_USER_MODEL = 'portal.User'
+
 # CORS Settings for development
 CORS_ALLOW_ALL_ORIGINS = True
 
-# Tell Django to use the custom User model from the 'portal' app
-AUTH_USER_MODEL = 'portal.User'
+# --- NEW MEDIA FILE CONFIGURATION ---
+# This is the URL that will serve the media files.
+MEDIA_URL = '/media/'
+
+# This is the path to the directory where uploaded files will be stored.
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

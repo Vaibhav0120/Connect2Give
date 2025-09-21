@@ -9,6 +9,11 @@
      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
      crossorigin=""/>
      
+    <!-- NEW: Cropper.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" 
+     integrity="sha512-O4_52xCRlHiBaaJvVz1e/gl9KZyJ27TqKXGFYcnL3GnYnAZ/i5eJSYYgc9IEX4ELYwD7most5Tj4IikJeTsvCg==" 
+     crossorigin="anonymous" referrerpolicy="no-referrer" />
+
     <title>{% block title %}Connect2Give{% endblock %}</title>
     
     <style>
@@ -28,10 +33,15 @@
         {% block content %}{% endblock %}
     </div>
 
-    <!-- Leaflet JavaScript for maps (place at the end for faster page load) -->
+    <!-- Leaflet JavaScript for maps -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
      crossorigin=""></script>
+     
+    <!-- NEW: Cropper.js JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js" 
+     integrity="sha512-6QPTMf2vZGldDDUb1BvCgsL7rQ7AnXUgNxgJPTotQoDTRnuA9G6e/1iYg9a/MP20M2uP7C/cgg41OrJAZ9hTog==" 
+     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
      
     {% block scripts %}{% endblock %}
 </body>

@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}NGO Dashboard - Connect2Give{% endblock %}
+
+{% block head %}
+    <style>
+        .ngo-dashboard-layout {
+            display: flex;
+            gap: 2em;
+        }
+        .sidebar {
+            flex: 0 0 220px; /* Sidebar has a fixed width */
+            background-color: #f8f9fa;
+            padding: 1em;
+            border-radius: 8px;
+            height: fit-content;
+        }
+        .main-content {
+            flex-grow: 1; /* Main content takes the remaining space */
+        }
+        .sidebar-nav ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar-nav li {
+            margin-bottom: 1em;
+        }
+        .sidebar-nav a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+            display: block;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+        .sidebar-nav a:hover, .sidebar-nav a.active {
+            background-color: #e9ecef;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h1>NGO Dashboard</h1>
+    <h2>Welcome, {{ user.ngo_profile.ngo_name }}!</h2>
+    <a href="{% url 'logout' %}"><button>Logout</button></a>
+    <hr style="margin-top: 1em; margin-bottom: 2em;">
+
+    <div class="ngo-dashboard-layout">
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <ul>
+                    <!-- The `request.resolver_match.url_name` is a smart Django trick to detect the current page -->
+                    <li>
+                        <a href="{% url 'ngo_dashboard_overview' %}" 
+                           class="{% if request.resolver_match.url_name == 'ngo_dashboard_overview' %}active{% endif %}">
+                           Overview
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'ngo_manage_camps' %}"
+                           class="{% if request.resolver_match.url_name == 'ngo_manage_camps' %}active{% endif %}">
+                           Manage Camps
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'ngo_manage_volunteers' %}"
+                           class="{% if request.resolver_match.url_name == 'ngo_manage_volunteers' %}active{% endif %}">
+                           Manage Volunteers
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'ngo_profile' %}"
+                           class="{% if request.resolver_match.url_name == 'ngo_profile' %}active{% endif %}">
+                           Profile
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'ngo_settings' %}"
+                           class="{% if request.resolver_match.url_name == 'ngo_settings' %}active{% endif %}">
+                           Settings
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            {% block ngo_content %}
+                <!-- Specific page content will be injected here -->
+            {% endblock %}
+        </main>
+    </div>
+{% endblock %}

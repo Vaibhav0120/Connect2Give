@@ -1,0 +1,58 @@
+{% extends 'ngo_base.html' %}
+
+{% block title %}Dashboard Overview - {{ block.super }}{% endblock %}
+
+{% block head %}
+    {{ block.super }} {# This inherits the styles from ngo_base.html #}
+    <style>
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5em;
+        }
+        .stat-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.5em;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .stat-card h3 {
+            margin-top: 0;
+            color: #555;
+            font-size: 1em;
+            text-transform: uppercase;
+        }
+        .stat-card .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #007bff;
+        }
+    </style>
+{% endblock %}
+
+
+{% block ngo_content %}
+    <h2>Dashboard Overview</h2>
+    <p>Here is a summary of your organization's activity on the Connect2Give platform.</p>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Active Camps</h3>
+            <p class="stat-number">{{ stats.active_camps }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Registered Volunteers</h3>
+            <p class="stat-number">{{ stats.total_volunteers }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Deliveries to Verify</h3>
+            <p class="stat-number">{{ stats.donations_to_verify }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Total Donations Received</h3>
+            <p class="stat-number">{{ stats.total_donations_received }}</p>
+        </div>
+    </div>
+{% endblock %}

@@ -1,8 +1,11 @@
 # Django Framework
 django==4.2.5
 
-# Pure Python MySQL Database Connector (replaces mysqlclient)
+# Pure Python MySQL Database Connector
 PyMySQL==1.1.0
+
+# Python Imaging Library
+Pillow==10.4.0
 
 # Django REST Framework for creating APIs
 djangorestframework==3.14.0
