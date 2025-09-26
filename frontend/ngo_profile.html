@@ -6,482 +6,474 @@
 {% block page_description %}Update your organization's public information{% endblock %}
 
 {% block head %}
-    {{ block.super }}
-    <!-- Modern profile page styling -->
-    <style>
-        .profile-container {
-            max-width: 800px;
-        }
+{{ block.super }}
+<!-- Modern profile page styling -->
+<style>
+    .profile-container {
+        max-width: 800px;
+    }
 
-        .profile-form {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
+    .profile-form {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
 
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        color: var(--text-secondary);
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border);
+        color: var(--text-primary);
+        padding: 0.875rem;
+        border-radius: var(--radius);
+        transition: all 0.2s ease;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    /* Image upload styling */
+    .image-upload-section {
+        text-align: center;
+    }
+
+    .image-upload-widget {
+        margin-bottom: 2rem;
+    }
+
+    .image-preview-container {
+        margin-bottom: 1rem;
+    }
+
+    .image-preview {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 3px solid var(--border);
+        object-fit: cover;
+        transition: all 0.2s ease;
+    }
+
+    .image-preview:hover {
+        border-color: var(--accent-blue);
+    }
+
+    .banner-preview {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-radius: var(--radius);
+        border: 2px solid var(--border);
+        transition: all 0.2s ease;
+    }
+
+    .banner-preview:hover {
+        border-color: var(--accent-blue);
+    }
+
+    .upload-btn {
+        background-color: var(--bg-secondary);
+        border: 2px dashed var(--border);
+        color: var(--text-secondary);
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+    }
+
+    .upload-btn:hover {
+        border-color: var(--accent-blue);
+        color: var(--accent-blue);
+        background-color: rgba(59, 130, 246, 0.05);
+    }
+
+    /* Map styling */
+    .map-section {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .address-group {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-end;
+    }
+
+    .address-group textarea {
+        flex: 1;
+    }
+
+    .address-group button {
+        flex-shrink: 0;
+        height: fit-content;
+    }
+
+    #location-map {
+        height: 300px;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        margin-top: 1rem;
+    }
+
+    /* Cropper modal styling */
+    .cropper-modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        align-items: center;
+        justify-content: center;
+    }
+
+    .cropper-modal-content {
+        background-color: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 2rem;
+        width: 90%;
+        max-width: 600px;
+        max-height: 80vh;
+        overflow: auto;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .cropper-container {
+        max-height: 400px;
+        margin: 1rem 0;
+    }
+
+    #image-to-crop {
+        max-width: 100%;
+        display: block;
+    }
+
+    .cropper-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 1.5rem;
+    }
+
+    .btn-cancel {
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border);
+        color: var(--text-secondary);
+    }
+
+    .btn-cancel:hover {
+        background-color: var(--bg-card-hover);
+    }
+
+    .btn-crop {
+        background-color: var(--accent-green);
+    }
+
+    .btn-crop:hover {
+        background-color: #059669;
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 768px) {
         .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 300px;
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            color: var(--text-secondary);
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-            display: block;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border);
-            color: var(--text-primary);
-            padding: 0.875rem;
-            border-radius: var(--radius);
-            transition: all 0.2s ease;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus {
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        /* Image upload styling */
-        .image-upload-section {
-            text-align: center;
-        }
-
-        .image-upload-widget {
-            margin-bottom: 2rem;
-        }
-
-        .image-preview-container {
-            margin-bottom: 1rem;
-        }
-
-        .image-preview {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 3px solid var(--border);
-            object-fit: cover;
-            transition: all 0.2s ease;
-        }
-
-        .image-preview:hover {
-            border-color: var(--accent-blue);
-        }
-
-        .banner-preview {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-            border-radius: var(--radius);
-            border: 2px solid var(--border);
-            transition: all 0.2s ease;
-        }
-
-        .banner-preview:hover {
-            border-color: var(--accent-blue);
-        }
-
-        .upload-btn {
-            background-color: var(--bg-secondary);
-            border: 2px dashed var(--border);
-            color: var(--text-secondary);
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--radius);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.875rem;
-            margin-top: 0.5rem;
-        }
-
-        .upload-btn:hover {
-            border-color: var(--accent-blue);
-            color: var(--accent-blue);
-            background-color: rgba(59, 130, 246, 0.05);
-        }
-
-        /* Map styling */
-        .map-section {
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid var(--border);
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
         }
 
         .address-group {
-            display: flex;
-            gap: 1rem;
-            align-items: flex-end;
+            flex-direction: column;
+            align-items: stretch;
         }
-
-        .address-group textarea {
-            flex: 1;
-        }
-
-        .address-group button {
-            flex-shrink: 0;
-            height: fit-content;
-        }
-
-        #location-map {
-            height: 300px;
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            margin-top: 1rem;
-        }
-
-        /* Cropper modal styling */
-        .cropper-modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            align-items: center;
-            justify-content: center;
-        }
-
-        .cropper-modal-content {
-            background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 2rem;
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow: auto;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-        }
-
-        .cropper-container {
-            max-height: 400px;
-            margin: 1rem 0;
-        }
-
-        #image-to-crop {
-            max-width: 100%;
-            display: block;
-        }
-
-        .cropper-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-            margin-top: 1.5rem;
-        }
-
-        .btn-cancel {
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border);
-            color: var(--text-secondary);
-        }
-
-        .btn-cancel:hover {
-            background-color: var(--bg-card-hover);
-        }
-
-        .btn-crop {
-            background-color: var(--accent-green);
-        }
-
-        .btn-crop:hover {
-            background-color: #059669;
-        }
-
-        /* Mobile responsive */
-        @media (max-width: 768px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-            
-            .address-group {
-                flex-direction: column;
-                align-items: stretch;
-            }
-        }
-    </style>
+    }
+</style>
 {% endblock %}
 
 {% block ngo_content %}
-    <div class="profile-container">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="success-message">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
+<div class="profile-container">
+    {% if messages %}
+    {% for message in messages %}
+    <div class="success-message">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
 
-        <div class="profile-form">
-            <form method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-                {{ form.latitude }}
-                {{ form.longitude }}
+    <div class="profile-form">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.latitude }}
+            {{ form.longitude }}
 
-                <div class="form-grid">
-                    <div>
-                        <div class="form-group">
-                            {{ form.ngo_name.label_tag }}
-                            {{ form.ngo_name }}
-                        </div>
-                        <div class="form-group">
-                            {{ form.contact_person.label_tag }}
-                            {{ form.contact_person }}
-                        </div>
+            <div class="form-grid">
+                <div>
+                    <div class="form-group">
+                        {{ form.ngo_name.label_tag }}
+                        {{ form.ngo_name }}
                     </div>
-                    
-                    <div class="image-upload-section">
-                        <div class="image-upload-widget">
-                            <label>Profile Picture (Logo)</label>
-                            <div class="image-preview-container">
-                                <img src="{% if form.instance.profile_picture %}{{ MEDIA_URL }}{{ form.instance.profile_picture }}{% else %}https://placehold.co/120x120/262626/a3a3a3?text=Logo{% endif %}" 
-                                     alt="Profile Picture" 
-                                     class="image-preview" 
-                                     id="profile_picture_preview">
-                            </div>
-                            <input type="file" 
-                                   id="id_profile_picture_input" 
-                                   accept="image/*" 
-                                   onchange="openCropper(event, 1, 'id_profile_picture')"
-                                   style="display: none;">
-                            <button type="button" class="upload-btn" onclick="document.getElementById('id_profile_picture_input').click()">
-                                Choose Image
-                            </button>
-                        </div>
+                    <div class="form-group">
+                        {{ form.contact_person.label_tag }}
+                        {{ form.contact_person }}
                     </div>
                 </div>
-                
-                <div class="form-group">
+
+                <div class="image-upload-section">
                     <div class="image-upload-widget">
-                        <label>Banner Image</label>
+                        <label>Profile Picture (Logo)</label>
                         <div class="image-preview-container">
-                            <img src="{% if form.instance.banner_image %}{{ MEDIA_URL }}{{ form.instance.banner_image }}{% else %}https://placehold.co/600x120/262626/a3a3a3?text=Banner{% endif %}" 
-                                 alt="Banner Image" 
-                                 class="banner-preview" 
-                                 id="banner_image_preview">
+                            <img src="{% if form.instance.profile_picture %}{{ MEDIA_URL }}{{ form.instance.profile_picture.url }}{% else %}https://placehold.co/120x120/262626/a3a3a3?text=Logo{% endif %}"
+                                alt="Profile Picture" class="image-preview" id="profile_picture_preview">
                         </div>
-                        <input type="file" 
-                               id="id_banner_image_input" 
-                               accept="image/*" 
-                               onchange="openCropper(event, 16/9, 'id_banner_image')"
-                               style="display: none;">
-                        <button type="button" class="upload-btn" onclick="document.getElementById('id_banner_image_input').click()">
-                            Choose Banner
+                        <input type="file" id="id_profile_picture_input" accept="image/*"
+                            onchange="openCropper(event, 1, 'id_profile_picture')" style="display: none;">
+                        <button type="button" class="upload-btn"
+                            onclick="document.getElementById('id_profile_picture_input').click()">
+                            Choose Image
                         </button>
                     </div>
                 </div>
-                
-                <!-- Hidden Django form fields -->
-                <div style="display: none;">
-                    {{ form.profile_picture }}
-                    {{ form.banner_image }}
-                </div>
+            </div>
 
-                <div class="map-section">
-                    <h3>Location & Address</h3>
-                    <div class="form-group">
-                        {{ form.address.label_tag }}
-                        <div class="address-group">
-                            {{ form.address }}
-                            <button type="button" onclick="findAddressOnMap()">Find Location</button>
-                        </div>
+            <div class="form-group">
+                <div class="image-upload-widget">
+                    <label>Banner Image</label>
+                    <div class="image-preview-container">
+                        <img src="{% if form.instance.banner_image %}{{ MEDIA_URL }}{{ form.instance.banner_image.url }}{% else %}https://placehold.co/600x120/262626/a3a3a3?text=Banner{% endif %}"
+                            alt="Banner Image" class="banner-preview" id="banner_image_preview">
                     </div>
-                    <div id="location-map"></div>
-                    <p style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.5rem;">
-                        Type an address and click "Find Location", or click on the map to update your location.
-                    </p>
+                    <input type="file" id="id_banner_image_input" accept="image/*"
+                        onchange="openCropper(event, 16/9, 'id_banner_image')" style="display: none;">
+                    <button type="button" class="upload-btn"
+                        onclick="document.getElementById('id_banner_image_input').click()">
+                        Choose Banner
+                    </button>
                 </div>
+            </div>
 
-                <div style="margin-top: 2rem; text-align: right;">
-                    <button type="submit">Save Changes</button>
+            <!-- Hidden Django form fields -->
+            <div style="display: none;">
+                {{ form.profile_picture }}
+                {{ form.banner_image }}
+            </div>
+
+            <div class="map-section">
+                <h3>Location & Address</h3>
+                <div class="form-group">
+                    {{ form.address.label_tag }}
+                    <div class="address-group">
+                        {{ form.address }}
+                        <button type="button" onclick="findAddressOnMap()">Find Location</button>
+                    </div>
                 </div>
-            </form>
+                <div id="location-map"></div>
+                <p style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.5rem;">
+                    Type an address and click "Find Location", or click on the map to update your location.
+                </p>
+            </div>
+
+            <div style="margin-top: 2rem; text-align: right;">
+                <button type="submit">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Fixed cropper modal with proper styling -->
+<div id="cropper-modal" class="cropper-modal">
+    <div class="cropper-modal-content">
+        <h3>Crop Your Image</h3>
+        <div class="cropper-container">
+            <img id="image-to-crop" src="/placeholder.svg">
+        </div>
+        <div class="cropper-actions">
+            <button type="button" class="btn-cancel" onclick="closeCropper()">Cancel</button>
+            <button type="button" class="btn-crop" onclick="cropAndApplyImage()">Crop & Use</button>
         </div>
     </div>
-
-    <!-- Fixed cropper modal with proper styling -->
-    <div id="cropper-modal" class="cropper-modal">
-        <div class="cropper-modal-content">
-            <h3>Crop Your Image</h3>
-            <div class="cropper-container">
-                <img id="image-to-crop" src="/placeholder.svg">
-            </div>
-            <div class="cropper-actions">
-                <button type="button" class="btn-cancel" onclick="closeCropper()">Cancel</button>
-                <button type="button" class="btn-crop" onclick="cropAndApplyImage()">Crop & Use</button>
-            </div>
-        </div>
-    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
-    {{ block.super }}
-    <!-- Fixed map and cropper JavaScript -->
-    <script>
-        // Map initialization
-        const initialLat = parseFloat("{{ form.instance.latitude|default:'28.6448'|escapejs }}");
-        const initialLon = parseFloat("{{ form.instance.longitude|default:'77.2167'|escapejs }}");
-        const initialZoom = parseInt("{{ form.instance.latitude|yesno:'15,11' }}");
-        
-        const map = L.map('location-map').setView([initialLat, initialLon], initialZoom);
-        let marker = null;
-        
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-        
-        const latField = document.getElementById('id_latitude');
-        const lonField = document.getElementById('id_longitude');
-        const addressField = document.getElementById('id_address');
-        
-        if (latField.value && lonField.value) {
-            marker = L.marker([latField.value, lonField.value]).addTo(map);
+{{ block.super }}
+<!-- Fixed map and cropper JavaScript -->
+<script>
+    // Map initialization
+    const initialLat = parseFloat("{{ form.instance.latitude|default:'28.6448'|escapejs }}");
+    const initialLon = parseFloat("{{ form.instance.longitude|default:'77.2167'|escapejs }}");
+    const initialZoom = parseInt("{{ form.instance.latitude|yesno:'15,11' }}");
+
+    const map = L.map('location-map').setView([initialLat, initialLon], initialZoom);
+    let marker = null;
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const latField = document.getElementById('id_latitude');
+    const lonField = document.getElementById('id_longitude');
+    const addressField = document.getElementById('id_address');
+
+    if (latField.value && lonField.value) {
+        marker = L.marker([latField.value, lonField.value]).addTo(map);
+    }
+
+    function updateMarkerAndFields(lat, lon, address = null) {
+        latField.value = lat;
+        lonField.value = lon;
+        if (address) {
+            addressField.value = address;
         }
-        
-        function updateMarkerAndFields(lat, lon, address = null) {
-            latField.value = lat;
-            lonField.value = lon;
-            if (address) {
-                addressField.value = address;
-            }
-            if (marker) {
-                marker.setLatLng([lat, lon]);
-            } else {
-                marker = L.marker([lat, lon]).addTo(map);
-            }
-            map.setView([lat, lon], 15);
+        if (marker) {
+            marker.setLatLng([lat, lon]);
+        } else {
+            marker = L.marker([lat, lon]).addTo(map);
         }
-        
-        map.on('click', function(e) {
-            const lat = e.latlng.lat;
-            const lon = e.latlng.lng;
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
-                .then(r => r.json())
-                .then(d => updateMarkerAndFields(lat, lon, d.display_name || 'Location selected'));
-        });
-        
-        function findAddressOnMap() {
-            const address = addressField.value;
-            if (!address) {
-                alert("Please enter an address to find.");
-                return;
-            }
-            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
-                .then(r => r.json())
-                .then(d => {
-                    if (d.length > 0) {
-                        updateMarkerAndFields(d[0].lat, d[0].lon);
-                    } else {
-                        alert("Address not found.");
-                    }
+        map.setView([lat, lon], 15);
+    }
+
+    map.on('click', function (e) {
+        const lat = e.latlng.lat;
+        const lon = e.latlng.lng;
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+            .then(r => r.json())
+            .then(d => updateMarkerAndFields(lat, lon, d.display_name || 'Location selected'));
+    });
+
+    function findAddressOnMap() {
+        const address = addressField.value;
+        if (!address) {
+            alert("Please enter an address to find.");
+            return;
+        }
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
+            .then(r => r.json())
+            .then(d => {
+                if (d.length > 0) {
+                    updateMarkerAndFields(d[0].lat, d[0].lon);
+                } else {
+                    alert("Address not found.");
+                }
+            });
+    }
+
+    const modal = document.getElementById('cropper-modal');
+    const image = document.getElementById('image-to-crop');
+    let cropper;
+    let targetInputFieldId;
+    let targetPreviewId;
+    let sourceFileName;
+
+    function openCropper(event, aspectRatio, targetId) {
+        const input = event.target;
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                image.src = e.target.result;
+                modal.style.display = 'flex';
+
+                // Destroy previous cropper instance
+                if (cropper) {
+                    cropper.destroy();
+                }
+
+                // Initialize new cropper
+                cropper = new Cropper(image, {
+                    aspectRatio: aspectRatio,
+                    viewMode: 1,
+                    background: false,
+                    autoCropArea: 1,
+                    responsive: true,
+                    restore: false,
+                    guides: true,
+                    center: true,
+                    highlight: false,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    toggleDragModeOnDblclick: false,
                 });
+            };
+            reader.readAsDataURL(input.files[0]);
+            sourceFileName = input.files[0].name;
+            targetInputFieldId = targetId;
+            targetPreviewId = targetId.replace('id_', '') + '_preview';
+        }
+    }
+
+    function closeCropper() {
+        modal.style.display = 'none';
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+    }
+
+    function cropAndApplyImage() {
+        if (!cropper) return;
+
+        const canvas = cropper.getCroppedCanvas({
+            width: 1024,
+            height: targetInputFieldId.includes('banner') ? 576 : 1024,
+            imageSmoothingQuality: 'high',
+        });
+
+        // Update preview image
+        const previewElement = document.getElementById(targetPreviewId);
+        if (previewElement) {
+            previewElement.src = canvas.toDataURL('image/jpeg', 0.9);
         }
 
-        const modal = document.getElementById('cropper-modal');
-        const image = document.getElementById('image-to-crop');
-        let cropper;
-        let targetInputFieldId;
-        let targetPreviewId;
-        let sourceFileName;
-
-        function openCropper(event, aspectRatio, targetId) {
-            const input = event.target;
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    image.src = e.target.result;
-                    modal.style.display = 'flex';
-                    
-                    // Destroy previous cropper instance
-                    if (cropper) {
-                        cropper.destroy();
-                    }
-                    
-                    // Initialize new cropper
-                    cropper = new Cropper(image, {
-                        aspectRatio: aspectRatio,
-                        viewMode: 1,
-                        background: false,
-                        autoCropArea: 1,
-                        responsive: true,
-                        restore: false,
-                        guides: true,
-                        center: true,
-                        highlight: false,
-                        cropBoxMovable: true,
-                        cropBoxResizable: true,
-                        toggleDragModeOnDblclick: false,
-                    });
-                };
-                reader.readAsDataURL(input.files[0]);
-                sourceFileName = input.files[0].name;
-                targetInputFieldId = targetId;
-                targetPreviewId = targetId.replace('id_', '') + '_preview';
-            }
-        }
-
-        function closeCropper() {
-            modal.style.display = 'none';
-            if (cropper) {
-                cropper.destroy();
-                cropper = null;
-            }
-        }
-
-        function cropAndApplyImage() {
-            if (!cropper) return;
-
-            const canvas = cropper.getCroppedCanvas({
-                width: 1024,
-                height: targetInputFieldId.includes('banner') ? 576 : 1024,
-                imageSmoothingQuality: 'high',
+        // Convert to blob and create file
+        canvas.toBlob(function (blob) {
+            const newFile = new File([blob], sourceFileName, {
+                type: 'image/jpeg',
+                lastModified: Date.now()
             });
 
-            // Update preview image
-            const previewElement = document.getElementById(targetPreviewId);
-            if (previewElement) {
-                previewElement.src = canvas.toDataURL('image/jpeg', 0.9);
+            // Create FileList and assign to input
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(newFile);
+
+            const targetInput = document.getElementById(targetInputFieldId);
+            if (targetInput) {
+                targetInput.files = dataTransfer.files;
             }
 
-            // Convert to blob and create file
-            canvas.toBlob(function (blob) {
-                const newFile = new File([blob], sourceFileName, { 
-                    type: 'image/jpeg', 
-                    lastModified: Date.now() 
-                });
+            closeCropper();
+        }, 'image/jpeg', 0.9);
+    }
 
-                // Create FileList and assign to input
-                const dataTransfer = new DataTransfer();
-                dataTransfer.items.add(newFile);
-                
-                const targetInput = document.getElementById(targetInputFieldId);
-                if (targetInput) {
-                    targetInput.files = dataTransfer.files;
-                }
-                
-                closeCropper();
-            }, 'image/jpeg', 0.9);
+    // Close modal when clicking outside
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) {
+            closeCropper();
         }
-
-        // Close modal when clicking outside
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                closeCropper();
-            }
-        });
-    </script>
+    });
+</script>
 {% endblock %}

@@ -1,3 +1,11 @@
+# portal/views.py
+
+# --- START: Added Imports ---
+import os
+from django.conf import settings
+# --- END: Added Imports ---
+
+# (imports from your existing file)
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -97,7 +105,13 @@ def volunteer_dashboard(request):
     my_active_donations = Donation.objects.filter(assigned_volunteer=volunteer_profile, status__in=['ACCEPTED', 'COLLECTED']).order_by('accepted_at')
     delivery_history = Donation.objects.filter(assigned_volunteer=volunteer_profile, status__in=['VERIFYING', 'DELIVERED']).order_by('-delivered_at')
     available_donations = Donation.objects.filter(status='PENDING').select_related('restaurant').order_by('-created_at')
-    upcoming_camps = DonationCamp.objects.filter(ngo__in=registered_ngos, is_active=True, end_time__gt=timezone.now()).order_by('start_time')
+    
+    # --- START: THE FIX IS HERE ---
+    # The 'end_time' field does not exist, so we remove that part of the filter.
+    # Filtering by 'is_active=True' is the correct way to get current camps.
+    upcoming_camps = DonationCamp.objects.filter(ngo__in=registered_ngos, is_active=True).order_by('start_time')
+    # --- END: THE FIX IS HERE ---
+
     donations_map_data = [{"lat": d.restaurant.latitude, "lon": d.restaurant.longitude, "name": d.restaurant.restaurant_name, "food": d.food_description, "pickup_address": d.pickup_address, "id": d.pk} for d in available_donations if d.restaurant.latitude and d.restaurant.longitude]
     camps_map_data = [{"lat": c.latitude, "lon": c.longitude, "name": c.name, "ngo": c.ngo.ngo_name, "address": c.location_address} for c in upcoming_camps if c.latitude and c.longitude]
     context = {'registered_ngos': registered_ngos, 'available_ngos': NGOProfile.objects.exclude(pk__in=[n.pk for n in registered_ngos]), 'camps': upcoming_camps, 'available_donations': available_donations, 'my_active_donations': my_active_donations, 'delivery_history': delivery_history, 'donations_map_data': json.dumps(donations_map_data), 'camps_map_data': json.dumps(camps_map_data)}
@@ -134,7 +148,12 @@ def select_delivery_camp(request, donation_id):
     donation = get_object_or_404(Donation, pk=donation_id, assigned_volunteer=request.user.volunteer_profile)
     volunteer_profile = request.user.volunteer_profile
     registered_ngos = volunteer_profile.registered_ngos.all()
-    active_camps = DonationCamp.objects.filter(ngo__in=registered_ngos, is_active=True, end_time__gt=timezone.now()).order_by('start_time')
+
+    # --- START: THE FIX IS HERE ---
+    # The same error was here. Removing the non-existent 'end_time' field.
+    active_camps = DonationCamp.objects.filter(ngo__in=registered_ngos, is_active=True).order_by('start_time')
+    # --- END: THE FIX IS HERE ---
+    
     context = {'donation': donation, 'camps': active_camps}
     return render(request, 'select_camp.html', context)
 @login_required(login_url='login_page')
@@ -201,17 +220,40 @@ def ngo_manage_volunteers(request):
     return render(request, 'ngo_manage_volunteers.html', context)
 @login_required(login_url='login_page')
 def ngo_profile(request):
-    if request.user.user_type != 'NGO': return redirect('index')
-    profile = request.user.ngo_profile
+    if request.user.user_type != 'NGO':
+        return redirect('index')
+    
+    profile = get_object_or_404(NGOProfile, user=request.user)
+
     if request.method == 'POST':
-        # THE FIX IS HERE: We must pass request.FILES to the form to handle the image uploads.
+        # --- START: Logic to Delete Old Images ---
+        # Get the old file paths before the model is updated
+        old_profile_pic_path = profile.profile_picture.path if profile.profile_picture else None
+        old_banner_image_path = profile.banner_image.path if profile.banner_image else None
+        # --- END: Logic to Delete Old Images ---
+
         form = NGOProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
-            form.save()
+            # Save the new instance, which updates the file fields
+            updated_profile = form.save()
+
+            # --- START: Check and delete the old profile picture ---
+            if old_profile_pic_path and updated_profile.profile_picture and old_profile_pic_path != updated_profile.profile_picture.path:
+                if os.path.exists(old_profile_pic_path):
+                    os.remove(old_profile_pic_path)
+            # --- END: Check and delete the old profile picture ---
+            
+            # --- START: Check and delete the old banner image ---
+            if old_banner_image_path and updated_profile.banner_image and old_banner_image_path != updated_profile.banner_image.path:
+                if os.path.exists(old_banner_image_path):
+                    os.remove(old_banner_image_path)
+            # --- END: Check and delete the old banner image ---
+
             messages.success(request, 'Your profile has been updated successfully!')
             return redirect('ngo_profile')
     else:
         form = NGOProfileForm(instance=profile)
+
     context = {'form': form}
     return render(request, 'ngo_profile.html', context)
 @login_required(login_url='login_page')
