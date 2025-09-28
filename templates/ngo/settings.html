@@ -1,23 +1,11 @@
-{% extends 'ngo_base.html' %}
+{% extends 'ngo/base.html' %}
 
 {% block title %}Account Settings - {{ block.super }}{% endblock %}
 
-{% block head %}
-    {{ block.super }}
-    <style>
-        .placeholder-content {
-            padding: 2em;
-            text-align: center;
-            background-color: #fff;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-        }
-    </style>
-{% endblock %}
-
+{% block page_title %}Account Settings{% endblock %}
+{% block page_description %}Manage your account preferences.{% endblock %}
 
 {% block ngo_content %}
-    <h2>Account Settings</h2>
     <div class="placeholder-content">
         <p>This is where you will be able to manage your account settings, such as changing your password, managing notification preferences, or deleting your account.</p>
         <p><strong>This feature is currently under development.</strong></p>

@@ -1,0 +1,34 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Connect2Give - Food Donation Platform{% endblock %}</title>
+    
+    <!-- Link to the new global stylesheet -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    
+    <!-- External Libraries (Leaflet, Cropper, Chart.js) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
+    
+    <!-- Block for page-specific head content (like extra CSS) -->
+    {% block head %}{% endblock %}
+</head>
+<body>
+
+    <!-- Main content block for child templates -->
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+    
+    <!-- External JS Libraries -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Block for page-specific scripts -->
+    {% block scripts %}{% endblock %}
+</body>
+</html>

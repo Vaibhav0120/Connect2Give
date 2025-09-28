@@ -22,12 +22,14 @@ from .serializers import UserSerializer
 from .models import User, RestaurantProfile, NGOProfile, VolunteerProfile, DonationCamp, Donation
 from .forms import DonationCampForm, DonationForm, NGOProfileForm
 
-# --- (Helper function, auth views, other dashboards, and action views are unchanged) ---
+# --- (Helper function remains unchanged) ---
 def get_user_dashboard_redirect(user):
     if user.user_type == User.UserType.RESTAURANT: return redirect('restaurant_dashboard')
     elif user.user_type == User.UserType.NGO: return redirect('ngo_dashboard_overview')
     elif user.user_type == User.UserType.VOLUNTEER: return redirect('volunteer_dashboard')
     else: return redirect('index')
+
+# --- Main Site & Auth Views ---
 def index(request):
     active_camps = DonationCamp.objects.filter(is_active=True).select_related('ngo')
     all_restaurants = RestaurantProfile.objects.filter(latitude__isnull=False, longitude__isnull=False)
@@ -35,16 +37,18 @@ def index(request):
     restaurants_map_data = [{"lat": r.latitude, "lon": r.longitude, "name": r.restaurant_name, "address": r.address} for r in all_restaurants]
     context = {'camps_map_data': json.dumps(camps_map_data), 'restaurants_map_data': json.dumps(restaurants_map_data)}
     return render(request, 'index.html', context)
+
 def register_step_1(request):
     if request.user.is_authenticated: return get_user_dashboard_redirect(request.user)
     if request.method == 'POST':
         username = request.POST.get('username')
         email = request.POST.get('email')
-        if User.objects.filter(username=username).exists(): return render(request, 'register_step_1.html', {'error': 'Username already exists.'})
-        if User.objects.filter(email=email).exists(): return render(request, 'register_step_1.html', {'error': 'Email already registered.'})
+        if User.objects.filter(username=username).exists(): return render(request, 'auth/register_step_1.html', {'error': 'Username already exists.'})
+        if User.objects.filter(email=email).exists(): return render(request, 'auth/register_step_1.html', {'error': 'Email already registered.'})
         request.session['registration_data'] = {'username': username, 'email': email, 'password': request.POST.get('password'), 'user_type': request.POST.get('user_type')}
         return redirect('register_step_2')
-    return render(request, 'register_step_1.html')
+    return render(request, 'auth/register_step_1.html')
+
 def register_step_2(request):
     if request.user.is_authenticated: return get_user_dashboard_redirect(request.user)
     registration_data = request.session.get('registration_data')
@@ -65,7 +69,8 @@ def register_step_2(request):
         messages.success(request, 'Registration successful! Please log in.')
         return redirect('login_page')
     context = {'user_type': user_type}
-    return render(request, 'register_step_2.html', context)
+    return render(request, 'auth/register_step_2.html', context)
+
 def login_page(request):
     if request.user.is_authenticated: return get_user_dashboard_redirect(request.user)
     if request.method == 'POST':
@@ -74,11 +79,14 @@ def login_page(request):
             login(request, user)
             return get_user_dashboard_redirect(user)
         else:
-            return render(request, 'login.html', {'error': 'Invalid username or password.'})
-    return render(request, 'login.html')
+            return render(request, 'auth/login.html', {'error': 'Invalid username or password.'})
+    return render(request, 'auth/login.html')
+
 def logout_view(request):
     logout(request)
     return redirect('index')
+
+# --- Dashboard Views ---
 @login_required(login_url='login_page')
 def restaurant_dashboard(request):
     if request.user.user_type != 'RESTAURANT': return redirect('index')
@@ -94,7 +102,8 @@ def restaurant_dashboard(request):
         form = DonationForm(initial={'pickup_address': restaurant_profile.address})
     donations = Donation.objects.filter(restaurant=restaurant_profile).order_by('-created_at')
     context = {'form': form, 'donations': donations}
-    return render(request, 'restaurant_dashboard.html', context)
+    return render(request, 'restaurant/dashboard.html', context)
+
 @login_required(login_url='login_page')
 def volunteer_dashboard(request):
     if request.user.user_type != 'VOLUNTEER': return redirect('index')
@@ -105,93 +114,21 @@ def volunteer_dashboard(request):
     my_active_donations = Donation.objects.filter(assigned_volunteer=volunteer_profile, status__in=['ACCEPTED', 'COLLECTED']).order_by('accepted_at')
     delivery_history = Donation.objects.filter(assigned_volunteer=volunteer_profile, status__in=['VERIFYING', 'DELIVERED']).order_by('-delivered_at')
     available_donations = Donation.objects.filter(status='PENDING').select_related('restaurant').order_by('-created_at')
-    
-    # --- START: THE FIX IS HERE ---
-    # The 'end_time' field does not exist, so we remove that part of the filter.
-    # Filtering by 'is_active=True' is the correct way to get current camps.
     upcoming_camps = DonationCamp.objects.filter(ngo__in=registered_ngos, is_active=True).order_by('start_time')
-    # --- END: THE FIX IS HERE ---
-
     donations_map_data = [{"lat": d.restaurant.latitude, "lon": d.restaurant.longitude, "name": d.restaurant.restaurant_name, "food": d.food_description, "pickup_address": d.pickup_address, "id": d.pk} for d in available_donations if d.restaurant.latitude and d.restaurant.longitude]
     camps_map_data = [{"lat": c.latitude, "lon": c.longitude, "name": c.name, "ngo": c.ngo.ngo_name, "address": c.location_address} for c in upcoming_camps if c.latitude and c.longitude]
     context = {'registered_ngos': registered_ngos, 'available_ngos': NGOProfile.objects.exclude(pk__in=[n.pk for n in registered_ngos]), 'camps': upcoming_camps, 'available_donations': available_donations, 'my_active_donations': my_active_donations, 'delivery_history': delivery_history, 'donations_map_data': json.dumps(donations_map_data), 'camps_map_data': json.dumps(camps_map_data)}
-    return render(request, 'volunteer_dashboard.html', context)
-@login_required(login_url='login_page')
-def register_with_ngo(request, ngo_id):
-    if request.user.user_type != 'VOLUNTEER': return redirect('index')
-    ngo = get_object_or_404(NGOProfile, pk=ngo_id)
-    volunteer = request.user.volunteer_profile
-    ngo.volunteers.add(volunteer)
-    return redirect('volunteer_dashboard')
-@login_required(login_url='login_page')
-def accept_donation(request, donation_id):
-    if request.user.user_type != 'VOLUNTEER': return redirect('index')
-    donation = get_object_or_404(Donation, pk=donation_id)
-    volunteer = request.user.volunteer_profile
-    if donation.status == 'PENDING':
-        donation.assigned_volunteer = volunteer
-        donation.status = 'ACCEPTED'
-        donation.accepted_at = timezone.now()
-        donation.save()
-    return redirect('volunteer_dashboard')
-@login_required(login_url='login_page')
-def mark_as_collected(request, donation_id):
-    if request.user.user_type != 'VOLUNTEER': return redirect('index')
-    donation = get_object_or_404(Donation, pk=donation_id, assigned_volunteer=request.user.volunteer_profile)
-    donation.status = 'COLLECTED'
-    donation.collected_at = timezone.now()
-    donation.save()
-    return redirect('select_delivery_camp', donation_id=donation.pk)
-@login_required(login_url='login_page')
-def select_delivery_camp(request, donation_id):
-    if request.user.user_type != 'VOLUNTEER': return redirect('index')
-    donation = get_object_or_404(Donation, pk=donation_id, assigned_volunteer=request.user.volunteer_profile)
-    volunteer_profile = request.user.volunteer_profile
-    registered_ngos = volunteer_profile.registered_ngos.all()
+    return render(request, 'volunteer/dashboard.html', context)
 
-    # --- START: THE FIX IS HERE ---
-    # The same error was here. Removing the non-existent 'end_time' field.
-    active_camps = DonationCamp.objects.filter(ngo__in=registered_ngos, is_active=True).order_by('start_time')
-    # --- END: THE FIX IS HERE ---
-    
-    context = {'donation': donation, 'camps': active_camps}
-    return render(request, 'select_camp.html', context)
-@login_required(login_url='login_page')
-def mark_as_delivered(request, donation_id, camp_id):
-    if request.user.user_type != 'VOLUNTEER': return redirect('index')
-    donation = get_object_or_404(Donation, pk=donation_id, assigned_volunteer=request.user.volunteer_profile)
-    camp = get_object_or_404(DonationCamp, pk=camp_id)
-    donation.status = 'VERIFYING'
-    donation.target_camp = camp
-    donation.delivered_at = timezone.now()
-    donation.save()
-    return redirect('volunteer_dashboard')
-@login_required(login_url='login_page')
-def mark_camp_as_completed(request, camp_id):
-    if request.user.user_type != 'NGO': return redirect('index')
-    camp = get_object_or_404(DonationCamp, pk=camp_id, ngo=request.user.ngo_profile)
-    if request.method == 'POST':
-        camp.is_active = False
-        camp.completed_at = timezone.now()
-        camp.save()
-    return redirect('ngo_manage_camps')
-@login_required(login_url='login_page')
-def confirm_delivery(request, donation_id):
-    if request.user.user_type != 'NGO': return redirect('index')
-    donation = get_object_or_404(Donation, pk=donation_id, target_camp__ngo=request.user.ngo_profile)
-    if request.method == 'POST':
-        donation.status = 'DELIVERED'
-        donation.save()
-    return redirect('ngo_manage_camps')
-
-# --- NGO DASHBOARD VIEWS ---
+# --- NGO Dashboard Views ---
 @login_required(login_url='login_page')
 def ngo_dashboard_overview(request):
     if request.user.user_type != 'NGO': return redirect('index')
     ngo_profile = request.user.ngo_profile
     stats = {'active_camps': DonationCamp.objects.filter(ngo=ngo_profile, is_active=True).count(), 'total_volunteers': ngo_profile.volunteers.count(), 'donations_to_verify': Donation.objects.filter(target_camp__ngo=ngo_profile, status='VERIFYING').count(), 'total_donations_received': Donation.objects.filter(target_camp__ngo=ngo_profile, status='DELIVERED').count()}
     context = {'stats': stats}
-    return render(request, 'ngo_dashboard_overview.html', context)
+    return render(request, 'ngo/dashboard_overview.html', context)
+
 @login_required(login_url='login_page')
 def ngo_manage_camps(request):
     if request.user.user_type != 'NGO': return redirect('index')
@@ -210,61 +147,117 @@ def ngo_manage_camps(request):
     completed_camps = DonationCamp.objects.filter(ngo=ngo_profile, is_active=False).order_by('-completed_at')
     donations_to_verify = Donation.objects.filter(target_camp__ngo=ngo_profile, status='VERIFYING').order_by('delivered_at')
     context = {'form': form, 'active_camps': active_camps, 'completed_camps': completed_camps, 'donations_to_verify': donations_to_verify}
-    return render(request, 'ngo_manage_camps.html', context)
+    return render(request, 'ngo/manage_camps.html', context)
+
 @login_required(login_url='login_page')
 def ngo_manage_volunteers(request):
     if request.user.user_type != 'NGO': return redirect('index')
     ngo_profile = request.user.ngo_profile
     registered_volunteers = ngo_profile.volunteers.annotate(active_deliveries=Count('assigned_donations', filter=Q(assigned_donations__status__in=['ACCEPTED', 'COLLECTED']))).order_by('full_name')
     context = {'volunteers': registered_volunteers}
-    return render(request, 'ngo_manage_volunteers.html', context)
+    return render(request, 'ngo/manage_volunteers.html', context)
+
 @login_required(login_url='login_page')
 def ngo_profile(request):
-    if request.user.user_type != 'NGO':
-        return redirect('index')
-    
+    if request.user.user_type != 'NGO': return redirect('index')
     profile = get_object_or_404(NGOProfile, user=request.user)
-
     if request.method == 'POST':
-        # --- START: Logic to Delete Old Images ---
-        # Get the old file paths before the model is updated
         old_profile_pic_path = profile.profile_picture.path if profile.profile_picture else None
         old_banner_image_path = profile.banner_image.path if profile.banner_image else None
-        # --- END: Logic to Delete Old Images ---
-
         form = NGOProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
-            # Save the new instance, which updates the file fields
             updated_profile = form.save()
-
-            # --- START: Check and delete the old profile picture ---
             if old_profile_pic_path and updated_profile.profile_picture and old_profile_pic_path != updated_profile.profile_picture.path:
-                if os.path.exists(old_profile_pic_path):
-                    os.remove(old_profile_pic_path)
-            # --- END: Check and delete the old profile picture ---
-            
-            # --- START: Check and delete the old banner image ---
+                if os.path.exists(old_profile_pic_path): os.remove(old_profile_pic_path)
             if old_banner_image_path and updated_profile.banner_image and old_banner_image_path != updated_profile.banner_image.path:
-                if os.path.exists(old_banner_image_path):
-                    os.remove(old_banner_image_path)
-            # --- END: Check and delete the old banner image ---
-
+                if os.path.exists(old_banner_image_path): os.remove(old_banner_image_path)
             messages.success(request, 'Your profile has been updated successfully!')
             return redirect('ngo_profile')
     else:
         form = NGOProfileForm(instance=profile)
-
     context = {'form': form}
-    return render(request, 'ngo_profile.html', context)
+    return render(request, 'ngo/profile.html', context)
+
 @login_required(login_url='login_page')
 def ngo_settings(request):
     if request.user.user_type != 'NGO': return redirect('index')
-    return render(request, 'ngo_settings.html')
+    return render(request, 'ngo/settings.html')
 
-# --- API Views (No change) ---
+# --- Action Views (Logic unchanged, only one template path change) ---
+@login_required(login_url='login_page')
+def register_with_ngo(request, ngo_id):
+    if request.user.user_type != 'VOLUNTEER': return redirect('index')
+    ngo = get_object_or_404(NGOProfile, pk=ngo_id)
+    volunteer = request.user.volunteer_profile
+    ngo.volunteers.add(volunteer)
+    return redirect('volunteer_dashboard')
+
+@login_required(login_url='login_page')
+def accept_donation(request, donation_id):
+    if request.user.user_type != 'VOLUNTEER': return redirect('index')
+    donation = get_object_or_404(Donation, pk=donation_id)
+    volunteer = request.user.volunteer_profile
+    if donation.status == 'PENDING':
+        donation.assigned_volunteer = volunteer
+        donation.status = 'ACCEPTED'
+        donation.accepted_at = timezone.now()
+        donation.save()
+    return redirect('volunteer_dashboard')
+
+@login_required(login_url='login_page')
+def mark_as_collected(request, donation_id):
+    if request.user.user_type != 'VOLUNTEER': return redirect('index')
+    donation = get_object_or_404(Donation, pk=donation_id, assigned_volunteer=request.user.volunteer_profile)
+    donation.status = 'COLLECTED'
+    donation.collected_at = timezone.now()
+    donation.save()
+    return redirect('select_delivery_camp', donation_id=donation.pk)
+
+@login_required(login_url='login_page')
+def select_delivery_camp(request, donation_id):
+    if request.user.user_type != 'VOLUNTEER': return redirect('index')
+    donation = get_object_or_404(Donation, pk=donation_id, assigned_volunteer=request.user.volunteer_profile)
+    volunteer_profile = request.user.volunteer_profile
+    registered_ngos = volunteer_profile.registered_ngos.all()
+    active_camps = DonationCamp.objects.filter(ngo__in=registered_ngos, is_active=True).order_by('start_time')
+    context = {'donation': donation, 'camps': active_camps}
+    return render(request, 'select_camp.html', context)
+
+@login_required(login_url='login_page')
+def mark_as_delivered(request, donation_id, camp_id):
+    if request.user.user_type != 'VOLUNTEER': return redirect('index')
+    donation = get_object_or_404(Donation, pk=donation_id, assigned_volunteer=request.user.volunteer_profile)
+    camp = get_object_or_404(DonationCamp, pk=camp_id)
+    donation.status = 'VERIFYING'
+    donation.target_camp = camp
+    donation.delivered_at = timezone.now()
+    donation.save()
+    return redirect('volunteer_dashboard')
+
+@login_required(login_url='login_page')
+def mark_camp_as_completed(request, camp_id):
+    if request.user.user_type != 'NGO': return redirect('index')
+    camp = get_object_or_404(DonationCamp, pk=camp_id, ngo=request.user.ngo_profile)
+    if request.method == 'POST':
+        camp.is_active = False
+        camp.completed_at = timezone.now()
+        camp.save()
+    return redirect('ngo_manage_camps')
+
+@login_required(login_url='login_page')
+def confirm_delivery(request, donation_id):
+    if request.user.user_type != 'NGO': return redirect('index')
+    donation = get_object_or_404(Donation, pk=donation_id, target_camp__ngo=request.user.ngo_profile)
+    if request.method == 'POST':
+        donation.status = 'DELIVERED'
+        donation.save()
+    return redirect('ngo_manage_camps')
+
+# --- API Views ---
 class RegisterAPIView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
 class LoginAPIView(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data, context={'request': request})
@@ -272,3 +265,4 @@ class LoginAPIView(ObtainAuthToken):
         user = serializer.user # type: ignore
         token, created = Token.objects.get_or_create(user=user)
         return Response({'token': token.key, 'user_id': user.pk, 'user_type': user.user_type})
+

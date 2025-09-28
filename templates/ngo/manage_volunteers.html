@@ -1,48 +1,14 @@
-{% extends 'ngo_base.html' %}
+{% extends 'ngo/base.html' %}
 
 {% block title %}Manage Volunteers - {{ block.super }}{% endblock %}
 
-{% block head %}
-    {{ block.super }}
-    <style>
-        .section { 
-            border: 1px solid #ccc; 
-            padding: 1.5em; 
-            margin-bottom: 2em; 
-            background-color: white; 
-            border-radius: 8px;
-        }
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin-top: 1em; 
-        }
-        th, td { 
-            border: 1px solid #ddd; 
-            padding: 12px; 
-            text-align: left; 
-        }
-        th { 
-            background-color: #f2f2f2; 
-        }
-        .status-active {
-            color: #28a745;
-            font-weight: bold;
-        }
-        .status-idle {
-            color: #6c757d;
-        }
-    </style>
-{% endblock %}
-
+{% block page_title %}Manage Volunteers{% endblock %}
+{% block page_description %}View and manage all the volunteers registered with your organization.{% endblock %}
 
 {% block ngo_content %}
-    <h2>Manage Volunteers</h2>
-    <p>View and manage all the volunteers who have registered with your organization.</p>
-
-    <div class="section">
+    <div class="content-card">
         <h3>My Registered Volunteers List</h3>
-        <table>
+        <table class="data-table">
             <thead>
                 <tr>
                     <th>Full Name</th>
@@ -67,7 +33,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="4">You have no registered volunteers yet.</td>
+                    <td colspan="4" class="empty-state">You have no registered volunteers yet.</td>
                 </tr>
                 {% endfor %}
             </tbody>

@@ -54,7 +54,9 @@ ROOT_URLCONF = 'food_donation_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'frontend')],
+        # --- CHANGE HERE ---
+        # Point to the new root 'templates' directory at the project level.
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -99,7 +101,9 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'frontend/assets')]
+# --- CHANGE HERE ---
+# Point to the new root 'static' directory at the project level.
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
@@ -117,3 +121,4 @@ MEDIA_URL = '/media/'
 
 # This is the path to the directory where uploaded files will be stored.
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+

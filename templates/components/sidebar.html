@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}
+        {# The head content will be provided by the child template (e.g., ngo/base.html) #}
+    {% endblock head %}
+</head>
+<body>
+    {% block body %}
+        {# The main body content, including the sidebar and main content area, goes here #}
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>{{ sidebar_title|default:"Dashboard" }}</h1>
+                <p>{{ sidebar_subtitle|default:"Main Menu" }}</p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                {% block nav_links %}
+                    <!-- Navigation links will be injected here by the child template -->
+                {% endblock nav_links %}
+            </nav>
+        </aside>
+    {% endblock body %}
+</body>
+</html>
