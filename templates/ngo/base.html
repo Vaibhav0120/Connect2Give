@@ -18,7 +18,12 @@
 {% endblock head %}
 
 
-{# This block defines the navigation links that will be injected into the sidebar #}
+{# These blocks define the user-specific title and subtitle for the sidebar header #}
+{% block sidebar_title %}{{ user.ngo_profile.ngo_name }}{% endblock %}
+{% block sidebar_subtitle %}NGO Dashboard{% endblock %}
+
+
+{# This block defines the navigation links that will be injected into the sidebar's <nav> #}
 {% block nav_links %}
     <div class="nav-item">
         <a href="{% url 'ngo_dashboard_overview' %}" 
@@ -65,7 +70,7 @@
 {# This block defines the main body content that appears next to the sidebar #}
 {% block body %}
     <div class="dashboard-container">
-        {{ block.super }} {# This renders the sidebar itself from the parent template #}
+        {{ block.super }} {# This renders the <aside class="sidebar"> from the parent template #}
 
         <main class="main-content">
             <div class="main-header">
@@ -77,12 +82,12 @@
             </div>
             
             {% block ngo_content %}
-                <!-- The content from ngo_profile.html, ngo_overview.html, etc. goes here -->
+                <!-- The content from the specific NGO page (e.g., ngo_profile.html) will go here -->
             {% endblock ngo_content %}
         </main>
     </div>
 
-    <!-- Scripts need to be included within the body block -->
+    <!-- Scripts need to be included within the body block to ensure the page is loaded first -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

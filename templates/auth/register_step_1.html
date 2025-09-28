@@ -1,15 +1,10 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Register (Step 1 of 2) - Connect2Give{% endblock %}
 
 {% block head %}
-    <style>
-        .form-container { max-width: 500px; margin: 2em auto; padding: 2em; background-color: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        .form-group { margin-bottom: 1em; }
-        label { display: block; margin-bottom: 0.5em; font-weight: bold; }
-        input, select { width: 100%; padding: 0.8em; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-        .error-message { color: #D8000C; background-color: #FFD2D2; border: 1px solid #D8000C; padding: 10px; margin-bottom: 1em; border-radius: 5px; }
-    </style>
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
 {% endblock %}
 
 {% block content %}

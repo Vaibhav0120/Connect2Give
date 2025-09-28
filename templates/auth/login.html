@@ -1,24 +1,16 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Login - Connect2Give{% endblock %}
 
 {% block head %}
-    <style>
-        .form-container { max-width: 500px; margin: 2em auto; padding: 2em; background-color: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        .form-group { margin-bottom: 1em; }
-        label { display: block; margin-bottom: 0.5em; font-weight: bold; }
-        input { width: 100%; padding: 0.8em; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-        .error-message { color: #D8000C; background-color: #FFD2D2; border: 1px solid #D8000C; padding: 10px; margin-bottom: 1em; border-radius: 5px; }
-        /* NEW STYLE FOR SUCCESS MESSAGES */
-        .success-message { color: #155724; background-color: #D4EDDA; border: 1px solid #C3E6CB; padding: 10px; margin-bottom: 1em; border-radius: 5px; }
-    </style>
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
 {% endblock %}
 
 {% block content %}
     <div class="form-container">
         <h1>Login to Your Account</h1>
 
-        {# NEW SECTION TO DISPLAY SUCCESS MESSAGES FROM REGISTRATION #}
         {% if messages %}
             {% for message in messages %}
                 <div class="success-message">

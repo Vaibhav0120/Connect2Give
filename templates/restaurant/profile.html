@@ -1,0 +1,208 @@
+{% extends 'restaurant/base.html' %}
+{% load static %}
+
+{% block title %}My Profile - {{ block.super }}{% endblock %}
+
+{% block page_title %}My Profile{% endblock %}
+{% block page_description %}Update your restaurant's public information{% endblock %}
+
+{% block restaurant_content %}
+<div class="profile-container">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="success-message">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="profile-form">
+        <form method="POST" enctype="multipart/form-data" action="{% url 'restaurant_profile' %}">
+            {% csrf_token %}
+            {{ form.latitude }}
+            {{ form.longitude }}
+
+            <div class="form-grid">
+                <div>
+                    <div class="form-group">
+                        {{ form.restaurant_name.label_tag }}
+                        {{ form.restaurant_name }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.phone_number.label_tag }}
+                        {{ form.phone_number }}
+                    </div>
+                </div>
+
+                <div class="image-upload-section">
+                    <div class="image-upload-widget">
+                        <label>Profile Picture (Logo)</label>
+                        <div class="image-preview-container">
+                            <img src="{% if form.instance.profile_picture %}{{ form.instance.profile_picture.url }}{% else %}https://placehold.co/120x120/e2e8f0/475569?text=Logo{% endif %}"
+                                alt="Profile Picture" class="image-preview" id="profile_picture_preview">
+                        </div>
+                        <input type="file" id="id_profile_picture_input" accept="image/*"
+                            onchange="openCropper(event, 1, 'id_profile_picture')" style="display: none;">
+                        <button type="button" class="upload-btn"
+                            onclick="document.getElementById('id_profile_picture_input').click()">
+                            Choose Image
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hidden Django form field for the cropped image -->
+            <div style="display: none;">
+                {{ form.profile_picture }}
+            </div>
+
+            <div class="map-section">
+                <h3>Location & Address</h3>
+                <div class="form-group">
+                    {{ form.address.label_tag }}
+                    <div class="address-group">
+                        {{ form.address }}
+                        <button type="button" onclick="findAddressOnMap()">Find Location</button>
+                    </div>
+                </div>
+                <div id="location-map"></div>
+                <p class="form-help-text">
+                    Type an address and click "Find Location", or click on the map to update your location.
+                </p>
+            </div>
+
+            <div style="margin-top: 2rem; text-align: right;">
+                <button type="submit">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Cropper modal -->
+<div id="cropper-modal" class="cropper-modal">
+    <div class="cropper-modal-content">
+        <h3>Crop Your Image</h3>
+        <div class="cropper-container">
+            <img id="image-to-crop" src="">
+        </div>
+        <div class="cropper-actions">
+            <button type="button" class="btn-cancel" onclick="closeCropper()">Cancel</button>
+            <button type="button" class="btn-crop" onclick="cropAndApplyImage()">Crop & Use</button>
+        </div>
+    </div>
+</div>
+{% endblock restaurant_content %}
+
+{% block scripts %}
+{{ block.super }}
+<!-- Page-specific JavaScript for map and image cropper -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // --- MAP INITIALIZATION ---
+        const initialLat = parseFloat("{{ form.instance.latitude|default:'28.6139'|escapejs }}");
+        const initialLon = parseFloat("{{ form.instance.longitude|default:'77.2090'|escapejs }}");
+        const initialZoom = parseInt("{{ form.instance.latitude|yesno:'15,11' }}");
+
+        const map = L.map('location-map').setView([initialLat, initialLon], initialZoom);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        let marker = null;
+        const latField = document.getElementById('id_latitude');
+        const lonField = document.getElementById('id_longitude');
+        const addressField = document.getElementById('id_address');
+
+        if (latField.value && lonField.value) {
+            marker = L.marker([latField.value, lonField.value]).addTo(map);
+        }
+
+        function updateMarkerAndFields(lat, lon, address = null) {
+            latField.value = lat;
+            lonField.value = lon;
+            if (address) {
+                addressField.value = address;
+            }
+            if (marker) {
+                marker.setLatLng([lat, lon]);
+            } else {
+                marker = L.marker([lat, lon]).addTo(map);
+            }
+            map.setView([lat, lon], 15);
+        }
+
+        window.findAddressOnMap = function() {
+            const address = addressField.value;
+            if (!address) { alert("Please enter an address to find."); return; }
+            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
+                .then(r => r.json())
+                .then(d => {
+                    if (d.length > 0) {
+                        updateMarkerAndFields(d[0].lat, d[0].lon);
+                    } else {
+                        alert("Address not found.");
+                    }
+                });
+        }
+        
+        map.on('click', function (e) {
+            const lat = e.latlng.lat;
+            const lon = e.latlng.lng;
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+                .then(r => r.json())
+                .then(d => updateMarkerAndFields(lat, lon, d.display_name || 'Location selected'));
+        });
+
+
+        // --- CROPPER LOGIC ---
+        const modal = document.getElementById('cropper-modal');
+        const image = document.getElementById('image-to-crop');
+        let cropper;
+        let targetInputFieldId;
+        let targetPreviewId;
+        let sourceFileName;
+
+        window.openCropper = function(event, aspectRatio, targetId) {
+            const input = event.target;
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    image.src = e.target.result;
+                    modal.style.display = 'flex';
+                    if (cropper) cropper.destroy();
+                    cropper = new Cropper(image, { aspectRatio: aspectRatio, viewMode: 1 });
+                };
+                reader.readAsDataURL(input.files[0]);
+                sourceFileName = input.files[0].name;
+                targetInputFieldId = targetId;
+                targetPreviewId = targetId.replace('id_', '') + '_preview';
+            }
+        }
+
+        window.closeCropper = function() {
+            modal.style.display = 'none';
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+        }
+
+        window.cropAndApplyImage = function() {
+            if (!cropper) return;
+            const canvas = cropper.getCroppedCanvas({ width: 1024, imageSmoothingQuality: 'high' });
+            document.getElementById(targetPreviewId).src = canvas.toDataURL('image/jpeg', 0.9);
+            canvas.toBlob(function (blob) {
+                const newFile = new File([blob], sourceFileName, { type: 'image/jpeg', lastModified: Date.now() });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(newFile);
+                document.getElementById(targetInputFieldId).files = dataTransfer.files;
+                closeCropper();
+            }, 'image/jpeg', 0.9);
+        }
+        
+        modal.addEventListener('click', function (e) {
+            if (e.target === modal) {
+                closeCropper();
+            }
+        });
+    });
+</script>
+{% endblock scripts %}

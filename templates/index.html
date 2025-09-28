@@ -1,20 +1,25 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% load static %}
+{% load portal_extras %} {# <-- LOAD THE NEW TEMPLATE TAGS #}
 
 {% block title %}Connect2Give - Home{% endblock %}
 
 {% block head %}
     <style>
+        /* Minimal page-specific styles */
+        .welcome-section {
+            padding: 4em 2em;
+            background-color: var(--bg-card);
+            border-radius: var(--radius);
+            text-align: center;
+            margin-top: 2rem;
+        }
         #home-map { 
             height: 500px; 
-            margin-top: 2em; 
-            border: 1px solid #ccc;
-            border-radius: 8px;
-        }
-        .welcome-section {
-            padding: 2em;
-            background-color: white;
-            border-radius: 8px;
-            text-align: center;
+            margin-top: 2em;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
         }
     </style>
 {% endblock %}
@@ -22,73 +27,60 @@
 {% block content %}
 
     {% if user.is_authenticated %}
-        {# This content is shown ONLY to logged-in users #}
         <div class="welcome-section">
             <h1>Welcome back, {{ user.username }}!</h1>
             <p>You are logged in as a: <strong>{{ user.get_user_type_display }}</strong>.</p>
-            
-            {% if user.user_type == 'RESTAURANT' %}
-                <a href="{% url 'restaurant_dashboard' %}"><button>Go to My Dashboard</button></a>
-            {% elif user.user_type == 'NGO' %}
-                <!-- THE FIX IS HERE: Point to the new overview page -->
-                <a href="{% url 'ngo_dashboard_overview' %}"><button>Go to My Dashboard</button></a>
-            {% elif user.user_type == 'VOLUNTEER' %}
-                <a href="{% url 'volunteer_dashboard' %}"><button>Go to My Dashboard</button></a>
-            {% else %} {# For Admins #}
-                 <p>Welcome to the site administration area.</p>
-            {% endif %}
-            
-            <br><br>
-            <hr>
             <br>
-            <a href="{% url 'logout' %}"><button>Logout</button></a>
+            {# --- THE FIX IS HERE --- #}
+            <a href="{% get_dashboard_url user %}" class="btn">Go to My Dashboard</a>
+            {# --- END OF FIX --- #}
+            <a href="{% url 'logout' %}" class="btn btn-secondary" style="margin-left: 1rem;">Logout</a>
         </div>
 
     {% else %}
-        {# This content is shown ONLY to guests (not logged-in users) #}
         <div class="welcome-section">
             <h1>Welcome to Connect2Give</h1>
             <p>The platform connecting restaurants with surplus food to NGOs and volunteers who can deliver it to those in need.</p>
             <br>
-            <a href="{% url 'login_page' %}"><button>Login</button></a>
-            <a href="{% url 'register_step_1' %}"><button>Register</button></a>
+            <a href="{% url 'login_page' %}" class="btn">Login</a>
+            <a href="{% url 'register_step_1' %}" class="btn btn-secondary" style="margin-left: 1rem;">Register</a>
         </div>
-
         <div id="home-map"></div>
     {% endif %}
 
 {% endblock %}
 
-
 {% block scripts %}
+    {{ block.super }}
     {% if not user.is_authenticated %}
         <script>
-            // This script will only run for logged-out users who can see the map div
-            const map = L.map('home-map').setView([28.644800, 77.216721], 11);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
+            document.addEventListener('DOMContentLoaded', function () {
+                const map = L.map('home-map').setView([28.6448, 77.2167], 11); // Centered on Delhi
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(map);
 
-            const camps = JSON.parse('{{ camps_map_data|safe }}');
-            const restaurants = JSON.parse('{{ restaurants_map_data|safe }}');
+                const camps = JSON.parse('{{ camps_map_data|safe }}');
+                const restaurants = JSON.parse('{{ restaurants_map_data|safe }}');
 
-            const campIcon = L.icon({
-                iconUrl: 'https://cdn-icons-png.flaticon.com/512/931/931949.png',
-                iconSize: [38, 38], iconAnchor: [19, 38], popupAnchor: [0, -38]
-            });
-            const restaurantIcon = L.icon({
-                iconUrl: 'https://cdn-icons-png.flaticon.com/512/3448/3448609.png',
-                iconSize: [38, 38], iconAnchor: [19, 38], popupAnchor: [0, -38]
-            });
+                const campIcon = L.icon({
+                    iconUrl: 'https://placehold.co/38x38/10b981/FFFFFF?text=C',
+                    iconSize: [38, 38], iconAnchor: [19, 38], popupAnchor: [0, -38]
+                });
+                const restaurantIcon = L.icon({
+                    iconUrl: 'https://placehold.co/38x38/3b82f6/FFFFFF?text=R',
+                    iconSize: [38, 38], iconAnchor: [19, 38], popupAnchor: [0, -38]
+                });
 
-            restaurants.forEach(r => {
-                const marker = L.marker([r.lat, r.lon], { icon: restaurantIcon }).addTo(map);
-                marker.bindPopup(`<b>${r.name}</b><br>${r.address}`);
-            });
+                restaurants.forEach(r => {
+                    L.marker([r.lat, r.lon], { icon: restaurantIcon }).addTo(map)
+                     .bindPopup(`<b>${r.name}</b><br>${r.address}`);
+                });
 
-            camps.forEach(camp => {
-                const marker = L.marker([camp.lat, camp.lon], { icon: campIcon }).addTo(map);
-                marker.bindPopup(`<b>Camp: ${camp.name}</b><br>NGO: ${camp.ngo}<br>Address: ${camp.address}<br>Starts: ${camp.start}`);
+                camps.forEach(camp => {
+                    L.marker([camp.lat, camp.lon], { icon: campIcon }).addTo(map)
+                     .bindPopup(`<b>Camp: ${camp.name}</b><br>NGO: ${camp.ngo}<br>Address: ${camp.address}<br>Starts: ${camp.start}`);
+                });
             });
         </script>
     {% endif %}

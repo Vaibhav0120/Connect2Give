@@ -1,5 +1,5 @@
 from django import forms
-from .models import DonationCamp, Donation, NGOProfile
+from .models import DonationCamp, Donation, NGOProfile, RestaurantProfile # Added RestaurantProfile
 
 class DonationCampForm(forms.ModelForm):
     """
@@ -38,7 +38,6 @@ class DonationForm(forms.ModelForm):
             'pickup_address': forms.Textarea(attrs={'rows': 3}),
         }
 
-# --- NEW FORM FOR NGO PROFILE ---
 class NGOProfileForm(forms.ModelForm):
     """
     A form for NGOs to edit their profile information, including images.
@@ -54,13 +53,43 @@ class NGOProfileForm(forms.ModelForm):
             'profile_picture', 
             'banner_image'
         ]
-        # We don't include registration_number as it shouldn't be editable.
         labels = {
             'ngo_name': 'Organization Name',
             'address': 'Primary Address',
             'contact_person': 'Contact Person Name',
             'profile_picture': 'Profile Picture (Logo)',
             'banner_image': 'Banner Image (for your public page)',
+        }
+        widgets = {
+            'latitude': forms.HiddenInput(),
+            'longitude': forms.HiddenInput(),
+            'address': forms.Textarea(attrs={'rows': 3}),
+        }
+
+# --- NEW FORM FOR RESTAURANT PROFILE ---
+class RestaurantProfileForm(forms.ModelForm):
+    """
+    A form for Restaurants to edit their profile information, including images.
+    """
+    class Meta:
+        model = RestaurantProfile
+        # NOTE: You will need to add 'banner_image' to the RestaurantProfile model
+        # for this to work exactly like the NGO form.
+        fields = [
+            'restaurant_name',
+            'address',
+            'phone_number',
+            'latitude',
+            'longitude',
+            'profile_picture',
+            # 'banner_image', 
+        ]
+        labels = {
+            'restaurant_name': 'Restaurant Name',
+            'address': 'Primary Address',
+            'phone_number': 'Public Phone Number',
+            'profile_picture': 'Profile Picture (Logo)',
+            # 'banner_image': 'Banner Image (for your public page)',
         }
         widgets = {
             'latitude': forms.HiddenInput(),

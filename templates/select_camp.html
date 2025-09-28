@@ -1,48 +1,68 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Select Delivery Camp</title>
-    <style>
-        body { font-family: sans-serif; padding: 2em; }
-        .section { border: 1px solid #ccc; padding: 1em; }
-        button { padding: 5px 10px; cursor: pointer; }
-        table { width: 100%; border-collapse: collapse; margin-top: 1em; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-    </style>
-</head>
-<body>
-    <h1>Deliver Donation</h1>
-    <p>You have collected: <strong>{{ donation.food_description }}</strong> from <strong>{{ donation.restaurant.restaurant_name }}</strong>.</p>
-    <p>Please select an active camp to deliver the food to:</p>
+{% extends 'base.html' %}
+{% load static %}
 
-    <div class="section">
-        <h3>Active Camps</h3>
-        <table>
-            <thead>
-                <tr><th>Camp Name</th><th>NGO</th><th>Location</th><th>Action</th></tr>
-            </thead>
-            <tbody>
-                {% for camp in camps %}
-                <tr>
-                    <td>{{ camp.name }}</td>
-                    <td>{{ camp.ngo.ngo_name }}</td>
-                    <td>{{ camp.location_address }}</td>
-                    <td>
-                        <form action="{% url 'mark_as_delivered' donation.pk camp.pk %}" method="POST" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit">Mark as Delivered Here</button>
-                        </form>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="4">There are no active camps available from your registered NGOs right now.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
+{% block title %}Select Delivery Camp{% endblock %}
+
+{% block head %}
+    <style>
+        .content-card {
+            max-width: 800px;
+            margin: 2em auto;
+            background-color: var(--bg-card);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1em;
+        }
+        .data-table th, .data-table td {
+            border-bottom: 1px solid var(--border);
+            padding: 1rem;
+            text-align: left;
+        }
+        .data-table th {
+            background-color: var(--bg-secondary);
+        }
+        .action-button {
+            background-color: var(--accent-green);
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="content-card">
+        <h1>Deliver Donation</h1>
+        <p>You have collected: <strong>{{ donation.food_description }}</strong> from <strong>{{ donation.restaurant.restaurant_name }}</strong>.</p>
+        <p>Please select an active camp to deliver the food to:</p>
+
+        <div class="data-table">
+            <table>
+                <thead>
+                    <tr><th>Camp Name</th><th>NGO</th><th>Location</th><th>Action</th></tr>
+                </thead>
+                <tbody>
+                    {% for camp in camps %}
+                    <tr>
+                        <td>{{ camp.name }}</td>
+                        <td>{{ camp.ngo.ngo_name }}</td>
+                        <td>{{ camp.location_address }}</td>
+                        <td>
+                            <form action="{% url 'mark_as_delivered' donation.pk camp.pk %}" method="POST" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="action-button">Deliver Here</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" style="text-align: center; padding: 2rem;">There are no active camps available from your registered NGOs right now.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <br>
+        <a href="{% url 'volunteer_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
     </div>
-    <br>
-    <a href="{% url 'volunteer_dashboard' %}">Back to Dashboard</a>
-</body>
-</html>
+{% endblock %}

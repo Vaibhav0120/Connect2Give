@@ -1,0 +1,53 @@
+/* =================================
+   AUTH & REGISTRATION FORM STYLES
+==================================== */
+
+.form-container {
+    max-width: 500px;
+    margin: 4em auto;
+    padding: 2.5em;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+}
+
+.form-container h1 {
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.form-container p {
+    text-align: center;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+/* Specific styles for the map on the registration page */
+#location-map {
+    height: 300px;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+
+.address-group {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.address-group textarea {
+    flex-grow: 1;
+}
+
+.address-group button {
+    width: auto;
+    flex-shrink: 0;
+    padding: 0.8em; /* Match textarea padding */
+}

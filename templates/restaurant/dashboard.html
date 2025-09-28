@@ -1,118 +1,91 @@
-{% extends 'base.html' %}
+{% extends 'restaurant/base.html' %}
+{% load static %}
 
-{% block title %}Restaurant Dashboard - Connect2Give{% endblock %}
+{% block title %}Dashboard - {{ block.super }}{% endblock %}
 
-{% block head %}
-    <style>
-        .dashboard-container { display: flex; gap: 2em; }
-        .section { flex: 1; border: 1px solid #ccc; padding: 1em; background-color: white; border-radius: 8px; }
-        .form-group { margin-bottom: 1em; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; }
-        input, textarea { width: 100%; padding: 0.8em; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-        .address-group { position: relative; }
-        .address-group button {
-            position: absolute;
-            right: 5px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: auto;
-            background-color: #28a745;
-            font-size: 12px;
-            padding: 8px 12px;
-        }
-        #location-status { font-size: 12px; margin-top: 5px; color: #28a745;}
-    </style>
-{% endblock %}
+{% block page_title %}Dashboard Overview{% endblock %}
+{% block page_description %}A summary of your donation activity.{% endblock %}
 
-{% block content %}
-    <h1>Restaurant Dashboard</h1>
-    <h2>Welcome, {{ user.restaurant_profile.restaurant_name }}!</h2>
-    <a href="{% url 'logout' %}"><button>Logout</button></a>
-    <hr style="margin-top: 1em; margin-bottom: 2em;">
-
-    <div class="dashboard-container">
-        <div class="section">
-            <h3>Post a New Food Donation</h3>
-            <form method="POST" action="{% url 'restaurant_dashboard' %}">
-                {% csrf_token %}
-                <div class="form-group">
-                    {{ form.food_description.label_tag }}
-                    {{ form.food_description }}
-                </div>
-                <div class="form-group">
-                    {{ form.quantity.label_tag }}
-                    {{ form.quantity }}
-                </div>
-                <div class="form-group">
-                    {{ form.pickup_address.label_tag }}
-                    <div class="address-group">
-                        {{ form.pickup_address }}
-                        <button type="button" onclick="useCurrentLocation()">Use Current Location</button>
-                    </div>
-                    <p id="location-status"></p>
-                </div>
-                <button type="submit">Post Donation</button>
-            </form>
+{% block restaurant_content %}
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Total Donations</h3>
+            <p class="stat-number">{{ stats.total_donations|default:"0" }}</p>
         </div>
-
-        <div class="section">
-            <h3>My Donation History</h3>
-            <table>
-                <thead>
-                    <tr><th>Description</th><th>Quantity</th><th>Status</th></tr>
-                </thead>
-                <tbody>
-                    {% for donation in donations %}
-                    <tr>
-                        <td>{{ donation.food_description }}</td>
-                        <td>{{ donation.quantity }}</td>
-                        <td>{{ donation.get_status_display }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="3">You have not posted any donations yet.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="stat-card">
+            <h3>Pending Pickup</h3>
+            <p class="stat-number">{{ stats.pending_donations|default:"0" }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Active Deliveries</h3>
+            <p class="stat-number">{{ stats.active_donations|default:"0" }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Completed</h3>
+            <p class="stat-number">{{ stats.completed_donations|default:"0" }}</p>
         </div>
     </div>
-{% endblock %}
+
+    <div class="dashboard-grid">
+        <div class="content-card">
+            <h3>Nearby Active Donation Camps</h3>
+            <div id="dashboard-map"></div>
+        </div>
+        <div class="content-card">
+            <h3>Monthly Donations</h3>
+            <canvas id="donationsChart" class="chart-canvas"></canvas>
+        </div>
+    </div>
+{% endblock restaurant_content %}
 
 {% block scripts %}
-<script>
-    function useCurrentLocation() {
-        const addressField = document.getElementById('id_pickup_address');
-        const status = document.getElementById('location-status');
+    {{ block.super }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- MAP INITIALIZATION ---
+            const map = L.map('dashboard-map').setView([28.6448, 77.2167], 11); // Centered on Delhi
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
 
-        status.textContent = 'Fetching location...';
+            const camps = JSON.parse('{{ camps_map_data|safe }}');
+            
+            const campIcon = L.icon({
+                iconUrl: 'https://placehold.co/38x38/10b981/FFFFFF?text=C',
+                iconSize: [38, 38], iconAnchor: [19, 38], popupAnchor: [0, -38]
+            });
 
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const lat = position.coords.latitude;
-                    const lon = position.coords.longitude;
+            camps.forEach(camp => {
+                L.marker([camp.lat, camp.lon], { icon: campIcon }).addTo(map)
+                 .bindPopup(`<b>Camp: ${camp.name}</b><br>NGO: ${camp.ngo}<br>Address: ${camp.address}`);
+            });
 
-                    // Use Nominatim to get address from coordinates
-                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data && data.display_name) {
-                                addressField.value = data.display_name;
-                                status.textContent = 'Address updated from your current location!';
-                            } else {
-                                status.textContent = 'Could not find a valid address for your location.';
-                            }
-                        })
-                        .catch(() => {
-                            status.textContent = 'Error looking up address.';
-                        });
+
+            // --- CHART INITIALIZATION ---
+            const donationsCtx = document.getElementById('donationsChart').getContext('2d');
+            new Chart(donationsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Donations Made',
+                        data: [8, 12, 9, 15, 11, 18],
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                        borderColor: '#10b981',
+                        borderWidth: 2,
+                        borderRadius: 5,
+                    }]
                 },
-                () => {
-                    status.textContent = 'Unable to retrieve your location.';
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#e2e8f0' } },
+                        x: { grid: { display: false } }
+                    }
                 }
-            );
-        } else {
-            status.textContent = 'Geolocation is not supported by your browser.';
-        }
-    }
-</script>
-{% endblock %}
+            });
+        });
+    </script>
+{% endblock scripts %}

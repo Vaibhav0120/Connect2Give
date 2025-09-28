@@ -3,16 +3,15 @@
 <html lang="en">
 <head>
     {% block head %}
-        {# The head content will be provided by the child template (e.g., ngo/base.html) #}
+        {# The head content will be provided by the child template #}
     {% endblock head %}
 </head>
 <body>
     {% block body %}
-        {# The main body content, including the sidebar and main content area, goes here #}
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h1>{{ sidebar_title|default:"Dashboard" }}</h1>
-                <p>{{ sidebar_subtitle|default:"Main Menu" }}</p>
+                <h1>{% block sidebar_title %}Dashboard{% endblock %}</h1>
+                <p>{% block sidebar_subtitle %}Main Menu{% endblock %}</p>
             </div>
             
             <nav class="sidebar-nav">

@@ -1,0 +1,85 @@
+{% extends 'components/sidebar.html' %}
+{% load static %}
+
+{# This block populates the <head> of the parent 'sidebar.html' template #}
+{% block head %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Restaurant Dashboard - Connect2Give{% endblock %}</title>
+    
+    <!-- Global, Sidebar, and Restaurant Stylesheets -->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sidebar.css' %}">
+    <link rel="stylesheet" href="{% static 'css/restaurant.css' %}">
+    
+    <!-- External Libraries -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+{% endblock head %}
+
+
+{# These blocks define the user-specific title and subtitle for the sidebar header #}
+{% block sidebar_title %}{{ user.restaurant_profile.restaurant_name }}{% endblock %}
+{% block sidebar_subtitle %}Restaurant Dashboard{% endblock %}
+
+
+{# This block defines the navigation links that will be injected into the sidebar's <nav> #}
+{% block nav_links %}
+    <div class="nav-item">
+        <a href="{% url 'restaurant_dashboard' %}" 
+           class="nav-link {% if request.resolver_match.url_name == 'restaurant_dashboard' %}active{% endif %}">
+            <svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 00-1 1v1a1 1 0 002 0V3a1 1 0 00-1-1zM4 4a1 1 0 00-1 1v1a1 1 0 002 0V5a1 1 0 00-1-1zM16 4a1 1 0 00-1 1v1a1 1 0 002 0V5a1 1 0 00-1-1zM1 9a1 1 0 011-1h16a1 1 0 110 2H2a1 1 0 01-1-1zM3 14a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"/></svg>
+            Dashboard
+        </a>
+    </div>
+    
+    <div class="nav-item">
+        <a href="{% url 'restaurant_donations' %}"
+           class="nav-link {% if request.resolver_match.url_name == 'restaurant_donations' %}active{% endif %}">
+           <svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zm1 2a1 1 0 000 2h6a1 1 0 100-2H7z" clip-rule="evenodd" /></svg>
+            Donations
+        </a>
+    </div>
+
+    <div class="nav-item">
+        <a href="{% url 'restaurant_profile' %}"
+           class="nav-link {% if request.resolver_match.url_name == 'restaurant_profile' %}active{% endif %}">
+            <svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clip-rule="evenodd" /></svg>
+            Profile
+        </a>
+    </div>
+
+    <div class="nav-item">
+        <a href="{% url 'restaurant_settings' %}"
+           class="nav-link {% if request.resolver_match.url_name == 'restaurant_settings' %}active{% endif %}">
+            <svg class="nav-icon" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" /></svg>
+            Settings
+        </a>
+    </div>
+{% endblock nav_links %}
+
+
+{# This block defines the main body content that appears next to the sidebar #}
+{% block body %}
+    <div class="dashboard-container">
+        {{ block.super }} {# This renders the <aside class="sidebar"> from the parent template #}
+
+        <main class="main-content">
+            <div class="main-header">
+                <div>
+                    <h2>{% block page_title %}Dashboard{% endblock %}</h2>
+                    <p style="margin: 0; color: var(--text-muted);">{% block page_description %}Manage your donations{% endblock %}</p>
+                </div>
+                <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+            </div>
+            
+            {% block restaurant_content %}
+                <!-- The content from the specific restaurant page will go here -->
+            {% endblock restaurant_content %}
+        </main>
+    </div>
+
+    <!-- Scripts need to be included within the body block to ensure the page is loaded first -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {% block scripts %}{% endblock scripts %}
+{% endblock body %}
