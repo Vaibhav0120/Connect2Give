@@ -20,7 +20,6 @@ class RestaurantProfile(models.Model):
     phone_number = models.CharField(max_length=15)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
-    # NEW IMAGE FIELD
     profile_picture = models.ImageField(upload_to='profile_pictures/restaurants/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -35,7 +34,6 @@ class VolunteerProfile(models.Model):
     skills = models.CharField(max_length=255, blank=True, null=True, help_text="e.g., Driving, Cooking, Medical")
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
-    # NEW IMAGE FIELD
     profile_picture = models.ImageField(upload_to='profile_pictures/volunteers/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -50,7 +48,6 @@ class NGOProfile(models.Model):
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     contact_person = models.CharField(max_length=100)
-    # NEW IMAGE FIELDS
     profile_picture = models.ImageField(upload_to='profile_pictures/ngos/', null=True, blank=True)
     banner_image = models.ImageField(upload_to='banner_images/ngos/', null=True, blank=True)
     volunteers = models.ManyToManyField('VolunteerProfile', through='NGOVolunteer', related_name='registered_ngos')
@@ -59,7 +56,6 @@ class NGOProfile(models.Model):
     def __str__(self):
         return self.ngo_name
 
-# --- (The rest of the models are unchanged) ---
 class NGOVolunteer(models.Model):
     ngo = models.ForeignKey(NGOProfile, on_delete=models.CASCADE)
     volunteer = models.ForeignKey(VolunteerProfile, on_delete=models.CASCADE)
@@ -68,6 +64,7 @@ class NGOVolunteer(models.Model):
         unique_together = ('ngo', 'volunteer')
     def __str__(self):
         return f"{self.volunteer.full_name} is a volunteer for {self.ngo.ngo_name}"
+
 class DonationCamp(models.Model):
     ngo = models.ForeignKey(NGOProfile, on_delete=models.CASCADE, related_name='camps')
     name = models.CharField(max_length=255)
@@ -80,6 +77,7 @@ class DonationCamp(models.Model):
     completed_at = models.DateTimeField(null=True, blank=True)
     def __str__(self):
         return f"{self.name} by {self.ngo.ngo_name}"
+
 class Donation(models.Model):
     class DonationStatus(models.TextChoices):
         PENDING = 'PENDING', 'Pending Pickup'
@@ -87,16 +85,18 @@ class Donation(models.Model):
         COLLECTED = 'COLLECTED', 'Collected by Volunteer'
         VERIFYING = 'VERIFYING', 'Pending Verification'
         DELIVERED = 'DELIVERED', 'Delivered & Verified'
+    
     restaurant = models.ForeignKey(RestaurantProfile, on_delete=models.CASCADE, related_name='donations')
     food_description = models.CharField(max_length=255, help_text="e.g., 20 veg thalis, 5kg rice")
     quantity = models.PositiveIntegerField(help_text="e.g., number of meals, weight in kg")
     pickup_address = models.TextField()
-    status = models.CharField(max_length=10, choices=DonationStatus.choices, default=DonationStatus.PENDING)
-    assigned_volunteer = models.ForeignKey(VolunteerProfile, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_donations')
-    target_camp = models.ForeignKey(DonationCamp, on_delete=models.SET_NULL, null=True, blank=True, related_name='donations_received')
+    status = models.CharField(max_length=10, choices=DonationStatus.choices, default=DonationStatus.PENDING, db_index=True)
+    assigned_volunteer = models.ForeignKey(VolunteerProfile, on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_donations', db_index=True)
+    target_camp = models.ForeignKey(DonationCamp, on_delete=models.SET_NULL, null=True, blank=True, related_name='donations_received', db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     accepted_at = models.DateTimeField(null=True, blank=True)
     collected_at = models.DateTimeField(null=True, blank=True)
     delivered_at = models.DateTimeField(null=True, blank=True)
+    
     def __str__(self):
         return f"Donation from {self.restaurant.restaurant_name} ({self.status})"

@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'channels',
+    'django_cleanup.apps.CleanupConfig',
     # Your local apps
     'portal',
 ]

@@ -5,6 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Connect2Give - Food Donation Platform{% endblock %}</title>
+
+    {# --- START: FAVICONS & ICONS --- #}
+    <link rel="icon" href="{% static 'images/logo.png' %}" type="image/png">
+    
+    <link rel="apple-touch-icon" href="{% static 'images/logo.png' %}">
+    
+    <meta name="msapplication-TileImage" content="{% static 'images/logo.png' %}">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    {# --- END: FAVICONS & ICONS --- #}
     
     <!-- Link to the new global stylesheet -->
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
