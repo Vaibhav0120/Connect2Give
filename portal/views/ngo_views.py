@@ -22,6 +22,8 @@ def ngo_dashboard_overview(request):
 def ngo_manage_camps(request):
     if request.user.user_type != 'NGO': return redirect('index')
     ngo_profile = request.user.ngo_profile
+    view_param = request.GET.get('view', None) # --- FIX: Get view from URL ---
+
     if request.method == 'POST':
         form = DonationCampForm(request.POST)
         if form.is_valid():
@@ -32,10 +34,18 @@ def ngo_manage_camps(request):
             return redirect('ngo_manage_camps')
     else:
         form = DonationCampForm()
+
     active_camps = DonationCamp.objects.filter(ngo=ngo_profile, is_active=True).order_by('start_time')
     completed_camps = DonationCamp.objects.filter(ngo=ngo_profile, is_active=False).order_by('-completed_at')
     donations_to_verify = Donation.objects.filter(target_camp__ngo=ngo_profile, status='VERIFYING').order_by('delivered_at')
-    context = {'form': form, 'active_camps': active_camps, 'completed_camps': completed_camps, 'donations_to_verify': donations_to_verify}
+    
+    context = {
+        'form': form, 
+        'active_camps': active_camps, 
+        'completed_camps': completed_camps, 
+        'donations_to_verify': donations_to_verify,
+        'active_tab': view_param # --- FIX: Pass active tab to template ---
+    }
     return render(request, 'ngo/manage_camps.html', context)
 
 @login_required(login_url='login_page')

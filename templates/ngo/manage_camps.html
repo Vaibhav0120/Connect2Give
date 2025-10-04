@@ -13,15 +13,13 @@
             {% endfor %}
         {% endif %}
 
-        <!-- Tabbed navigation interface -->
         <div class="tab-navigation">
-            <button class="tab-button active" onclick="switchTab(event, 'create-camp')">Create Camp</button>
-            <button class="tab-button" onclick="switchTab(event, 'camps-history')">Camps History</button>
-            <button class="tab-button" onclick="switchTab(event, 'donation-verification')">Donation Verification</button>
+            <button class="tab-button {% if not active_tab %}active{% endif %}" onclick="switchTab(event, 'create-camp')">Create Camp</button>
+            <button class="tab-button {% if active_tab == 'history' %}active{% endif %}" onclick="switchTab(event, 'camps-history')">Camps History</button>
+            <button class="tab-button {% if active_tab == 'verification' %}active{% endif %}" onclick="switchTab(event, 'donation-verification')">Donation Verification</button>
         </div>
 
-        <!-- Create Camp Tab -->
-        <div id="create-camp" class="tab-content active">
+        <div id="create-camp" class="tab-content {% if not active_tab %}active{% endif %}">
             <div class="content-card">
                 <h3 style="margin-bottom: 1.5rem; color: var(--text-primary);">Create a New Donation Camp</h3>
                 <form method="POST" action="{% url 'ngo_manage_camps' %}">
@@ -59,8 +57,7 @@
             </div>
         </div>
 
-        <!-- Camps History Tab -->
-        <div id="camps-history" class="tab-content">
+        <div id="camps-history" class="tab-content {% if active_tab == 'history' %}active{% endif %}">
             <div class="content-card">
                 <h3 style="margin-bottom: 1.5rem; color: var(--text-primary);">Active Camps</h3>
                 <table class="data-table">
@@ -125,8 +122,7 @@
             </div>
         </div>
 
-        <!-- Donation Verification Tab -->
-        <div id="donation-verification" class="tab-content">
+        <div id="donation-verification" class="tab-content {% if active_tab == 'verification' %}active{% endif %}">
             <div class="content-card">
                 <h3 style="margin-bottom: 1.5rem; color: var(--text-primary);">Donations Pending Verification</h3>
                 <table class="data-table">

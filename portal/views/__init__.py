@@ -8,13 +8,13 @@ from .volunteer_views import *
 from .api_views import *
 
 # --- HELPER & PUBLIC VIEWS ---
-# (Keeping these here for simplicity as they are used across different user types)
 from django.shortcuts import render, redirect
 import json
 from ..models import User, DonationCamp, RestaurantProfile, Donation
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
+from django.urls import reverse # --- FIX: Add import for reverse ---
 
 
 def get_user_dashboard_redirect(user):
@@ -44,7 +44,9 @@ def mark_camp_as_completed(request, camp_id):
         camp.is_active = False
         camp.completed_at = timezone.now()
         camp.save()
-    return redirect('ngo_manage_camps')
+    # --- FIX: Redirect with parameter to stay on history tab ---
+    redirect_url = reverse('ngo_manage_camps') + '?view=history'
+    return redirect(redirect_url)
 
 @login_required(login_url='login_page')
 def confirm_delivery(request, donation_id):
@@ -53,4 +55,5 @@ def confirm_delivery(request, donation_id):
     if request.method == 'POST':
         donation.status = 'DELIVERED'
         donation.save()
-    return redirect('ngo_manage_camps')
+    redirect_url = reverse('ngo_manage_camps') + '?view=verification'
+    return redirect(redirect_url)
