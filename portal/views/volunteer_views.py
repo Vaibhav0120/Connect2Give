@@ -40,6 +40,7 @@ def volunteer_dashboard(request):
 def volunteer_manage_pickups(request):
     if request.user.user_type != 'VOLUNTEER': return redirect('index')
     volunteer_profile = request.user.volunteer_profile
+    view = request.GET.get('view')
     
     thirty_minutes_ago = timezone.now() - timedelta(minutes=30)
     Donation.objects.filter(status='ACCEPTED', accepted_at__lt=thirty_minutes_ago).update(status='PENDING', assigned_volunteer=None, accepted_at=None)
@@ -52,10 +53,10 @@ def volunteer_manage_pickups(request):
         'active_donations': active_donations,
         'available_donations': available_donations,
         'delivery_history': delivery_history,
-        'view': request.GET.get('view')
+        'view': view
     }
 
-    if request.GET.get('view') == 'delivery_route':
+    if view == 'delivery_route':
         if not volunteer_profile.latitude or not volunteer_profile.longitude:
             messages.error(request, 'Please set your location in your profile before calculating routes.')
             return redirect('volunteer_profile')
@@ -74,20 +75,20 @@ def volunteer_manage_pickups(request):
                     nearest_camp = camp
         
         context['nearest_camp'] = nearest_camp
-        # --- FIX: Safely pass data to template ---
+        
+        # --- FIX IS HERE: Pass the dictionaries directly, without json.dumps() ---
         if nearest_camp:
-            context['nearest_camp_data'] = json.dumps({
+            context['nearest_camp_data'] = {
                 'name': nearest_camp.name,
                 'latitude': nearest_camp.latitude,
                 'longitude': nearest_camp.longitude,
                 'pk': nearest_camp.pk
-            })
-        context['volunteer_location_data'] = json.dumps({
+            }
+        context['volunteer_location_data'] = {
             'lat': volunteer_profile.latitude,
             'lon': volunteer_profile.longitude
-        })
+        }
         # --- END FIX ---
-
 
     return render(request, 'volunteer/manage_pickups.html', context)
 
