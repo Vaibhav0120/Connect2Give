@@ -1,201 +1,69 @@
-{% extends 'base.html' %}
+{% extends 'volunteer/base.html' %}
+{% load static %}
 
-{% block title %}Volunteer Dashboard - Connect2Give{% endblock %}
+{% block title %}Dashboard - {{ block.super }}{% endblock %}
 
-{% block head %}
-    <style>
-        .grid-container { display: grid; grid-template-columns: 1fr 1fr; gap: 2em; }
-        .section { border: 1px solid #ccc; padding: 1em; margin-bottom: 2em; background-color: white; border-radius: 8px;}
-        #map { height: 500px; margin-bottom: 2em; border: 1px solid #ccc; border-radius: 8px; }
-        h1, h2, h3 { color: #333; }
-    </style>
-{% endblock %}
+{% block page_title %}Dashboard Overview{% endblock %}
+{% block page_description %}A summary of your volunteer activity.{% endblock %}
 
-{% block content %}
-    <h1>Volunteer Dashboard</h1>
-    <h2>Welcome, {{ user.volunteer_profile.full_name }}!</h2>
-    <a href="{% url 'logout' %}"><button>Logout</button></a>
-    <hr style="margin-top: 1em; margin-bottom: 2em;">
-
-    <h3>Donations and Camps Map</h3>
-    <div id="map"></div>
-
-    <div class="section">
-        <h3>My Active Deliveries</h3>
-        <table>
-            <thead>
-                <tr><th>From</th><th>Food</th><th>Status</th><th>Action</th></tr>
-            </thead>
-            <tbody>
-                {% for donation in my_active_donations %}
-                <tr>
-                    <td>{{ donation.restaurant.restaurant_name }}</td>
-                    <td>{{ donation.food_description }}</td>
-                    <td>{{ donation.get_status_display }}</td>
-                    <td>
-                        {% if donation.status == 'ACCEPTED' %}
-                            <a href="{% url 'mark_as_collected' donation.pk %}"><button class="action-button">Mark as Collected</button></a>
-                        {% elif donation.status == 'COLLECTED' %}
-                            <a href="{% url 'select_delivery_camp' donation.pk %}"><button class="action-button">Deliver to Camp</button></a>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="4">You have no active deliveries.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <div class="section">
-        <h3>Available Donations for Pickup</h3>
-        <table>
-            <thead>
-                <tr><th>From</th><th>Food</th><th>Address</th><th>Action</th></tr>
-            </thead>
-            <tbody>
-                {% for donation in available_donations %}
-                <tr>
-                    <td>{{ donation.restaurant.restaurant_name }}</td>
-                    <td>{{ donation.food_description }}</td>
-                    <td>{{ donation.pickup_address }}</td>
-                    <td>
-                        <a href="{% url 'accept_donation' donation.pk %}"><button class="action-button">Claim for Pickup</button></a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="4">There are no pending donations right now.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    
-    <div class="grid-container">
-        <div class="section">
-            <h3>Register with an NGO</h3>
-             <table>
-                <thead>
-                    <tr><th>NGO Name</th><th>Action</th></tr>
-                </thead>
-                <tbody>
-                    {% for ngo in available_ngos %}
-                    <tr>
-                        <td>{{ ngo.ngo_name }}</td>
-                        <td>
-                            <a href="{% url 'register_with_ngo' ngo.pk %}"><button class="action-button">Register</button></a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="2">There are no new NGOs to register with.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+{% block volunteer_content %}
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Active Pickups</h3>
+            <p class="stat-number">{{ stats.active_pickups|default:"0" }}</p>
         </div>
-        <div class="section">
-            <h3>My Registered NGOs</h3>
-            <ul>
-                {% for ngo in registered_ngos %}
-                <li>{{ ngo.ngo_name }}</li>
-                {% empty %}
-                <li>You have not registered with any NGOs yet.</li>
-                {% endfor %}
-            </ul>
+        <div class="stat-card">
+            <h3>Completed Deliveries</h3>
+            <p class="stat-number">{{ stats.completed_deliveries|default:"0" }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Registered NGOs</h3>
+            <p class="stat-number">{{ stats.registered_ngos|default:"0" }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Available Donations</h3>
+            <p class="stat-number">{{ stats.available_donations|default:"0" }}</p>
         </div>
     </div>
-    
-    <div class="section">
-        <h3>Available Donation Camps from My NGOs</h3>
-        <table>
-            <thead>
-                <tr><th>Camp Name</th><th>NGO</th><th>Location</th><th>Starts</th></tr>
-            </thead>
-            <tbody>
-                {% for camp in camps %}
-                <tr>
-                    <td>{{ camp.name }}</td>
-                    <td>{{ camp.ngo.ngo_name }}</td>
-                    <td>{{ camp.location_address }}</td>
-                    <td>{{ camp.start_time|date:"d M Y, H:i" }}</td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="4">There are no active camps from your registered NGOs.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
 
-    <div class="section">
-        <h3>My Delivery History</h3>
-        <table>
-            <thead>
-                <tr><th>From</th><th>Food</th><th>Delivered To</th><th>Status</th></tr>
-            </thead>
-            <tbody>
-                {% for donation in delivery_history %}
-                <tr>
-                    <td>{{ donation.restaurant.restaurant_name }}</td>
-                    <td>{{ donation.food_description }}</td>
-                    <td>{{ donation.target_camp.name }}</td>
-                    <td>{{ donation.get_status_display }}</td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="4">You have not completed any deliveries yet.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="content-card">
+        <h3>Nearby Donations and Camps</h3>
+        <div id="dashboard-map"></div>
     </div>
-{% endblock %}
+{% endblock volunteer_content %}
 
 {% block scripts %}
-<script>
-    // Initialize the map and set its view to your location, Delhi
-    const map = L.map('map').setView([28.644800, 77.216721], 11);
+    {{ block.super }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- MAP INITIALIZATION ---
+            const map = L.map('dashboard-map').setView([28.6448, 77.2167], 11); // Centered on Delhi
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
 
-    // Add a tile layer from OpenStreetMap (free to use)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
+            const donations = JSON.parse('{{ donations_map_data|safe }}');
+            const camps = JSON.parse('{{ camps_map_data|safe }}');
+            
+            const restaurantIcon = L.icon({
+                iconUrl: 'https://placehold.co/38x38/3b82f6/FFFFFF?text=R',
+                iconSize: [38, 38], iconAnchor: [19, 38], popupAnchor: [0, -38]
+            });
 
-    // Parse the data passed from the Django view
-    // The |safe filter is crucial to prevent Django from escaping the JSON string
-    const donations = JSON.parse('{{ donations_map_data|safe }}');
-    const camps = JSON.parse('{{ camps_map_data|safe }}');
+            const campIcon = L.icon({
+                iconUrl: 'https://placehold.co/38x38/10b981/FFFFFF?text=C',
+                iconSize: [38, 38], iconAnchor: [19, 38], popupAnchor: [0, -38]
+            });
 
-    // Create custom icons for better visual distinction
-    const restaurantIcon = L.icon({
-        iconUrl: 'https://cdn-icons-png.flaticon.com/512/3448/3448609.png',
-        iconSize: [38, 38],
-        iconAnchor: [19, 38],
-        popupAnchor: [0, -38]
-    });
+            donations.forEach(donation => {
+                L.marker([donation.lat, donation.lon], { icon: restaurantIcon }).addTo(map)
+                 .bindPopup(`<b>${donation.name}</b><br>${donation.food}<br><a href="/donation/accept/${donation.id}/">Accept</a>`);
+            });
 
-    const campIcon = L.icon({
-        iconUrl: 'https://cdn-icons-png.flaticon.com/512/931/931949.png',
-        iconSize: [38, 38],
-        iconAnchor: [19, 38],
-        popupAnchor: [0, -38]
-    });
-
-    // Add Donation Markers to the Map
-    donations.forEach(donation => {
-        const marker = L.marker([donation.lat, donation.lon], { icon: restaurantIcon }).addTo(map);
-        marker.bindPopup(
-            `<b>${donation.name}</b><br>` +
-            `Food: ${donation.food}<br>` +
-            `Address: ${donation.pickup_address}<br>` +
-            `<br><a href="/donation/accept/${donation.id}/"><button class='action-button'>Claim for Pickup</button></a>`
-        );
-    });
-
-    // Add Camp Markers to the Map
-    camps.forEach(camp => {
-        const marker = L.marker([camp.lat, camp.lon], { icon: campIcon }).addTo(map);
-        marker.bindPopup(
-            `<b>Camp: ${camp.name}</b><br>` +
-            `NGO: ${camp.ngo}<br>` +
-            `Address: ${camp.address}`
-        );
-    });
-
-</script>
-{% endblock %}
+            camps.forEach(camp => {
+                L.marker([camp.lat, camp.lon], { icon: campIcon }).addTo(map)
+                 .bindPopup(`<b>Camp: ${camp.name}</b><br>NGO: ${camp.ngo}<br>Address: ${camp.address}`);
+            });
+        });
+    </script>
+{% endblock scripts %}

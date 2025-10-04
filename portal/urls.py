@@ -9,7 +9,7 @@ urlpatterns = [
     path('login/', views.login_page, name='login_page'),
     path('logout/', views.logout_view, name='logout'),
     
-    # --- Restaurant Dashboard URLs (NEW STRUCTURE) ---
+    # --- Restaurant Dashboard URLs ---
     path('dashboard/restaurant/', views.restaurant_dashboard, name='restaurant_dashboard'),
     path('dashboard/restaurant/donations/', views.restaurant_donations, name='restaurant_donations'),
     path('dashboard/restaurant/profile/', views.restaurant_profile, name='restaurant_profile'),
@@ -22,15 +22,18 @@ urlpatterns = [
     path('dashboard/ngo/profile/', views.ngo_profile, name='ngo_profile'),
     path('dashboard/ngo/settings/', views.ngo_settings, name='ngo_settings'),
 
-    # --- Volunteer Dashboard URL ---
+    # --- Volunteer Dashboard URLs ---
     path('dashboard/volunteer/', views.volunteer_dashboard, name='volunteer_dashboard'),
+    path('dashboard/volunteer/pickups/', views.volunteer_manage_pickups, name='volunteer_manage_pickups'),
+    path('dashboard/volunteer/camps/', views.volunteer_manage_camps, name='volunteer_manage_camps'),
+    path('dashboard/volunteer/profile/', views.volunteer_profile, name='volunteer_profile'),
+    path('dashboard/volunteer/settings/', views.volunteer_settings, name='volunteer_settings'),
     
     # --- Action URLs ---
     path('register_with_ngo/<int:ngo_id>/', views.register_with_ngo, name='register_with_ngo'),
+    path('unregister_from_ngo/<int:ngo_id>/', views.unregister_from_ngo, name='unregister_from_ngo'),
     path('donation/accept/<int:donation_id>/', views.accept_donation, name='accept_donation'),
-    path('donation/collect/<int:donation_id>/', views.mark_as_collected, name='mark_as_collected'),
-    path('donation/deliver/<int:donation_id>/', views.select_delivery_camp, name='select_delivery_camp'),
-    path('donation/deliver/<int:donation_id>/to/<int:camp_id>/', views.mark_as_delivered, name='mark_as_delivered'),
+    path('donation/deliver/to/<int:camp_id>/', views.mark_as_delivered, name='mark_as_delivered'),
     path('camp/complete/<int:camp_id>/', views.mark_camp_as_completed, name='mark_camp_as_completed'),
     path('donation/confirm_delivery/<int:donation_id>/', views.confirm_delivery, name='confirm_delivery'),
 

@@ -1,0 +1,209 @@
+{% extends 'volunteer/base.html' %}
+
+{% block title %}Manage Pickups - {{ block.super }}{% endblock %}
+{% block page_title %}Manage Pickups{% endblock %}
+{% block page_description %}Accept new donations and track your delivery progress.{% endblock %}
+
+{% block volunteer_content %}
+    <div class="tab-navigation">
+        {# --- FIX: Corrected the onclick handler to properly reload the page --- #}
+        <button class="tab-button {% if not view %}active{% endif %}" onclick="window.location.href='{% url 'volunteer_manage_pickups' %}'">Available Pickups</button>
+        <button class="tab-button" onclick="switchTab(event, 'history')">Delivery History</button>
+    </div>
+
+    <div id="pickups" class="tab-content {% if not view %}active{% endif %}">
+        <div class="content-card">
+            <h3>My Active Pickups ({{ active_donations.count }}/10)</h3>
+            {% if active_donations %}
+                <div class="pickup-list">
+                    {% for donation in active_donations %}
+                        <div class="pickup-item">
+                            <p><strong>{{ donation.restaurant.restaurant_name }}</strong></p>
+                            <p>{{ donation.food_description }}</p>
+                            <p><small>{{ donation.pickup_address }}</small></p>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="pickup-actions">
+                     <a href="{% url 'volunteer_manage_pickups' %}?view=delivery_route" class="btn">Deliver to Nearest Camp</a>
+                </div>
+            {% else %}
+                 <p class="empty-state">You have no active pickups.</p>
+            {% endif %}
+        </div>
+        
+        {% if view == 'delivery_route' %}
+        <div class="content-card">
+            <h3>Route to Nearest Camp</h3>
+            {% if nearest_camp %}
+                <div id="delivery-map"></div>
+                <div id="delivery-info" class="delivery-info-container"></div>
+            {% else %}
+                <p class="empty-state">Could not find any active camps from your registered NGOs. You can register with more NGOs from the 'Manage NGOs' page.</p>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="content-card">
+            <h3>Available Donations for Pickup</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Restaurant</th>
+                        <th>Food Description</th>
+                        <th>Address</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for donation in available_donations %}
+                    <tr>
+                        <td><strong>{{ donation.restaurant.restaurant_name }}</strong></td>
+                        <td>{{ donation.food_description }}</td>
+                        <td>{{ donation.pickup_address }}</td>
+                        <td>
+                            {% if active_donations.count < 10 %}
+                            <form action="{% url 'accept_donation' donation.pk %}" method="POST" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="action-button">Accept</button>
+                            </form>
+                            {% else %}
+                            <button class="action-button" disabled>Pickup limit reached</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="empty-state">There are no available donations right now.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+
+    <div id="history" class="tab-content">
+        <div class="content-card">
+            <h3>My Delivery History</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>From</th>
+                        <th>Delivered To</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for donation in delivery_history %}
+                    <tr>
+                        <td>{{ donation.food_description }}</td>
+                        <td>{{ donation.restaurant.restaurant_name }}</td>
+                        <td>{{ donation.target_camp.name|default:"N/A" }}</td>
+                        <td><span class="status-badge status-{{ donation.status|lower }}">{{ donation.get_status_display }}</span></td>
+                        <td>{{ donation.delivered_at|date:"d M Y, H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="empty-state">You have no completed deliveries.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+
+{# This uses a Django template filter to safely embed JSON data into the HTML #}
+{% if view == 'delivery_route' %}
+    {{ volunteer_location_data|json_script:"volunteer-location-data" }}
+    {% if nearest_camp_data %}
+        {{ nearest_camp_data|json_script:"nearest-camp-data" }}
+    {% endif %}
+{% endif %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // This logic will only run if the URL has '?view=delivery_route'
+        if ("{{ view }}" === "delivery_route") {
+            const volunteerDataElement = document.getElementById('volunteer-location-data');
+            const campDataElement = document.getElementById('nearest-camp-data');
+            const mapContainer = document.getElementById('delivery-map');
+
+            // Gracefully handle cases where data is missing
+            if (!volunteerDataElement || !campDataElement || !mapContainer) {
+                if(mapContainer) {
+                    mapContainer.innerHTML = '<p class="empty-state">Cannot display route due to missing location data. Please set your location in your profile.</p>';
+                }
+                console.error("Missing data elements needed for map routing.");
+                return;
+            }
+
+            // Check if the mapping library is loaded
+            if (typeof L === 'undefined' || !L.Routing) {
+                console.error("Leaflet or Leaflet Routing Machine is not loaded.");
+                mapContainer.innerHTML = '<p class="empty-state">Error: Mapping library failed to load. Please refresh the page.</p>';
+                return;
+            }
+
+            const volunteerData = JSON.parse(volunteerDataElement.textContent);
+            const campData = JSON.parse(campDataElement.textContent);
+
+            const map = L.map('delivery-map').setView([volunteerData.lat, volunteerData.lon], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+            
+            // Build the URL for the form submission
+            const deliveryFormAction = `/donation/deliver/to/${campData.pk}/`;
+
+            L.Routing.control({
+                waypoints: [
+                    L.latLng(volunteerData.lat, volunteerData.lon),
+                    L.latLng(campData.latitude, campData.longitude)
+                ],
+                routeWhileDragging: false,
+                createMarker: function(i, waypoint, n) {
+                    const markerOptions = { draggable: false };
+                    let popupText = (i === 0) 
+                        ? "<strong>Your Location</strong>"
+                        : `<strong>Nearest Camp:</strong><br>${campData.name}`;
+                    return L.marker(waypoint.latLng, markerOptions).bindPopup(popupText);
+                }
+            }).on('routesfound', function(e) {
+                const routes = e.routes;
+                if (!routes.length) return;
+                const summary = routes[0].summary;
+                const deliveryInfo = document.getElementById('delivery-info');
+                
+                const distance = (summary.totalDistance / 1000).toFixed(2);
+                const time = Math.round(summary.totalTime / 60);
+
+                // Display the route summary and the delivery confirmation button
+                deliveryInfo.innerHTML = `
+                    <div class="route-summary">
+                        <p><strong>Distance:</strong> ${distance} km</p>
+                        <p><strong>Estimated Time:</strong> ${time} minutes</p>
+                        <form action="${deliveryFormAction}" method="POST" style="margin-top: 1rem;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn">Confirm & Mark All as Delivered</button>
+                        </form>
+                    </div>
+                `;
+            }).addTo(map);
+        }
+    });
+
+    // This function handles the tab switching behavior
+    function switchTab(event, tabId) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+        
+        const newActiveTab = document.getElementById(tabId);
+        if (newActiveTab) newActiveTab.classList.add('active');
+        if (event && event.currentTarget) event.currentTarget.classList.add('active');
+    }
+</script>
+{% endblock scripts %}

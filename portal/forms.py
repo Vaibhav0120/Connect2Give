@@ -1,5 +1,5 @@
 from django import forms
-from .models import DonationCamp, Donation, NGOProfile, RestaurantProfile # Added RestaurantProfile
+from .models import DonationCamp, Donation, NGOProfile, RestaurantProfile, VolunteerProfile
 
 class DonationCampForm(forms.ModelForm):
     """
@@ -66,15 +66,12 @@ class NGOProfileForm(forms.ModelForm):
             'address': forms.Textarea(attrs={'rows': 3}),
         }
 
-# --- NEW FORM FOR RESTAURANT PROFILE ---
 class RestaurantProfileForm(forms.ModelForm):
     """
     A form for Restaurants to edit their profile information, including images.
     """
     class Meta:
         model = RestaurantProfile
-        # NOTE: You will need to add 'banner_image' to the RestaurantProfile model
-        # for this to work exactly like the NGO form.
         fields = [
             'restaurant_name',
             'address',
@@ -82,14 +79,40 @@ class RestaurantProfileForm(forms.ModelForm):
             'latitude',
             'longitude',
             'profile_picture',
-            # 'banner_image', 
         ]
         labels = {
             'restaurant_name': 'Restaurant Name',
             'address': 'Primary Address',
             'phone_number': 'Public Phone Number',
             'profile_picture': 'Profile Picture (Logo)',
-            # 'banner_image': 'Banner Image (for your public page)',
+        }
+        widgets = {
+            'latitude': forms.HiddenInput(),
+            'longitude': forms.HiddenInput(),
+            'address': forms.Textarea(attrs={'rows': 3}),
+        }
+
+class VolunteerProfileForm(forms.ModelForm):
+    """
+    A form for Volunteers to edit their profile information.
+    """
+    class Meta:
+        model = VolunteerProfile
+        fields = [
+            'full_name', 
+            'phone_number', 
+            'skills', 
+            'address', 
+            'latitude', 
+            'longitude', 
+            'profile_picture'
+        ]
+        labels = {
+            'full_name': 'Full Name',
+            'phone_number': 'Phone Number',
+            'skills': 'Skills (e.g., Driving, First Aid)',
+            'address': 'Your Primary Address',
+            'profile_picture': 'Profile Picture',
         }
         widgets = {
             'latitude': forms.HiddenInput(),

@@ -1,0 +1,136 @@
+{% extends 'volunteer/base.html' %}
+
+{% block title %}My Profile - {{ block.super }}{% endblock %}
+
+{% block page_title %}My Profile{% endblock %}
+{% block page_description %}Update your public information and location.{% endblock %}
+
+{% block volunteer_content %}
+<div class="profile-container">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="success-message">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="profile-form">
+        <form method="POST" enctype="multipart/form-data" action="{% url 'volunteer_profile' %}">
+            {% csrf_token %}
+            {{ form.latitude }}
+            {{ form.longitude }}
+
+            <div class="form-grid">
+                <div>
+                    <div class="form-group">
+                        {{ form.full_name.label_tag }}
+                        {{ form.full_name }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.phone_number.label_tag }}
+                        {{ form.phone_number }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.skills.label_tag }}
+                        {{ form.skills }}
+                    </div>
+                </div>
+
+                <div class="image-upload-section">
+                    <div class="image-upload-widget">
+                        <label>Profile Picture</label>
+                        <div class="image-preview-container">
+                            <img src="{% if form.instance.profile_picture %}{{ form.instance.profile_picture.url }}{% else %}https://placehold.co/120x120/e2e8f0/475569?text=Photo{% endif %}"
+                                alt="Profile Picture" class="image-preview" id="profile_picture_preview">
+                        </div>
+                        <input type="file" id="id_profile_picture_input" name="profile_picture_input" accept="image/*" style="display: none;">
+                        <button type="button" class="upload-btn"
+                            onclick="document.getElementById('id_profile_picture_input').click()">
+                            Choose Image
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hidden Django form field for the cropped image -->
+            <div style="display: none;">
+                {{ form.profile_picture }}
+            </div>
+
+            <div class="map-section">
+                <h3>Location & Address</h3>
+                <div class="form-group">
+                    {{ form.address.label_tag }}
+                    <div class="address-group">
+                        {{ form.address }}
+                        <button type="button" onclick="window.findAddressOnMap()">Find Location</button>
+                    </div>
+                </div>
+                <div id="location-map"></div>
+                <p class="form-help-text">
+                    Type an address and click "Find Location", or click on the map to update your location.
+                </p>
+            </div>
+
+            <div style="margin-top: 2rem; text-align: right;">
+                <button type="submit">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Cropper modal -->
+<div id="cropper-modal" class="cropper-modal">
+    <div class="cropper-modal-content">
+        <h3>Crop Your Image</h3>
+        <div class="cropper-container">
+            <img id="image-to-crop" src="">
+        </div>
+        <div class="cropper-actions">
+            <button type="button" class="btn-secondary" onclick="window.closeCropper()">Cancel</button>
+            <button type="button" class="btn" onclick="window.cropAndApplyImage()">Crop & Use</button>
+        </div>
+    </div>
+</div>
+{% endblock volunteer_content %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // --- START: ROBUST FIX FOR MAP & LAYOUT RENDERING ---
+        
+        // Initialize map and cropper functionality
+        const map = initializeProfileMapAndCropper({
+            initialLat: "{{ form.instance.latitude|default:'28.6139'|escapejs }}",
+            initialLon: "{{ form.instance.longitude|default:'77.2090'|escapejs }}",
+            hasLocation: "{{ form.instance.latitude|yesno:'true,false' }}",
+            profilePicInputId: 'id_profile_picture_input',
+            targetDjangoFieldId: 'id_profile_picture',
+            aspectRatio: 1
+        });
+
+        // This function will be called to fix the map size.
+        function refreshMapSize() {
+            if (map) {
+                map.invalidateSize();
+            }
+        }
+
+        // Use requestAnimationFrame to ensure the map refresh happens after the browser
+        // has finished its rendering and layout calculations. This is more reliable
+        // than a fixed timeout.
+        if (window.requestAnimationFrame) {
+            window.requestAnimationFrame(refreshMapSize);
+        } else {
+            // Fallback for older browsers
+            setTimeout(refreshMapSize, 150);
+        }
+
+        // For extra safety, also attach the refresh to the window's load event.
+        // This handles any slow-loading resources that might affect the layout.
+        window.addEventListener('load', refreshMapSize);
+
+        // --- END: ROBUST FIX ---
+    });
+</script>
+{% endblock scripts %}
