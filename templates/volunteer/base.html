@@ -7,12 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Volunteer Dashboard - Connect2Give{% endblock %}</title>
     
-    <!-- Global, Sidebar, and Volunteer Stylesheets -->
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/sidebar.css' %}">
     <link rel="stylesheet" href="{% static 'css/volunteer.css' %}">
     
-    <!-- External Libraries -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
@@ -80,22 +78,25 @@
                     <p style="margin: 0; color: var(--text-muted);">{% block page_description %}Welcome to your volunteer dashboard{% endblock %}</p>
                 </div>
                 <div>
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="toast-message {% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</div>
-                        {% endfor %}
-                    {% endif %}
+                    {# --- FIX: Messages moved from here --- #}
                     <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
                 </div>
             </div>
+
+            {# --- FIX: New, better location for messages --- #}
+            {% if messages %}
+                <div class="messages-container" style="margin-bottom: 2rem;">
+                {% for message in messages %}
+                    <div class="{% if message.tags %}{{ message.tags }}{% endif %}-message">{{ message }}</div>
+                {% endfor %}
+                </div>
+            {% endif %}
             
             {% block volunteer_content %}
-                <!-- The content from the specific volunteer page will go here -->
-            {% endblock volunteer_content %}
+                {% endblock volunteer_content %}
         </main>
     </div>
 
-    <!-- Scripts need to be included within the body block to ensure the page is loaded first -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>

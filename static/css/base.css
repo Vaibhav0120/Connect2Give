@@ -110,25 +110,32 @@ label {
     box-shadow: var(--shadow-lg);
 }
 
-/* Success message */
-.success-message {
-    background-color: rgba(16, 185, 129, 0.1);
-    border: 1px solid var(--accent-green);
-    color: var(--accent-green);
+/* --- FIX: Standardized message styles --- */
+.success-message, .error-message, .warning-message {
     padding: 1rem;
     border-radius: var(--radius);
     margin-bottom: 1.5rem;
+    border: 1px solid transparent;
 }
 
-/* Error message */
+.success-message {
+    background-color: rgba(16, 185, 129, 0.1);
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+}
+
 .error-message {
     background-color: rgba(239, 68, 68, 0.1);
-    border: 1px solid var(--accent-red);
+    border-color: var(--accent-red);
     color: var(--accent-red);
-    padding: 1rem;
-    border-radius: var(--radius);
-    margin-bottom: 1.5rem;
 }
+
+.warning-message {
+    background-color: rgba(245, 159, 11, 0.1);
+    border-color: var(--accent-orange);
+    color: var(--accent-orange);
+}
+
 
 h1, h2, h3, h4, h5, h6 {
     color: var(--text-primary);

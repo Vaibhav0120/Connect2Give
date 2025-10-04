@@ -1,51 +1,1051 @@
 {% extends "base.html" %}
 {% load static %}
-{% load portal_extras %} {# <-- LOAD THE NEW TEMPLATE TAGS #}
+{% load portal_extras %}
 
-{% block title %}Connect2Give - Home{% endblock %}
+{% block title %}Connect2Give - Turn Surplus into Support{% endblock %}
 
 {% block head %}
     <style>
-        /* Minimal page-specific styles */
-        .welcome-section {
-            padding: 4em 2em;
-            background-color: var(--bg-card);
-            border-radius: var(--radius);
-            text-align: center;
-            margin-top: 2rem;
+        /* Remove container padding to eliminate top/bottom gaps */
+        .container {
+            padding: 0 !important;
         }
-        #home-map { 
-            height: 500px; 
-            margin-top: 2em;
-            border-radius: var(--radius);
+        
+        /* Reset container constraints for full-width sections */
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Override base container to allow full-width sections */
+        .full-width {
+            width: 100vw;
+            position: relative;
+            left: 50%;
+            right: 50%;
+            margin-left: -50vw;
+            margin-right: -50vw;
+        }
+
+        .content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Modern navbar with glassmorphism effect */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .navbar-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            color: var(--accent-green);
+        }
+
+        .navbar-logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .navbar-btn {
+            padding: 0.625rem 1.5rem;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+        }
+
+        .navbar-btn-login {
+            color: var(--text-primary);
+            background: transparent;
+        }
+
+        .navbar-btn-login:hover {
+            background: var(--bg-primary);
+        }
+
+        .navbar-btn-signup {
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .navbar-btn-signup:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .navbar-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .navbar-user-info {
+            text-align: right;
+        }
+
+        .navbar-user-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9375rem;
+        }
+
+        .navbar-user-role {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        .navbar-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Modern hero section with gradient overlay */
+        .hero-section {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.95) 0%, rgba(59, 130, 246, 0.95) 100%),
+                        url('/placeholder.svg?height=1080&width=1920') center/cover;
+            color: white;
+            overflow: hidden;
+            padding-top: 80px;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.1) 0%, transparent 50%);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 900px;
+            padding: 2rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .hero-content h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            color: white;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-content p {
+            font-size: clamp(1.125rem, 2vw, 1.5rem);
+            margin-bottom: 2.5rem;
+            color: rgba(255, 255, 255, 0.95);
+            line-height: 1.6;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1.25rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-hero {
+            padding: 1.125rem 2.5rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-hero-primary {
+            background-color: white;
+            color: var(--accent-green);
+        }
+
+        .btn-hero-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-hero-secondary {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-hero-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Stats section with modern card design */
+        .stats-section {
+            background: linear-gradient(to bottom, white 0%, var(--bg-primary) 100%);
+            padding: 4rem 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 2.5rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
             border: 1px solid var(--border);
-            box-shadow: var(--shadow);
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .stat-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number {
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* How it works with modern step indicators */
+        .how-section {
+            padding: 6rem 0;
+            background-color: var(--bg-primary);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .section-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .step-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+            position: relative;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .step-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .step-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        .step-number {
+            position: absolute;
+            top: -20px;
+            left: 2.5rem;
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-green));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .step-icon {
+            width: 80px;
+            height: 80px;
+            margin: 1.5rem auto 1.5rem;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+
+        .step-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .step-card p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            font-size: 1rem;
+        }
+
+        /* Map section with better styling */
+        .map-section {
+            padding: 6rem 0;
+            background: white;
+        }
+
+        .map-container {
+            max-width: 1200px;
+            margin: 2rem auto 0;
+            padding: 0 2rem;
+        }
+
+        #home-map {
+            height: 600px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border);
+        }
+
+        /* Mission section with two-column layout */
+        .mission-section {
+            padding: 6rem 0;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, white 100%);
+        }
+
+        .mission-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            align-items: center;
+        }
+
+        .mission-content h2 {
+            font-size: clamp(2rem, 4vw, 2.75rem);
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .mission-content p {
+            font-size: 1.125rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .impact-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .impact-item {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .impact-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .impact-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .impact-item h4 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .impact-item p {
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* CTA section with gradient background */
+        .cta-section {
+            padding: 6rem 0;
+            background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .cta-content h2 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: white;
+            letter-spacing: -0.02em;
+        }
+
+        .cta-content p {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .cta-card {
+            background: white;
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .cta-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .cta-card-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .cta-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .cta-card p {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .cta-card .btn {
+            width: 100%;
+            padding: 1rem;
+            font-weight: 600;
+            border-radius: 12px;
+        }
+
+        /* Modern footer design */
+        .footer {
+            background: linear-gradient(to bottom, #0f172a 0%, #1e293b 100%);
+            color: #cbd5e1;
+            padding: 5rem 0 2rem;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            max-width: 1200px;
+            margin: 0 auto 3rem;
+            padding: 0 2rem;
+        }
+
+        .footer-column h4 {
+            color: white;
+            margin-bottom: 1.5rem;
+            font-size: 1.125rem;
+            font-weight: 700;
+        }
+
+        .footer-column p {
+            color: #94a3b8;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.875rem;
+        }
+
+        .footer-links a {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            display: inline-block;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-green);
+            transform: translateX(4px);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-link {
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            font-size: 1.25rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .social-link:hover {
+            background: var(--accent-green);
+            transform: translateY(-4px);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-left: 2rem;
+            padding-right: 2rem;
+        }
+
+        /* Welcome section for logged-in users */
+        .welcome-card {
+            max-width: 900px;
+            margin: 8rem auto 4rem;
+            padding: 4rem 3rem;
+            background: white;
+            border-radius: 24px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-blue));
+        }
+
+        .welcome-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 2rem;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+        }
+
+        .welcome-card h1 {
+            font-size: 2.75rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .welcome-card .user-type-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1));
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent-green);
+            margin-bottom: 2.5rem;
+            border: 2px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .welcome-card .btn {
+            margin: 0.5rem;
+            padding: 1rem 2.5rem;
+            font-size: 1.125rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .welcome-card .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive design improvements */
+        @media (max-width: 768px) {
+            .mission-grid {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .impact-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn-hero {
+                width: 100%;
+            }
+
+            #home-map {
+                height: 400px;
+            }
+
+            .navbar-container {
+                padding: 0.875rem 1.5rem;
+            }
+
+            .navbar-brand {
+                font-size: 1.25rem;
+            }
+
+            .navbar-logo {
+                width: 36px;
+                height: 36px;
+                font-size: 1.125rem;
+            }
+
+            .navbar-btn {
+                padding: 0.5rem 1.125rem;
+                font-size: 0.875rem;
+            }
+
+            .navbar-user-info {
+                display: none;
+            }
+
+            .welcome-card {
+                margin-top: 6rem;
+                padding: 3rem 2rem;
+            }
+
+            .welcome-card h1 {
+                font-size: 2rem;
+            }
         }
     </style>
 {% endblock %}
 
 {% block content %}
 
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="{% url 'index' %}" class="navbar-brand">
+                <div class="navbar-logo">C2G</div>
+                <span>Connect2Give</span>
+            </a>
+            
+            {% if user.is_authenticated %}
+                <div class="navbar-actions">
+                    <div class="navbar-user">
+                        <div class="navbar-user-info">
+                            <div class="navbar-user-name">{{ user.username }}</div>
+                            <div class="navbar-user-role">{{ user.get_user_type_display }}</div>
+                        </div>
+                        <div class="navbar-avatar">{{ user.username|first|upper }}</div>
+                    </div>
+                    <a href="{% get_dashboard_url user %}" class="navbar-btn navbar-btn-login">Dashboard</a>
+                    <a href="{% url 'logout' %}" class="navbar-btn navbar-btn-signup">Logout</a>
+                </div>
+            {% else %}
+                <div class="navbar-actions">
+                    <a href="{% url 'login_page' %}" class="navbar-btn navbar-btn-login">Login</a>
+                    <a href="{% url 'register_step_1' %}" class="navbar-btn navbar-btn-signup">Sign Up</a>
+                </div>
+            {% endif %}
+        </div>
+    </nav>
+
     {% if user.is_authenticated %}
-        <div class="welcome-section">
+        <div class="welcome-card">
+            <div class="welcome-icon">👋</div>
             <h1>Welcome back, {{ user.username }}!</h1>
-            <p>You are logged in as a: <strong>{{ user.get_user_type_display }}</strong>.</p>
-            <br>
-            {# --- THE FIX IS HERE --- #}
-            <a href="{% get_dashboard_url user %}" class="btn">Go to My Dashboard</a>
-            {# --- END OF FIX --- #}
-            <a href="{% url 'logout' %}" class="btn btn-secondary" style="margin-left: 1rem;">Logout</a>
+            <div class="user-type-badge">{{ user.get_user_type_display }}</div>
+            <div>
+                <a href="{% get_dashboard_url user %}" class="btn">Go to Dashboard</a>
+                <a href="{% url 'logout' %}" class="btn btn-secondary">Logout</a>
+            </div>
         </div>
 
     {% else %}
-        <div class="welcome-section">
-            <h1>Welcome to Connect2Give</h1>
-            <p>The platform connecting restaurants with surplus food to NGOs and volunteers who can deliver it to those in need.</p>
-            <br>
-            <a href="{% url 'login_page' %}" class="btn">Login</a>
-            <a href="{% url 'register_step_1' %}" class="btn btn-secondary" style="margin-left: 1rem;">Register</a>
+        <div class="full-width">
+            <!-- Hero section with modern gradient design -->
+            <section class="hero-section">
+                <div class="hero-content">
+                    <h1>Turn Surplus into Support</h1>
+                    <p>Connect2Give bridges restaurants with excess food to NGOs and volunteers. Together, we fight hunger and reduce waste in our community.</p>
+                    <div class="hero-buttons">
+                        <a href="{% url 'register_step_1' %}" class="btn-hero btn-hero-primary">Get Started</a>
+                        <a href="#how-it-works" class="btn-hero btn-hero-secondary">Learn More</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Stats section with animated counters -->
+            <section class="stats-section">
+                <div class="stats-grid">
+                    <div class="stat-card" data-target="50000">
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">Meals Donated</div>
+                    </div>
+                    <div class="stat-card" data-target="1200">
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">People Fed Daily</div>
+                    </div>
+                    <div class="stat-card" data-target="300">
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">Active Volunteers</div>
+                    </div>
+                    <div class="stat-card" data-target="50">
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">Partner Restaurants</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- How it works with step numbers and icons -->
+            <section class="how-section" id="how-it-works">
+                <div class="content-wrapper">
+                    <div class="section-header">
+                        <h2 class="section-title">How It Works</h2>
+                        <p class="section-subtitle">Three simple steps to make a meaningful impact in your community</p>
+                    </div>
+                    <div class="steps-grid">
+                        <div class="step-card">
+                            <div class="step-number">1</div>
+                            <div class="step-icon">🍽️</div>
+                            <h3>Restaurant Lists Food</h3>
+                            <p>Restaurants with surplus food quickly list donations through our platform, specifying quantity and pickup details.</p>
+                        </div>
+                        <div class="step-card">
+                            <div class="step-number">2</div>
+                            <div class="step-icon">🚗</div>
+                            <h3>Volunteer Collects</h3>
+                            <p>Nearby volunteers receive instant notifications, accept the pickup, and collect the food promptly from the restaurant.</p>
+                        </div>
+                        <div class="step-card">
+                            <div class="step-number">3</div>
+                            <div class="step-icon">❤️</div>
+                            <h3>Delivered to NGO</h3>
+                            <p>Volunteers deliver food to registered NGO camps where it's distributed to people in need within hours.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Map section with better container -->
+            <section class="map-section">
+                <div class="content-wrapper">
+                    <div class="section-header">
+                        <h2 class="section-title">Our Reach Across the City</h2>
+                        <p class="section-subtitle">See our network of partner restaurants and active NGO camps</p>
+                    </div>
+                </div>
+                <div class="map-container">
+                    <div id="home-map"></div>
+                </div>
+            </section>
+
+            <!-- Mission section with impact cards -->
+            <section class="mission-section">
+                <div class="mission-grid">
+                    <div class="mission-content">
+                        <h2>Fighting Hunger, Reducing Waste</h2>
+                        <p>Every day, tons of perfectly good food goes to waste while millions go hungry. Connect2Give bridges this gap by creating seamless connections between those who have surplus and those who need it most.</p>
+                        <p>Our platform empowers restaurants to make a difference, enables NGOs to serve more people, and gives volunteers a meaningful way to contribute to their community.</p>
+                    </div>
+                    <div class="impact-grid">
+                        <div class="impact-item">
+                            <span class="impact-icon">🍕</span>
+                            <h4>Partner Restaurants</h4>
+                            <p>Leading restaurants committed to zero waste and community support</p>
+                        </div>
+                        <div class="impact-item">
+                            <span class="impact-icon">🤝</span>
+                            <h4>NGO Partners</h4>
+                            <p>Trusted organizations serving communities across the city</p>
+                        </div>
+                        <div class="impact-item">
+                            <span class="impact-icon">👥</span>
+                            <h4>Volunteers</h4>
+                            <p>Dedicated individuals making direct impact every day</p>
+                        </div>
+                        <div class="impact-item">
+                            <span class="impact-icon">🌍</span>
+                            <h4>Community</h4>
+                            <p>Together building a sustainable, caring future</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CTA section with gradient and pattern -->
+            <section class="cta-section">
+                <div class="cta-content">
+                    <h2>Ready to Join the Movement?</h2>
+                    <p>Choose your role and start making a difference today</p>
+                    <div class="cta-cards">
+                        <div class="cta-card">
+                            <span class="cta-card-icon">🏪</span>
+                            <h3>I'm a Restaurant</h3>
+                            <p>Turn your surplus food into meals for those in need. Join our network of partner restaurants.</p>
+                            <a href="{% url 'register_step_1' %}" class="btn">Register Now</a>
+                        </div>
+                        <div class="cta-card">
+                            <span class="cta-card-icon">🏢</span>
+                            <h3>I'm an NGO</h3>
+                            <p>Connect with food donors and volunteers to serve more people in your community.</p>
+                            <a href="{% url 'register_step_1' %}" class="btn">Join Us</a>
+                        </div>
+                        <div class="cta-card">
+                            <span class="cta-card-icon">🙋</span>
+                            <h3>I Want to Volunteer</h3>
+                            <p>Make a direct impact by helping deliver food from restaurants to those who need it.</p>
+                            <a href="{% url 'register_step_1' %}" class="btn">Start Volunteering</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Modern footer with better structure -->
+            <footer class="footer">
+                <div class="footer-grid">
+                    <div class="footer-column">
+                        <h4>Connect2Give</h4>
+                        <p>Bridging the gap between surplus food and hungry communities. Together, we can make a difference.</p>
+                        <div class="social-links">
+                            <a href="#" class="social-link" aria-label="Facebook">📘</a>
+                            <a href="#" class="social-link" aria-label="Twitter">🐦</a>
+                            <a href="#" class="social-link" aria-label="Instagram">📷</a>
+                            <a href="#" class="social-link" aria-label="LinkedIn">💼</a>
+                        </div>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Quick Links</h4>
+                        <ul class="footer-links">
+                            <li><a href="{% url 'index' %}">Home</a></li>
+                            <li><a href="#how-it-works">How It Works</a></li>
+                            <li><a href="#">About Us</a></li>
+                            <li><a href="#">Contact</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Get Started</h4>
+                        <ul class="footer-links">
+                            <li><a href="{% url 'login_page' %}">Login</a></li>
+                            <li><a href="{% url 'register_step_1' %}">Register</a></li>
+                            <li><a href="#">Partner With Us</a></li>
+                            <li><a href="#">Volunteer</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Legal</h4>
+                        <ul class="footer-links">
+                            <li><a href="#">Privacy Policy</a></li>
+                            <li><a href="#">Terms of Service</a></li>
+                            <li><a href="#">Cookie Policy</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2025 Connect2Give. All rights reserved.</p>
+                </div>
+            </footer>
         </div>
-        <div id="home-map"></div>
     {% endif %}
 
 {% endblock %}
@@ -55,7 +1055,16 @@
     {% if not user.is_authenticated %}
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-                const map = L.map('home-map').setView([28.6448, 77.2167], 11); // Centered on Delhi
+                const navbar = document.querySelector('.navbar');
+                window.addEventListener('scroll', () => {
+                    if (window.scrollY > 50) {
+                        navbar.classList.add('scrolled');
+                    } else {
+                        navbar.classList.remove('scrolled');
+                    }
+                });
+
+                const map = L.map('home-map').setView([28.6448, 77.2167], 11);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     attribution: '&copy; OpenStreetMap contributors'
                 }).addTo(map);
@@ -63,23 +1072,83 @@
                 const camps = JSON.parse('{{ camps_map_data|safe }}');
                 const restaurants = JSON.parse('{{ restaurants_map_data|safe }}');
 
-                const campIcon = L.icon({
-                    iconUrl: 'https://placehold.co/38x38/10b981/FFFFFF?text=C',
-                    iconSize: [38, 38], iconAnchor: [19, 38], popupAnchor: [0, -38]
+                const campIcon = L.divIcon({
+                    className: 'custom-marker',
+                    html: '<div style="background: #10b981; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); border: 3px solid white;">C</div>',
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
                 });
-                const restaurantIcon = L.icon({
-                    iconUrl: 'https://placehold.co/38x38/3b82f6/FFFFFF?text=R',
-                    iconSize: [38, 38], iconAnchor: [19, 38], popupAnchor: [0, -38]
+                
+                const restaurantIcon = L.divIcon({
+                    className: 'custom-marker',
+                    html: '<div style="background: #3b82f6; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); border: 3px solid white;">R</div>',
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
                 });
 
                 restaurants.forEach(r => {
                     L.marker([r.lat, r.lon], { icon: restaurantIcon }).addTo(map)
-                     .bindPopup(`<b>${r.name}</b><br>${r.address}`);
+                     .bindPopup(`<div style="padding: 0.5rem;"><strong>${r.name}</strong><br><span style="color: #64748b;">${r.address}</span></div>`);
                 });
 
                 camps.forEach(camp => {
                     L.marker([camp.lat, camp.lon], { icon: campIcon }).addTo(map)
-                     .bindPopup(`<b>Camp: ${camp.name}</b><br>NGO: ${camp.ngo}<br>Address: ${camp.address}<br>Starts: ${camp.start}`);
+                     .bindPopup(`<div style="padding: 0.5rem;"><strong>Camp: ${camp.name}</strong><br>NGO: ${camp.ngo}<br><span style="color: #64748b;">${camp.address}</span></div>`);
+                });
+
+                const animateCounter = (element, target) => {
+                    let current = 0;
+                    const duration = 2000;
+                    const steps = 60;
+                    const increment = target / steps;
+                    const stepTime = duration / steps;
+
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= target) {
+                            element.textContent = target.toLocaleString() + '+';
+                            clearInterval(timer);
+                        } else {
+                            element.textContent = Math.floor(current).toLocaleString();
+                        }
+                    }, stepTime);
+                };
+
+                const observerOptions = {
+                    threshold: 0.15,
+                    rootMargin: '0px 0px -50px 0px'
+                };
+
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach((entry, index) => {
+                        if (entry.isIntersecting) {
+                            setTimeout(() => {
+                                entry.target.classList.add('visible');
+                                
+                                if (entry.target.classList.contains('stat-card')) {
+                                    const numberElement = entry.target.querySelector('.stat-number');
+                                    const target = parseInt(entry.target.dataset.target);
+                                    animateCounter(numberElement, target);
+                                }
+                            }, index * 100);
+                            
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, observerOptions);
+
+                document.querySelectorAll('.stat-card, .step-card').forEach(el => {
+                    observer.observe(el);
+                });
+
+                document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                    anchor.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const target = document.querySelector(this.getAttribute('href'));
+                        if (target) {
+                            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    });
                 });
             });
         </script>
