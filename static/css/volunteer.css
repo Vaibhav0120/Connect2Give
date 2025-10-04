@@ -63,9 +63,11 @@
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
+    text-decoration: none; /* For cases where it's an <a> tag */
+    text-align: center;
 }
 
-.tab-button.active {
+.tab-button.active, .tab-button:hover {
     background-color: var(--accent-blue);
     color: white;
     border-color: var(--accent-blue);
@@ -83,6 +85,7 @@
     padding: 1rem;
     border-bottom: 1px solid var(--border);
     text-align: left;
+    vertical-align: middle;
 }
 
 .data-table th {
@@ -125,3 +128,31 @@
     border-radius: var(--radius);
     background-color: var(--bg-primary);
 }
+
+.route-summary {
+    padding: 1rem;
+    background-color: var(--bg-primary);
+    border-top: 1px solid var(--border);
+    margin-top: 1rem;
+}
+
+.route-summary p {
+    margin-bottom: 0.5rem;
+}
+
+/* --- FIX: ADDED STATUS BADGE STYLES --- */
+.status-badge {
+    display: inline-block;
+    padding: 0.25em 0.6em;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1;
+    border-radius: 0.375rem;
+    color: #fff;
+}
+
+.status-pending { background-color: var(--accent-orange); }
+.status-accepted { background-color: var(--accent-blue); }
+.status-collected { background-color: var(--accent-purple); }
+.status-verifying { background-color: #64748b; }
+.status-delivered { background-color: var(--accent-green); }

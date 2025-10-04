@@ -6,11 +6,22 @@
 
 {% block volunteer_content %}
     <div class="tab-navigation">
-        <button class="tab-button active" onclick="switchTab(event, 'pickups')">Pickups</button>
-        <button class="tab-button" onclick="switchTab(event, 'history')">Delivery History</button>
+        {# This is the main dynamic tab for Pickup/Delivery #}
+        <button class="tab-button {% if view != 'history' %}active{% endif %}" onclick="switchTab(event, 'main-content')">
+            {% if view == 'delivery_route' %}
+                Delivery
+            {% else %}
+                Pickup
+            {% endif %}
+        </button>
+        {# The history tab remains consistent #}
+        <button class="tab-button {% if view == 'history' %}active{% endif %}" onclick="switchTab(event, 'history')">Delivery History</button>
     </div>
 
-    <div id="pickups" class="tab-content active">
+    {# --- Main Content Area for Pickup or Delivery --- #}
+    <div id="main-content" class="tab-content {% if view != 'history' %}active{% endif %}">
+        
+        {# This card shows your currently accepted donations in BOTH modes #}
         <div class="content-card">
             <h3>My Active Pickups ({{ active_donations.count }}/10)</h3>
             {% if active_donations %}
@@ -23,27 +34,37 @@
                         </div>
                     {% endfor %}
                 </div>
+                
+                {# The button changes depending on the current mode #}
                 <div class="pickup-actions">
-                     <a href="{% url 'volunteer_manage_pickups' %}?view=delivery_route" class="btn">Deliver to Nearest Camp</a>
+                    {% if view == 'delivery_route' %}
+                        <a href="{% url 'volunteer_manage_pickups' %}" class="btn btn-secondary">Collect More Pickups</a>
+                    {% else %}
+                        <a href="{% url 'volunteer_manage_pickups' %}?view=delivery_route" class="btn">Deliver to Nearest Camp</a>
+                    {% endif %}
                 </div>
             {% else %}
                  <p class="empty-state">You have no active pickups.</p>
             {% endif %}
         </div>
         
+        {# The bottom card changes depending on the current mode #}
         {% if view == 'delivery_route' %}
+            {# DELIVERY MODE: Show the map #}
             <div class="content-card">
                 <h3>Route to Nearest Camp</h3>
                 {% if nearest_camp %}
                     <div id="delivery-map"></div>
                     <div id="delivery-info" class="delivery-info-container"></div>
                 {% else %}
-                    <p class="empty-state">Could not find any active camps from your registered NGOs. You can register with more NGOs from the 'Manage NGOs' page.</p>
+                    <p class="empty-state">Could not find any active camps from your registered NGOs.</p>
                 {% endif %}
             </div>
         {% else %}
+            {# PICKUP MODE: Show available donations #}
             <div class="content-card">
                 <h3>Available Donations for Pickup</h3>
+                {% if available_donations %}
                 <table class="data-table">
                     <thead>
                         <tr><th>Restaurant</th><th>Food Description</th><th>Address</th><th>Action</th></tr>
@@ -65,16 +86,18 @@
                                 {% endif %}
                             </td>
                         </tr>
-                        {% empty %}
-                        <tr><td colspan="4" class="empty-state">There are no available donations right now.</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
+                {% else %}
+                <p class="empty-state">There are no available donations right now.</p>
+                {% endif %}
             </div>
         {% endif %}
     </div>
 
-    <div id="history" class="tab-content">
+    {# --- History Content Area (unchanged) --- #}
+    <div id="history" class="tab-content {% if view == 'history' %}active{% endif %}">
         <div class="content-card">
             <h3>My Delivery History</h3>
             <table class="data-table">
@@ -113,8 +136,16 @@
     let deliveryMapInstance = null; 
 
     document.addEventListener('DOMContentLoaded', function () {
+        // If the page loads in delivery mode, initialize the map
         if ("{{ view }}" === "delivery_route") {
             initializeDeliveryRouteMap();
+        }
+
+        // If the page loads with a specific view, ensure the correct tab is shown
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('view') === 'history') {
+            document.getElementById('main-content').classList.remove('active');
+            document.getElementById('history').classList.add('active');
         }
     });
 
@@ -164,12 +195,15 @@
         .addTo(deliveryMapInstance);
     }
 
+    // A simplified function to switch between the main content and history tabs
     function switchTab(event, tabId) {
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-        event.currentTarget.classList.add('active');
-        setTimeout(() => { if (deliveryMapInstance) { deliveryMapInstance.invalidateSize(); } }, 10);
+        const url = new URL(window.location);
+        if (tabId === 'history') {
+            url.searchParams.set('view', 'history');
+        } else {
+            url.searchParams.delete('view');
+        }
+        window.location.href = url.toString();
     }
 </script>
 {% endblock scripts %}
