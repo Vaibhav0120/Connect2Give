@@ -63,7 +63,6 @@
         {% else %}
             {# PICKUP MODE: Show available donations #}
             <div class="content-card">
-                <!-- Search Form -->
                 <form method="GET" action="{% url 'volunteer_manage_pickups' %}" style="margin-bottom: 1.5rem;">
                     <div style="display: flex; gap: 10px; align-items: center;">
                         <input type="text" name="q" placeholder="Search by restaurant name or pickup address..." value="{{ request.GET.q }}" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
@@ -192,7 +191,7 @@
                 L.latLng(campData.latitude, campData.longitude)
             ],
             routeWhileDragging: false,
-            createMarker: (i, waypoint) => L.marker(waypoint.latLng, { draggable: false }).bindPopup(i === 0 ? "<strong>Your Location</strong>" : `<strong>Nearest Camp:</strong><br>${campData.name}`)
+            createMarker: (i, waypoint) => L.marker(waypoint.latLng, { draggable: false }).bindPopup(i === 0 ? "<strong>Your Location</strong>" : "<strong>Nearest Camp:</strong><br>" + campData.name)
         })
         .on('routesfound', function(e) {
             const summary = e.routes[0].summary;

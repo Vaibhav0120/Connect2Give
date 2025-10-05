@@ -86,7 +86,15 @@ class Donation(models.Model):
         COLLECTED = 'COLLECTED', 'Collected by Volunteer'
         VERIFYING = 'VERIFYING', 'Pending Verification'
         DELIVERED = 'DELIVERED', 'Delivered & Verified'
-    
+
+    RATING_CHOICES = (
+        (1, '1 Star'),
+        (2, '2 Stars'),
+        (3, '3 Stars'),
+        (4, '4 Stars'),
+        (5, '5 Stars'),
+    )
+
     restaurant = models.ForeignKey(RestaurantProfile, on_delete=models.CASCADE, related_name='donations')
     food_description = models.CharField(max_length=255, help_text="e.g., 20 veg thalis, 5kg rice")
     quantity = models.PositiveIntegerField(help_text="e.g., number of meals, weight in kg")
@@ -98,11 +106,11 @@ class Donation(models.Model):
     accepted_at = models.DateTimeField(null=True, blank=True)
     collected_at = models.DateTimeField(null=True, blank=True)
     delivered_at = models.DateTimeField(null=True, blank=True)
-    
+
     # Rating and Review fields
-    rating = models.IntegerField(null=True, blank=True, choices=[(i, i) for i in range(1, 6)], help_text="Rating from 1 to 5 stars")
+    rating = models.IntegerField(null=True, blank=True, choices=RATING_CHOICES, help_text="Rating from 1 to 5 stars")
     review = models.TextField(null=True, blank=True, help_text="NGO's review of the volunteer delivery")
-    
+
     def __str__(self):
         return f"Donation from {self.restaurant.restaurant_name} ({self.status})"
 
@@ -112,7 +120,7 @@ class Badge(models.Model):
     description = models.TextField()
     icon_url = models.CharField(max_length=255, blank=True, null=True, help_text="URL or emoji for badge icon")
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     def __str__(self):
         return self.name
 
@@ -120,9 +128,9 @@ class VolunteerBadge(models.Model):
     volunteer = models.ForeignKey(VolunteerProfile, on_delete=models.CASCADE, related_name='badges')
     badge = models.ForeignKey(Badge, on_delete=models.CASCADE)
     date_awarded = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         unique_together = ('volunteer', 'badge')
-    
+
     def __str__(self):
         return f"{self.volunteer.full_name} - {self.badge.name}"

@@ -15,14 +15,11 @@
     <meta name="msapplication-TileColor" content="#ffffff">
     {# --- END: FAVICONS & ICONS --- #}
     
-    <!-- Link to the new global stylesheet -->
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     
-    <!-- External Libraries (Leaflet, Cropper, Chart.js) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" />
     
-    <!-- Toast Notification Styles -->
     <style>
         .toast-container {
             position: fixed;
@@ -111,24 +108,19 @@
         }
     </style>
     
-    <!-- Block for page-specific head content (like extra CSS) -->
     {% block head %}{% endblock %}
 </head>
 <body>
-    <!-- Toast Container -->
     <div class="toast-container" id="toast-container"></div>
 
-    <!-- Main content block for child templates -->
     <div class="container">
         {% block content %}{% endblock %}
     </div>
     
-    <!-- External JS Libraries -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <!-- Toast Notification JavaScript -->
     <script>
         // Global function to get CSRF token
         function getCookie(name) {
@@ -177,7 +169,6 @@
         }
     </script>
     
-    <!-- Integrate Django Messages with Toast -->
     {% if messages %}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -188,7 +179,6 @@
     </script>
     {% endif %}
     
-    <!-- Block for page-specific scripts -->
     {% block scripts %}{% endblock %}
 </body>
 </html>
