@@ -1,7 +1,10 @@
 document.addEventListener('DOMContentLoaded', function () {
+    console.log("cropper_map_logic.js: Script loaded and DOMContentLoaded event fired.");
+
     // --- MAP INITIALIZATION ---
     const mapContainer = document.getElementById('location-map');
     if (mapContainer) {
+        console.log("cropper_map_logic.js: Found map container, initializing map.");
         const initialLat = parseFloat(document.getElementById('id_latitude').value || '28.6139');
         const initialLon = parseFloat(document.getElementById('id_longitude').value || '77.2090');
         const initialZoom = document.getElementById('id_latitude').value ? 15 : 11;
@@ -57,6 +60,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // --- CROPPER LOGIC ---
     const modal = document.getElementById('cropper-modal');
     if (modal) {
+        console.log("cropper_map_logic.js: Found cropper modal, initializing logic.");
         const image = document.getElementById('image-to-crop');
         let cropper;
         let targetInputFieldId;
@@ -64,6 +68,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let sourceFileName;
 
         window.openCropper = function(event, aspectRatio, targetId) {
+            console.log("cropper_map_logic.js: Global openCropper called for target:", targetId);
             const input = event.target;
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -81,6 +86,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         window.closeCropper = function() {
+            console.log("cropper_map_logic.js: Global closeCropper called.");
             modal.style.display = 'none';
             if (cropper) {
                 cropper.destroy();

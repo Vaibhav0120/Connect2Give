@@ -18,6 +18,9 @@
     overflow-y: auto;
     box-shadow: var(--shadow);
     z-index: 100;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .main-content {
@@ -119,6 +122,21 @@
     opacity: 1;
 }
 
+.sidebar-footer {
+    display: none; /* Hidden by default */
+    padding: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.sidebar-logout-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background-color: var(--accent-red);
+    color: white;
+    padding: 0.75rem 1.5rem;
+}
+
 
 /* =================================
    MOBILE MENU TOGGLE
@@ -202,6 +220,14 @@
         flex-direction: column;
         align-items: flex-start;
         gap: 1rem;
+    }
+
+    .main-header .logout-btn {
+        display: none; /* Hide logout button in header on mobile */
+    }
+    
+    .sidebar-footer {
+        display: block; /* Show sidebar footer on mobile */
     }
 
     .main-header h2 {

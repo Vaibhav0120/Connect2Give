@@ -78,12 +78,10 @@
                     <p style="margin: 0; color: var(--text-muted);">{% block page_description %}Welcome to your volunteer dashboard{% endblock %}</p>
                 </div>
                 <div>
-                    {# --- FIX: Messages moved from here --- #}
                     <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
                 </div>
             </div>
 
-            {# --- FIX: New, better location for messages --- #}
             {% if messages %}
                 <div class="messages-container" style="margin-bottom: 2rem;">
                 {% for message in messages %}
@@ -93,7 +91,7 @@
             {% endif %}
             
             {% block volunteer_content %}
-                {% endblock volunteer_content %}
+            {% endblock volunteer_content %}
         </main>
     </div>
 
@@ -101,7 +99,6 @@
     <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="{% static 'js/cropper_map_logic.js' %}"></script>
     
     {% block scripts %}{% endblock scripts %}
 {% endblock body %}

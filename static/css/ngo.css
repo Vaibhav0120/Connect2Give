@@ -401,7 +401,7 @@
 
 @media (max-width: 768px) {
     .stats-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
         gap: 1rem;
     }
 
@@ -414,13 +414,15 @@
     }
 
     .tab-navigation {
-        flex-direction: column;
+        flex-direction: row;
+        overflow-x: auto;
         padding: 0.25rem;
     }
 
     .tab-button {
         padding: 0.75rem 1rem;
         font-size: 0.875rem;
+        white-space: nowrap;
     }
     
     .address-group {
