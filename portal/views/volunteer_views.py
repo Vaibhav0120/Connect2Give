@@ -8,6 +8,9 @@ from ..models import Donation, DonationCamp, NGOProfile, VolunteerProfile
 from ..forms import VolunteerProfileForm
 from django.contrib import messages
 from geopy.distance import geodesic
+from django.http import JsonResponse
+from django.db import transaction
+
 
 @login_required(login_url='login_page')
 def volunteer_dashboard(request):
@@ -153,64 +156,61 @@ def volunteer_settings(request):
 
 @login_required(login_url='login_page')
 def register_with_ngo(request, ngo_id):
-    if request.user.user_type != 'VOLUNTEER' or request.method != 'POST': return redirect('index')
-    ngo = get_object_or_404(NGOProfile, pk=ngo_id)
-    volunteer = request.user.volunteer_profile
-    ngo.volunteers.add(volunteer)
+    if request.user.user_type != 'VOLUNTEER' or request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Invalid request.'}, status=400)
     
-    # Check if it's an AJAX request
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.content_type == 'application/json':
-        from django.http import JsonResponse
+    try:
+        ngo = get_object_or_404(NGOProfile, pk=ngo_id)
+        volunteer = request.user.volunteer_profile
+        ngo.volunteers.add(volunteer)
         return JsonResponse({'success': True, 'message': f'Successfully registered with {ngo.ngo_name}.'})
-    
-    messages.success(request, f"Successfully registered with {ngo.ngo_name}.")
-    return redirect('volunteer_manage_camps')
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': 'An unexpected error occurred.'}, status=500)
+
 
 @login_required(login_url='login_page')
 def unregister_from_ngo(request, ngo_id):
-    if request.user.user_type != 'VOLUNTEER' or request.method != 'POST': return redirect('index')
-    ngo = get_object_or_404(NGOProfile, pk=ngo_id)
-    volunteer = request.user.volunteer_profile
-    ngo.volunteers.remove(volunteer)
-    
-    # Check if it's an AJAX request
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.content_type == 'application/json':
-        from django.http import JsonResponse
+    if request.user.user_type != 'VOLUNTEER' or request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Invalid request.'}, status=400)
+        
+    try:
+        ngo = get_object_or_404(NGOProfile, pk=ngo_id)
+        volunteer = request.user.volunteer_profile
+        ngo.volunteers.remove(volunteer)
         return JsonResponse({'success': True, 'message': f'Successfully unregistered from {ngo.ngo_name}.'})
-    
-    messages.success(request, f"Successfully unregistered from {ngo.ngo_name}.")
-    return redirect('volunteer_manage_camps')
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': 'An unexpected error occurred.'}, status=500)
+
 
 @login_required(login_url='login_page')
 def accept_donation(request, donation_id):
-    from django.http import JsonResponse
-    
-    if request.user.user_type != 'VOLUNTEER' or request.method != 'POST': 
+    if request.user.user_type != 'VOLUNTEER' or request.method != 'POST':
         return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)
     
-    donation = get_object_or_404(Donation, pk=donation_id)
-    volunteer = request.user.volunteer_profile
+    try:
+        with transaction.atomic():
+            donation = Donation.objects.select_for_update().get(pk=donation_id)
+            
+            if donation.status != 'PENDING':
+                return JsonResponse({'success': False, 'message': 'This donation is no longer available.'}, status=404)
 
-    if Donation.objects.filter(assigned_volunteer=volunteer, status__in=['ACCEPTED', 'COLLECTED']).count() >= 10:
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.content_type == 'application/json':
-            return JsonResponse({'success': False, 'message': 'You cannot accept more than 10 donations at a time.'})
-        messages.error(request, 'You cannot accept more than 10 donations at a time.')
-        return redirect('volunteer_manage_pickups')
+            volunteer = request.user.volunteer_profile
 
-    if donation.status == 'PENDING':
-        donation.assigned_volunteer = volunteer
-        donation.status = 'ACCEPTED'
-        donation.accepted_at = timezone.now()
-        donation.save()
-        
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.content_type == 'application/json':
-            return JsonResponse({'success': True, 'message': 'Donation accepted. Please pick it up within 30 minutes.'})
-        messages.success(request, 'Donation accepted. Please pick it up within 30 minutes.')
-    else:
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.content_type == 'application/json':
-            return JsonResponse({'success': False, 'message': 'This donation is no longer available.'})
-        messages.error(request, 'This donation is no longer available.')
-    return redirect('volunteer_manage_pickups')
+            if Donation.objects.filter(assigned_volunteer=volunteer, status__in=['ACCEPTED', 'COLLECTED']).count() >= 10:
+                return JsonResponse({'success': False, 'message': 'You cannot accept more than 10 donations at a time.'}, status=400)
+
+            donation.assigned_volunteer = volunteer
+            donation.status = 'ACCEPTED'
+            donation.accepted_at = timezone.now()
+            donation.save()
+            
+            return JsonResponse({'success': True, 'message': 'Donation accepted! Please check your active pickups.'})
+            
+    except Donation.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Donation not found.'}, status=404)
+    except Exception as e:
+        print(f"Error in accept_donation: {e}")
+        return JsonResponse({'success': False, 'message': 'An unexpected error occurred.'}, status=500)
 
 @login_required(login_url='login_page')
 def mark_as_delivered(request, camp_id):
@@ -236,7 +236,6 @@ def mark_as_delivered(request, camp_id):
 @login_required(login_url='login_page')
 def save_webpush_subscription(request):
     """API endpoint to save webpush subscription data"""
-    from django.http import JsonResponse
     import json
     
     if request.method != 'POST' or request.user.user_type != 'VOLUNTEER':

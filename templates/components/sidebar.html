@@ -5,8 +5,46 @@
     {% block head %}
         {# The head content will be provided by the child template #}
     {% endblock head %}
+
+    {# --- ADDED: Toast Notification Styles --- #}
+    <style>
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .toast {
+            min-width: 300px;
+            max-width: 500px;
+            padding: 16px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            animation: slideIn 0.3s ease-out;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .toast.success { background-color: #10b981; color: white; }
+        .toast.error { background-color: #ef4444; color: white; }
+        .toast.warning { background-color: #f59e0b; color: white; }
+        .toast.info { background-color: #3b82f6; color: white; }
+        .toast-close { background: none; border: none; color: inherit; font-size: 20px; cursor: pointer; margin-left: 12px; opacity: 0.8; padding: 0; line-height: 1; }
+        .toast-close:hover { opacity: 1; }
+        @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(400px); opacity: 0; } }
+        .toast.hiding { animation: slideOut 0.3s ease-in forwards; }
+    </style>
 </head>
 <body>
+    {# --- ADDED: Toast Notification Container --- #}
+    <div class="toast-container" id="toast-container"></div>
+
     {% block body %}
         <button class="mobile-sidebar-toggle" id="sidebar-toggle-btn" onclick="toggleSidebar()" aria-label="Toggle sidebar">
             ☰
@@ -23,13 +61,63 @@
                 
                 <nav class="sidebar-nav">
                     {% block nav_links %}
-                        {% endblock nav_links %}
+                    {% endblock nav_links %}
                 </nav>
             </div>
             <div class="sidebar-footer">
                 <a href="{% url 'logout' %}" class="sidebar-logout-btn">Logout</a>
             </div>
         </aside>
+
+        {# --- ADDED: Global Helper Scripts --- #}
+        <script>
+            // Global function to get CSRF token
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            
+            // Global function to show toast notifications
+            function showToast(message, type = 'success', duration = 4000) {
+                const container = document.getElementById('toast-container');
+                if (!container) return;
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                
+                const messageSpan = document.createElement('span');
+                messageSpan.textContent = message;
+                
+                const closeBtn = document.createElement('button');
+                closeBtn.className = 'toast-close';
+                closeBtn.innerHTML = '×';
+                closeBtn.onclick = () => removeToast(toast);
+                
+                toast.appendChild(messageSpan);
+                toast.appendChild(closeBtn);
+                container.appendChild(toast);
+                
+                setTimeout(() => removeToast(toast), duration);
+            }
+            
+            function removeToast(toast) {
+                toast.classList.add('hiding');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }
+        </script>
 
         <script>
             // Mobile sidebar toggle functionality
@@ -39,7 +127,9 @@
                 const toggleBtn = document.getElementById('sidebar-toggle-btn');
                 sidebar.classList.toggle('open');
                 overlay.classList.toggle('active');
-                toggleBtn.style.display = 'none'; // Hide button when sidebar is open
+                if (toggleBtn) {
+                    toggleBtn.style.display = 'none'; // Hide button when sidebar is open
+                }
             }
 
             function closeSidebar() {
@@ -48,7 +138,9 @@
                 const toggleBtn = document.getElementById('sidebar-toggle-btn');
                 sidebar.classList.remove('open');
                 overlay.classList.remove('active');
-                toggleBtn.style.display = 'block'; // Show button when sidebar is closed
+                if (toggleBtn) {
+                    toggleBtn.style.display = 'block'; // Show button when sidebar is closed
+                }
             }
 
             // Close sidebar when clicking on a nav link on mobile

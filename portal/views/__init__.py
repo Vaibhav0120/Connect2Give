@@ -15,6 +15,7 @@ from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
+from django.http import JsonResponse
 
 
 # FIX 1: Update this function to correctly redirect new users
@@ -66,38 +67,32 @@ def confirm_delivery(request, donation_id):
 
 @login_required(login_url='login_page')
 def rate_donation(request, donation_id):
-    """NGO rates a completed donation delivery"""
-    from django.http import JsonResponse
-    from django.contrib import messages
+    """NGO rates a completed donation delivery, always returns JSON."""
+    if request.user.user_type != 'NGO' or request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Unauthorized request.'}, status=403)
     
-    if request.user.user_type != 'NGO':
-        return JsonResponse({'success': False, 'message': 'Unauthorized'}, status=403)
-    
-    donation = get_object_or_404(Donation, pk=donation_id, target_camp__ngo=request.user.ngo_profile, status='DELIVERED')
-    
-    if request.method == 'POST':
+    try:
+        donation = get_object_or_404(Donation, pk=donation_id, target_camp__ngo=request.user.ngo_profile, status='DELIVERED')
+        
         rating = request.POST.get('rating')
         review = request.POST.get('review', '')
         
-        try:
-            rating = int(rating)
-            if rating < 1 or rating > 5:
-                raise ValueError("Rating must be between 1 and 5")
-            
-            donation.rating = rating
-            donation.review = review
-            donation.save()
-            
-            # Check if it's an AJAX request
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({'success': True, 'message': 'Rating submitted successfully'})
-            
-            messages.success(request, 'Rating submitted successfully!')
-            return redirect(reverse('ngo_manage_camps') + '?view=history')
-        except (ValueError, TypeError) as e:
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({'success': False, 'message': str(e)}, status=400)
-            messages.error(request, 'Invalid rating value')
-            return redirect('ngo_manage_camps')
-    
-    return redirect('ngo_manage_camps')
+        if not rating:
+            return JsonResponse({'success': False, 'message': 'Rating is a required field.'}, status=400)
+
+        rating = int(rating)
+        if not (1 <= rating <= 5):
+            raise ValueError("Rating must be between 1 and 5.")
+        
+        donation.rating = rating
+        donation.review = review
+        donation.save()
+        
+        return JsonResponse({'success': True, 'message': 'Rating submitted successfully!'})
+
+    except (ValueError, TypeError) as e:
+        return JsonResponse({'success': False, 'message': f'Invalid data: {e}'}, status=400)
+    except Donation.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Donation not found or already rated.'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': 'An unexpected error occurred.'}, status=500)
