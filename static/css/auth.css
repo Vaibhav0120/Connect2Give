@@ -106,25 +106,31 @@
 }
 
 .password-wrapper input {
-    padding-right: 3rem;
+    padding-right: 3.5rem; /* Make space for the button */
 }
 
 .password-toggle {
     position: absolute;
-    right: 1rem;
+    right: 0.25rem;
     top: 50%;
     transform: translateY(-50%);
-    background: none;
+    background: transparent !important;
     border: none;
     color: #64748b;
     cursor: pointer;
     padding: 0.5rem;
-    font-size: 1.25rem;
-    transition: color 0.2s;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: none !important;
+    transition: color 0.2s, background-color 0.2s;
 }
 
 .password-toggle:hover {
-    color: #334155;
+    color: #334155; /* Subtle color change on hover for better UX */
+    background: #f1f5f9 !important; /* Subtle background on hover */
+    transform: translateY(-50%); /* Keep it centered, no other movement */
 }
 
 /* Submit Button */
@@ -357,4 +363,9 @@
 
 @keyframes spin {
     to { transform: rotate(360deg); }
+}
+
+.password-toggle svg {
+    width: 20px;
+    height: 20px;
 }

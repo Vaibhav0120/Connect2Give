@@ -14,4 +14,5 @@ def get_dashboard_url(user):
         return reverse('ngo_dashboard_overview')
     elif user.user_type == 'VOLUNTEER':
         return reverse('volunteer_dashboard')
-    return reverse('index')
+    # For new users, send them to complete their profile
+    return reverse('register_step_2')

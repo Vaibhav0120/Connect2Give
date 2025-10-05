@@ -1,3 +1,4 @@
+# portal/urls.py
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
@@ -36,7 +37,6 @@ urlpatterns = [
     
     # --- Google OAuth Callback ---
     path('accounts/google/login/callback/', views.google_callback, name='google_callback'),
-    path('accounts/google/select-user-type/', views.google_select_user_type, name='google_select_user_type'),
     
     # --- Restaurant Dashboard URLs ---
     path('dashboard/restaurant/', views.restaurant_dashboard, name='restaurant_dashboard'),

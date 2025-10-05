@@ -17,6 +17,7 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 
 
+# FIX 1: Update this function to correctly redirect new users
 def get_user_dashboard_redirect(user):
     if user.user_type == User.UserType.RESTAURANT:
         return redirect('restaurant_dashboard')
@@ -25,9 +26,15 @@ def get_user_dashboard_redirect(user):
     elif user.user_type == User.UserType.VOLUNTEER:
         return redirect('volunteer_dashboard')
     else:
-        return redirect('index')
+        # For new users (default 'ADMIN' type), redirect to complete their profile
+        return redirect('register_step_2')
 
 def index(request):
+    # FIX 2: Add this check at the top of the index view
+    if request.user.is_authenticated:
+        return get_user_dashboard_redirect(request.user)
+        
+    # The rest of the function is for non-logged-in users
     active_camps = DonationCamp.objects.filter(is_active=True).select_related('ngo')
     all_restaurants = RestaurantProfile.objects.filter(latitude__isnull=False, longitude__isnull=False)
     camps_map_data = [{"lat": c.latitude, "lon": c.longitude, "name": c.name, "ngo": c.ngo.ngo_name, "address": c.location_address, "start": c.start_time.strftime('%d %b %Y, %H:%M')} for c in active_camps if c.latitude and c.longitude]

@@ -167,7 +167,8 @@ ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 # Social account settings
 SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_QUERY_EMAIL = True
-SOCIALACCOUNT_LOGIN_ON_GET = False
+# CHANGE THIS LINE
+SOCIALACCOUNT_LOGIN_ON_GET = True  # Set this to True to bypass the confirmation page
 
 # Google OAuth configuration
 SOCIALACCOUNT_PROVIDERS = {
