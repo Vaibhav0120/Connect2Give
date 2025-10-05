@@ -35,7 +35,7 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = ['192.168.0.167', '127.0.0.1', 'localhost', 'vaibhav0120.pythonanywhere.com', '.pythonanywhere.com']
+ALLOWED_HOSTS = ['192.168.0.167', '127.0.0.1', 'localhost', 'vaibhav0120.pythonanywhere.com', '.pythonanywhere.com', ".ngrok-free.dev"]
 
 # Application definition
 INSTALLED_APPS = [
@@ -73,6 +73,7 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
 ]
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 ROOT_URLCONF = 'food_donation_project.urls'
 
 TEMPLATES = [
@@ -153,7 +154,7 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-SITE_ID = 1
+SITE_ID = 1 # Changed this to the ID of your ngrok site
 
 # --- Allauth settings (Corrected and Final) ---
 ACCOUNT_LOGIN_METHODS = ['username', 'email']
