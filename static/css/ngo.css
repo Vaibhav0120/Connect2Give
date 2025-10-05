@@ -1,528 +1,577 @@
 /* =================================
-   NGO DASHBOARD OVERVIEW PAGE
+   NGO DASHBOARD STYLES
 ==================================== */
+
+/* =================================
+   STATS GRID
+==================================== */
+
 .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .stat-card {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 2rem;
-    transition: all 0.2s ease;
-    position: relative;
-    overflow: hidden;
-    box-shadow: var(--shadow);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 
 .stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
 }
 
 .stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+
+.stat-card:nth-child(1)::before {
+  background: var(--accent-primary);
+}
+.stat-card:nth-child(2)::before {
+  background: var(--accent-green);
+}
+.stat-card:nth-child(3)::before {
+  background: var(--accent-orange);
+}
+.stat-card:nth-child(4)::before {
+  background: var(--color-dark);
 }
 
 .stat-card h3 {
-    color: var(--text-secondary);
-    font-size: 0.875rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 1rem;
-    margin-top: 0;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+  margin-top: 0;
 }
 
 .stat-number {
-    font-size: 3rem;
-    font-weight: 700;
-    margin: 0;
-    line-height: 1;
+  font-size: 3rem;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1;
+  color: var(--text-primary);
 }
 
-.stat-card:nth-child(1) .stat-number { color: var(--accent-blue); }
-.stat-card:nth-child(1)::before { background: var(--accent-blue); }
-.stat-card:nth-child(2) .stat-number { color: var(--accent-green); }
-.stat-card:nth-child(2)::before { background: var(--accent-green); }
-.stat-card:nth-child(3) .stat-number { color: var(--accent-orange); }
-.stat-card:nth-child(3)::before { background: var(--accent-orange); }
-.stat-card:nth-child(4) .stat-number { color: var(--accent-purple); }
-.stat-card:nth-child(4)::before { background: var(--accent-purple); }
+/* =================================
+   CHARTS
+==================================== */
 
 .charts-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 2rem;
-    margin-bottom: 2rem;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
 }
 
 .chart-container {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 2rem;
-    box-shadow: var(--shadow);
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-sm);
 }
 
 .chart-container h3 {
-    margin-bottom: 1.5rem;
-    font-size: 1.25rem;
+  margin-bottom: 1.5rem;
+  font-size: 1.25rem;
+  color: var(--text-primary);
 }
 
 .chart-canvas {
-    max-height: 300px;
+  max-height: 300px;
 }
 
 /* =================================
-   NGO MANAGE CAMPS PAGE
+   TAB NAVIGATION
 ==================================== */
+
 .tab-navigation {
-    display: flex;
-    background-color: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 0.5rem;
-    margin-bottom: 2rem;
-    gap: 0.5rem;
+  display: flex;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 0.5rem;
+  margin-bottom: 2rem;
+  gap: 0.5rem;
 }
 
 .tab-button {
-    flex: 1;
-    padding: 0.875rem 1.5rem;
-    background-color: transparent;
-    border: none;
-    border-radius: calc(var(--radius) - 2px);
-    color: var(--text-secondary);
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: center;
+  flex: 1;
+  padding: 0.875rem 1.5rem;
+  background-color: transparent;
+  border: none;
+  border-radius: var(--radius);
+  color: var(--text-secondary);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
 }
 
 .tab-button:hover {
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 .tab-button.active {
-    background-color: var(--accent-blue);
-    color: white;
-    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+  background-color: var(--accent-primary);
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 173, 181, 0.2);
 }
 
 .tab-content {
-    display: none;
+  display: none;
 }
 
 .tab-content.active {
-    display: block;
+  display: block;
 }
 
+/* =================================
+   CONTENT CARDS
+==================================== */
+
 .content-card {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 2rem;
-    margin-bottom: 2rem;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-sm);
 }
 
 .form-group {
-    margin-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .address-group {
-    display: flex;
-    gap: 1rem;
-    align-items: flex-end;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
 }
 
 .address-group textarea {
-    flex: 1;
+  flex: 1;
 }
 
 .address-group button {
-    flex-shrink: 0;
-    height: fit-content;
+  flex-shrink: 0;
+  height: fit-content;
 }
 
-#camp-map, #location-map {
-    height: 350px;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    margin: 1rem 0;
+/* =================================
+   MAPS
+==================================== */
+
+#camp-map,
+#location-map {
+  height: 350px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin: 1rem 0;
 }
+
+/* =================================
+   DATA TABLES
+==================================== */
 
 .data-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: var(--bg-card);
-    border-radius: var(--radius);
-    overflow: hidden;
-    border: 1px solid var(--border);
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--bg-card);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
 }
 
 .data-table th {
-    background-color: var(--bg-secondary);
-    color: var(--text-secondary);
-    font-weight: 600;
-    padding: 1rem;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
+  background-color: var(--bg-primary);
+  color: var(--text-secondary);
+  font-weight: 600;
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 2px solid var(--border);
 }
 
 .data-table td {
-    padding: 1rem;
-    border-bottom: 1px solid var(--border);
-    color: var(--text-primary);
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
 }
 
 .data-table tr:last-child td {
-    border-bottom: none;
+  border-bottom: none;
 }
 
 .data-table tr:hover {
-    background-color: var(--bg-secondary);
+  background-color: var(--bg-primary);
 }
 
+/* =================================
+   ACTION BUTTONS
+==================================== */
+
 .action-button {
-    background-color: var(--accent-green);
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: calc(var(--radius) - 2px);
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
+  background-color: var(--accent-green);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .action-button:hover {
-    background-color: #059669;
-    transform: translateY(-1px);
-}
-
-.empty-state {
-    text-align: center;
-    color: var(--text-muted);
-    padding: 3rem;
-    font-style: italic;
+  background-color: #218838;
+  transform: translateY(-1px);
 }
 
 /* =================================
-   NGO MANAGE VOLUNTEERS PAGE
+   STATUS INDICATORS
 ==================================== */
+
 .status-active {
-    color: var(--accent-green);
-    font-weight: bold;
+  color: var(--accent-green);
+  font-weight: 600;
 }
+
 .status-idle {
-    color: var(--text-muted);
+  color: var(--text-muted);
 }
 
 /* =================================
-   NGO PROFILE PAGE
+   PROFILE PAGE
 ==================================== */
+
 .profile-container {
-    max-width: 800px;
+  max-width: 900px;
 }
 
 .profile-form {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 2rem;
-    margin-bottom: 2rem;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-sm);
 }
 
 .form-grid {
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 2rem;
-    margin-bottom: 2rem;
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 2rem;
+  margin-bottom: 2rem;
 }
 
 .image-upload-section {
-    text-align: center;
+  text-align: center;
 }
 
 .image-upload-widget {
-    margin-bottom: 2rem;
+  margin-bottom: 2rem;
 }
 
 .image-preview-container {
-    margin-bottom: 1rem;
+  margin-bottom: 1rem;
 }
 
 .image-preview {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    border: 3px solid var(--border);
-    object-fit: cover;
-    transition: all 0.2s ease;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 3px solid var(--border);
+  object-fit: cover;
+  transition: all 0.2s ease;
 }
 
 .image-preview:hover {
-    border-color: var(--accent-blue);
+  border-color: var(--accent-primary);
 }
 
 .banner-preview {
-    width: 100%;
-    height: 120px;
-    object-fit: cover;
-    border-radius: var(--radius);
-    border: 2px solid var(--border);
-    transition: all 0.2s ease;
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  border: 2px solid var(--border);
+  transition: all 0.2s ease;
 }
 
 .banner-preview:hover {
-    border-color: var(--accent-blue);
+  border-color: var(--accent-primary);
 }
 
 .upload-btn {
-    background-color: var(--bg-secondary);
-    border: 2px dashed var(--border);
-    color: var(--text-secondary);
-    padding: 0.75rem 1.5rem;
-    border-radius: var(--radius);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 0.875rem;
-    margin-top: 0.5rem;
+  background-color: var(--bg-secondary);
+  border: 2px dashed var(--border);
+  color: var(--text-secondary);
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
 }
 
 .upload-btn:hover {
-    border-color: var(--accent-blue);
-    color: var(--accent-blue);
-    background-color: rgba(59, 130, 246, 0.05);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  background-color: var(--accent-primary-light);
 }
 
 .map-section {
-    margin-top: 2rem;
-    padding-top: 2rem;
-    border-top: 1px solid var(--border);
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
 }
 
+/* =================================
+   IMAGE CROPPER MODAL
+==================================== */
+
 .cropper-modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
-    align-items: center;
-    justify-content: center;
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  align-items: center;
+  justify-content: center;
 }
 
 .cropper-modal-content {
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 2rem;
-    width: 90%;
-    max-width: 600px;
-    max-height: 80vh;
-    overflow: auto;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  background-color: white;
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow: auto;
+  box-shadow: var(--shadow-lg);
 }
 
 .cropper-container {
-    max-height: 400px;
-    margin: 1rem 0;
+  max-height: 400px;
+  margin: 1rem 0;
 }
 
 #image-to-crop {
-    max-width: 100%;
-    display: block;
+  max-width: 100%;
+  display: block;
 }
 
 .cropper-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: flex-end;
-    margin-top: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
 }
 
 .btn-cancel {
-    background-color: var(--bg-secondary);
-    border: 1px solid var(--border);
-    color: var(--text-secondary);
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
 }
 
 .btn-cancel:hover {
-    background-color: var(--bg-card-hover);
+  background-color: var(--bg-card-hover);
 }
 
 .btn-crop {
-    background-color: var(--accent-green);
+  background-color: var(--accent-green);
 }
 
 .btn-crop:hover {
-    background-color: #059669;
+  background-color: #218838;
 }
-
 
 /* =================================
-   NGO SETTINGS PAGE
+   EMPTY STATE
 ==================================== */
-.placeholder-content {
-    padding: 2em;
-    text-align: center;
-    background-color: #fff;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
+
+.empty-state {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 3rem;
+  font-style: italic;
 }
 
+/* =================================
+   SETTINGS PAGE
+==================================== */
+
+.placeholder-content {
+  padding: 3rem 2rem;
+  text-align: center;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  color: var(--text-muted);
+}
 
 /* =================================
    RESPONSIVE STYLES
 ==================================== */
+
 @media (max-width: 1024px) {
-    .charts-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 768px) {
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
-    }
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
 
-    .stat-card {
-        padding: 1.5rem;
-    }
+  .stat-card {
+    padding: 1.5rem;
+  }
 
-    .stat-number {
-        font-size: 2.5rem;
-    }
+  .stat-number {
+    font-size: 2.5rem;
+  }
 
-    .tab-navigation {
-        flex-direction: row;
-        overflow-x: auto;
-        padding: 0.25rem;
-    }
+  .tab-navigation {
+    overflow-x: auto;
+    padding: 0.375rem;
+  }
 
-    .tab-button {
-        padding: 0.75rem 1rem;
-        font-size: 0.875rem;
-        white-space: nowrap;
-    }
-    
-    .address-group {
-        flex-direction: column;
-        align-items: stretch;
-    }
+  .tab-button {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
 
-    .content-card {
-        padding: 1.5rem;
-    }
+  .address-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-    .form-group {
-        margin-bottom: 1.25rem;
-    }
+  .content-card {
+    padding: 1.5rem;
+  }
 
-    /* Mobile-friendly table: Convert to card layout */
-    .data-table {
-        border: none;
-    }
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
 
-    .data-table thead {
-        display: none;
-    }
+  .data-table {
+    border: none;
+  }
 
-    .data-table tbody {
-        display: block;
-    }
+  .data-table thead {
+    display: none;
+  }
 
-    .data-table tr {
-        display: block;
-        margin-bottom: 1rem;
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        background: var(--bg-card);
-        padding: 1rem;
-    }
+  .data-table tbody {
+    display: block;
+  }
 
-    .data-table tr:hover {
-        background: var(--bg-card);
-    }
+  .data-table tr {
+    display: block;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-card);
+    padding: 1rem;
+  }
 
-    .data-table td {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.5rem 0;
-        border: none;
-        text-align: right;
-    }
+  .data-table tr:hover {
+    background: var(--bg-card);
+  }
 
-    .data-table td:before {
-        content: attr(data-label);
-        font-weight: 600;
-        color: var(--text-secondary);
-        text-align: left;
-        margin-right: 1rem;
-    }
+  .data-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border: none;
+    text-align: right;
+  }
 
-    .form-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
+  .data-table td:before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-align: left;
+    margin-right: 1rem;
+  }
 
-    .chart-container {
-        padding: 1.5rem;
-    }
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
 
-    .chart-canvas {
-        max-height: 250px;
-    }
+  .chart-container {
+    padding: 1.5rem;
+  }
 
-    #camp-map, #location-map {
-        height: 300px;
-    }
+  .chart-canvas {
+    max-height: 250px;
+  }
 
-    .action-button {
-        width: 100%;
-        margin-top: 0.5rem;
-    }
+  #camp-map,
+  #location-map {
+    height: 300px;
+  }
 
-    .cropper-modal-content {
-        width: 95%;
-        padding: 1.5rem;
-    }
+  .action-button {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+
+  .cropper-modal-content {
+    width: 95%;
+    padding: 1.5rem;
+  }
 }
 
 @media (max-width: 480px) {
-    .stat-card {
-        padding: 1.25rem;
-    }
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
 
-    .stat-number {
-        font-size: 2rem;
-    }
+  .stat-card {
+    padding: 1.25rem;
+  }
 
-    .content-card {
-        padding: 1rem;
-    }
+  .stat-number {
+    font-size: 2rem;
+  }
 
-    .chart-canvas {
-        max-height: 200px;
-    }
+  .content-card {
+    padding: 1rem;
+  }
+
+  .chart-canvas {
+    max-height: 200px;
+  }
 }

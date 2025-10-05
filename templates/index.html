@@ -40,15 +40,15 @@
             left: 0;
             right: 0;
             z-index: 1000;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(238, 238, 238, 0.95);
             backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            border-bottom: 1px solid rgba(57, 62, 70, 0.1);
             transition: all 0.3s ease;
         }
 
         .navbar.scrolled {
-            background: rgba(255, 255, 255, 0.98);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            background: rgba(238, 238, 238, 0.98);
+            box-shadow: 0 4px 20px rgba(34, 40, 49, 0.08);
         }
 
         .navbar-container {
@@ -65,7 +65,7 @@
             align-items: center;
             gap: 0.75rem;
             text-decoration: none;
-            color: var(--text-primary);
+            color: #222831;
             font-size: 1.5rem;
             font-weight: 800;
             letter-spacing: -0.02em;
@@ -73,13 +73,13 @@
         }
 
         .navbar-brand:hover {
-            color: var(--accent-green);
+            color: #00ADB5;
         }
 
         .navbar-logo {
             width: 40px;
             height: 40px;
-            background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+            background: #00ADB5;
             border-radius: 10px;
             display: flex;
             align-items: center;
@@ -87,7 +87,7 @@
             color: white;
             font-size: 1.25rem;
             font-weight: 800;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 173, 181, 0.25);
         }
 
         .navbar-actions {
@@ -109,23 +109,24 @@
         }
 
         .navbar-btn-login {
-            color: var(--text-primary);
+            color: #222831;
             background: transparent;
         }
 
         .navbar-btn-login:hover {
-            background: var(--bg-primary);
+            background: rgba(57, 62, 70, 0.08);
         }
 
         .navbar-btn-signup {
-            background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+            background: #00ADB5;
             color: white;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 173, 181, 0.25);
         }
 
         .navbar-btn-signup:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 6px 20px rgba(0, 173, 181, 0.35);
+            background: #009aa1;
         }
 
         .navbar-user {
@@ -140,38 +141,37 @@
 
         .navbar-user-name {
             font-weight: 600;
-            color: var(--text-primary);
+            color: #222831;
             font-size: 0.9375rem;
         }
 
         .navbar-user-role {
             font-size: 0.8125rem;
-            color: var(--text-secondary);
+            color: #393E46;
         }
 
         .navbar-avatar {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+            background: #00ADB5;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: 700;
             font-size: 1rem;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 173, 181, 0.25);
         }
 
-        /* Modern hero section with gradient overlay */
+        /* Modern hero section */
         .hero-section {
             position: relative;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.95) 0%, rgba(59, 130, 246, 0.95) 100%),
-                        url('/placeholder.svg?height=1080&width=1920') center/cover;
+            background: linear-gradient(135deg, #00ADB5 0%, #393E46 100%);
             color: white;
             overflow: hidden;
             padding-top: 80px;
@@ -184,7 +184,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.1) 0%, transparent 50%);
+            background: radial-gradient(circle at 30% 50%, rgba(238, 238, 238, 0.08) 0%, transparent 50%);
         }
 
         .hero-content {
@@ -208,7 +208,7 @@
         .hero-content p {
             font-size: clamp(1.125rem, 2vw, 1.5rem);
             margin-bottom: 2.5rem;
-            color: rgba(255, 255, 255, 0.95);
+            color: rgba(238, 238, 238, 0.95);
             line-height: 1.6;
             max-width: 700px;
             margin-left: auto;
@@ -235,30 +235,31 @@
 
         .btn-hero-primary {
             background-color: white;
-            color: var(--accent-green);
+            color: #00ADB5;
         }
 
         .btn-hero-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            background-color: #EEEEEE;
         }
 
         .btn-hero-secondary {
-            background-color: rgba(255, 255, 255, 0.2);
+            background-color: rgba(238, 238, 238, 0.15);
             color: white;
             backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(238, 238, 238, 0.3);
         }
 
         .btn-hero-secondary:hover {
-            background-color: rgba(255, 255, 255, 0.3);
+            background-color: rgba(238, 238, 238, 0.25);
             transform: translateY(-2px);
         }
 
         /* Stats section with modern card design */
         .stats-section {
-            background: linear-gradient(to bottom, white 0%, var(--bg-primary) 100%);
-            padding: 4rem 0;
+            background: #EEEEEE;
+            padding: 5rem 0;
         }
 
         .stats-grid {
@@ -275,8 +276,8 @@
             padding: 2.5rem 2rem;
             border-radius: 16px;
             text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(34, 40, 49, 0.08);
+            border: 1px solid rgba(57, 62, 70, 0.1);
             opacity: 0;
             transform: translateY(30px);
             transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -289,23 +290,20 @@
 
         .stat-card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 24px rgba(34, 40, 49, 0.12);
         }
 
         .stat-number {
             font-size: clamp(2.5rem, 5vw, 3.5rem);
             font-weight: 800;
-            background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: #00ADB5;
             margin-bottom: 0.5rem;
             line-height: 1;
         }
 
         .stat-label {
             font-size: 1rem;
-            color: var(--text-secondary);
+            color: #393E46;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -314,7 +312,7 @@
         /* How it works with modern step indicators */
         .how-section {
             padding: 6rem 0;
-            background-color: var(--bg-primary);
+            background-color: white;
         }
 
         .section-header {
@@ -326,13 +324,13 @@
             font-size: clamp(2rem, 4vw, 3rem);
             font-weight: 800;
             margin-bottom: 1rem;
-            color: var(--text-primary);
+            color: #222831;
             letter-spacing: -0.02em;
         }
 
         .section-subtitle {
             font-size: 1.25rem;
-            color: var(--text-secondary);
+            color: #393E46;
             max-width: 600px;
             margin: 0 auto;
         }
@@ -347,11 +345,11 @@
         }
 
         .step-card {
-            background: white;
+            background: #EEEEEE;
             padding: 2.5rem;
             border-radius: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(34, 40, 49, 0.06);
+            border: 1px solid rgba(57, 62, 70, 0.08);
             position: relative;
             opacity: 0;
             transform: translateY(40px);
@@ -365,7 +363,7 @@
 
         .step-card:hover {
             transform: translateY(-12px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 12px 32px rgba(34, 40, 49, 0.12);
         }
 
         .step-number {
@@ -374,7 +372,7 @@
             left: 2.5rem;
             width: 48px;
             height: 48px;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-green));
+            background: #00ADB5;
             color: white;
             border-radius: 50%;
             display: flex;
@@ -382,30 +380,31 @@
             justify-content: center;
             font-size: 1.5rem;
             font-weight: 800;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 4px 12px rgba(0, 173, 181, 0.3);
         }
 
         .step-icon {
             width: 80px;
             height: 80px;
             margin: 1.5rem auto 1.5rem;
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1));
+            background: white;
             border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 2.5rem;
+            box-shadow: 0 2px 8px rgba(34, 40, 49, 0.06);
         }
 
         .step-card h3 {
             font-size: 1.5rem;
             margin-bottom: 1rem;
-            color: var(--text-primary);
+            color: #222831;
             font-weight: 700;
         }
 
         .step-card p {
-            color: var(--text-secondary);
+            color: #393E46;
             line-height: 1.7;
             font-size: 1rem;
         }
@@ -413,7 +412,7 @@
         /* Map section with better styling */
         .map-section {
             padding: 6rem 0;
-            background: white;
+            background: #EEEEEE;
         }
 
         .map-container {
@@ -425,14 +424,14 @@
         #home-map {
             height: 600px;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-            border: 1px solid var(--border);
+            box-shadow: 0 8px 32px rgba(34, 40, 49, 0.12);
+            border: 1px solid rgba(57, 62, 70, 0.1);
         }
 
         /* Mission section with two-column layout */
         .mission-section {
             padding: 6rem 0;
-            background: linear-gradient(135deg, var(--bg-primary) 0%, white 100%);
+            background: white;
         }
 
         .mission-grid {
@@ -449,14 +448,14 @@
             font-size: clamp(2rem, 4vw, 2.75rem);
             font-weight: 800;
             margin-bottom: 1.5rem;
-            color: var(--text-primary);
+            color: #222831;
             letter-spacing: -0.02em;
         }
 
         .mission-content p {
             font-size: 1.125rem;
             line-height: 1.8;
-            color: var(--text-secondary);
+            color: #393E46;
             margin-bottom: 1.5rem;
         }
 
@@ -467,17 +466,17 @@
         }
 
         .impact-item {
-            background: white;
+            background: #EEEEEE;
             padding: 2rem;
             border-radius: 16px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(34, 40, 49, 0.06);
+            border: 1px solid rgba(57, 62, 70, 0.08);
             transition: all 0.3s ease;
         }
 
         .impact-item:hover {
             transform: translateY(-4px);
-            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 24px rgba(34, 40, 49, 0.12);
         }
 
         .impact-icon {
@@ -490,20 +489,20 @@
             font-size: 1.125rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
-            color: var(--text-primary);
+            color: #222831;
         }
 
         .impact-item p {
             font-size: 0.9375rem;
-            color: var(--text-secondary);
+            color: #393E46;
             margin: 0;
             line-height: 1.6;
         }
 
-        /* CTA section with gradient background */
+        /* CTA section */
         .cta-section {
             padding: 6rem 0;
-            background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%);
+            background: #393E46;
             position: relative;
             overflow: hidden;
         }
@@ -515,7 +514,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2300ADB5' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
         }
 
         .cta-content {
@@ -537,7 +536,7 @@
 
         .cta-content p {
             font-size: 1.25rem;
-            color: rgba(255, 255, 255, 0.95);
+            color: #EEEEEE;
             margin-bottom: 3rem;
             max-width: 600px;
             margin-left: auto;
@@ -555,14 +554,14 @@
             background: white;
             padding: 3rem 2rem;
             border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
             transition: all 0.3s ease;
             text-align: center;
         }
 
         .cta-card:hover {
             transform: translateY(-12px);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
         }
 
         .cta-card-icon {
@@ -575,11 +574,11 @@
             font-size: 1.5rem;
             font-weight: 700;
             margin-bottom: 1rem;
-            color: var(--text-primary);
+            color: #222831;
         }
 
         .cta-card p {
-            color: var(--text-secondary);
+            color: #393E46;
             margin-bottom: 2rem;
             line-height: 1.6;
         }
@@ -589,12 +588,23 @@
             padding: 1rem;
             font-weight: 600;
             border-radius: 12px;
+            background: #00ADB5;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .cta-card .btn:hover {
+            background: #009aa1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 173, 181, 0.3);
         }
 
         /* Modern footer design */
         .footer {
-            background: linear-gradient(to bottom, #0f172a 0%, #1e293b 100%);
-            color: #cbd5e1;
+            background: #222831;
+            color: #EEEEEE;
             padding: 5rem 0 2rem;
         }
 
@@ -615,9 +625,10 @@
         }
 
         .footer-column p {
-            color: #94a3b8;
+            color: #EEEEEE;
             line-height: 1.7;
             margin-bottom: 1.5rem;
+            opacity: 0.8;
         }
 
         .footer-links {
@@ -631,15 +642,17 @@
         }
 
         .footer-links a {
-            color: #cbd5e1;
+            color: #EEEEEE;
             text-decoration: none;
             transition: all 0.2s ease;
             display: inline-block;
+            opacity: 0.8;
         }
 
         .footer-links a:hover {
-            color: var(--accent-green);
+            color: #00ADB5;
             transform: translateX(4px);
+            opacity: 1;
         }
 
         .social-links {
@@ -651,7 +664,7 @@
         .social-link {
             width: 44px;
             height: 44px;
-            background: rgba(255, 255, 255, 0.1);
+            background: #393E46;
             border-radius: 12px;
             display: flex;
             align-items: center;
@@ -660,23 +673,23 @@
             text-decoration: none;
             font-size: 1.25rem;
             transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
         }
 
         .social-link:hover {
-            background: var(--accent-green);
+            background: #00ADB5;
             transform: translateY(-4px);
         }
 
         .footer-bottom {
             text-align: center;
             padding-top: 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: #94a3b8;
+            border-top: 1px solid rgba(238, 238, 238, 0.1);
+            color: #EEEEEE;
             max-width: 1200px;
             margin: 0 auto;
             padding-left: 2rem;
             padding-right: 2rem;
+            opacity: 0.7;
         }
 
         /* Welcome section for logged-in users */
@@ -687,8 +700,8 @@
             background: white;
             border-radius: 24px;
             text-align: center;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--border);
+            box-shadow: 0 8px 32px rgba(34, 40, 49, 0.12);
+            border: 1px solid rgba(57, 62, 70, 0.1);
             position: relative;
             overflow: hidden;
         }
@@ -700,40 +713,40 @@
             left: 0;
             right: 0;
             height: 6px;
-            background: linear-gradient(90deg, var(--accent-green), var(--accent-blue));
+            background: #00ADB5;
         }
 
         .welcome-icon {
             width: 80px;
             height: 80px;
             margin: 0 auto 2rem;
-            background: linear-gradient(135deg, var(--accent-green), var(--accent-blue));
+            background: #00ADB5;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 2.5rem;
-            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+            box-shadow: 0 8px 24px rgba(0, 173, 181, 0.25);
         }
 
         .welcome-card h1 {
             font-size: 2.75rem;
             font-weight: 800;
             margin-bottom: 1rem;
-            color: var(--text-primary);
+            color: #222831;
             letter-spacing: -0.02em;
         }
 
         .welcome-card .user-type-badge {
             display: inline-block;
             padding: 0.5rem 1.5rem;
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(59, 130, 246, 0.1));
+            background: rgba(0, 173, 181, 0.1);
             border-radius: 50px;
             font-size: 1rem;
             font-weight: 600;
-            color: var(--accent-green);
+            color: #00ADB5;
             margin-bottom: 2.5rem;
-            border: 2px solid rgba(16, 185, 129, 0.2);
+            border: 2px solid rgba(0, 173, 181, 0.2);
         }
 
         .welcome-card .btn {
@@ -743,10 +756,24 @@
             border-radius: 12px;
             font-weight: 600;
             transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            background: #00ADB5;
+            color: white;
         }
 
         .welcome-card .btn:hover {
             transform: translateY(-2px);
+            background: #009aa1;
+            box-shadow: 0 4px 12px rgba(0, 173, 181, 0.3);
+        }
+
+        .welcome-card .btn-secondary {
+            background: #393E46;
+        }
+
+        .welcome-card .btn-secondary:hover {
+            background: #2d3139;
         }
 
         /* Animations */
@@ -769,7 +796,7 @@
             font-size: 1.5rem;
             cursor: pointer;
             padding: 0.5rem;
-            color: var(--text-primary);
+            color: #222831;
         }
 
         .mobile-menu {
@@ -778,13 +805,13 @@
             top: 70px;
             left: 0;
             right: 0;
-            background: rgba(255, 255, 255, 0.98);
+            background: rgba(238, 238, 238, 0.98);
             backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid rgba(57, 62, 70, 0.1);
             padding: 1rem;
             flex-direction: column;
             gap: 0.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 20px rgba(34, 40, 49, 0.1);
             z-index: 999;
         }
 
@@ -1012,7 +1039,7 @@
 
     {% else %}
         <div class="full-width">
-            <!-- Hero section with modern gradient design -->
+             {% comment %} Hero section with modern gradient design  {% endcomment %}
             <section class="hero-section">
                 <div class="hero-content">
                     <h1>Turn Surplus into Support</h1>
@@ -1024,7 +1051,7 @@
                 </div>
             </section>
 
-            <!-- Stats section with animated counters -->
+             {% comment %} Stats section with animated counters  {% endcomment %}
             <section class="stats-section">
                 <div class="stats-grid">
                     <div class="stat-card" data-target="50000">
@@ -1046,7 +1073,7 @@
                 </div>
             </section>
 
-            <!-- How it works with step numbers and icons -->
+             {% comment %} How it works with step numbers and icons  {% endcomment %}
             <section class="how-section" id="how-it-works">
                 <div class="content-wrapper">
                     <div class="section-header">
@@ -1076,7 +1103,7 @@
                 </div>
             </section>
 
-            <!-- Map section with better container -->
+             {% comment %} Map section with better container  {% endcomment %}
             <section class="map-section">
                 <div class="content-wrapper">
                     <div class="section-header">
@@ -1089,7 +1116,7 @@
                 </div>
             </section>
 
-            <!-- Mission section with impact cards -->
+             {% comment %} Mission section with impact cards  {% endcomment %}
             <section class="mission-section">
                 <div class="mission-grid">
                     <div class="mission-content">
@@ -1122,7 +1149,7 @@
                 </div>
             </section>
 
-            <!-- CTA section with gradient and pattern -->
+             {% comment %} CTA section with gradient and pattern  {% endcomment %}
             <section class="cta-section">
                 <div class="cta-content">
                     <h2>Ready to Join the Movement?</h2>
@@ -1150,7 +1177,7 @@
                 </div>
             </section>
 
-            <!-- Modern footer with better structure -->
+             {% comment %} Modern footer with better structure  {% endcomment %}
             <footer class="footer">
                 <div class="footer-grid">
                     <div class="footer-column">
@@ -1243,28 +1270,29 @@
 
                 const campIcon = L.divIcon({
                     className: 'custom-marker',
-                    html: '<div style="background: #10b981; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); border: 3px solid white;">C</div>',
+                    html: '<div style="background: #00ADB5; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; box-shadow: 0 4px 12px rgba(0, 173, 181, 0.4); border: 3px solid white;">C</div>',
                     iconSize: [32, 32],
                     iconAnchor: [16, 16]
                 });
                 
                 const restaurantIcon = L.divIcon({
                     className: 'custom-marker',
-                    html: '<div style="background: #3b82f6; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); border: 3px solid white;">R</div>',
+                    html: '<div style="background: #393E46; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; box-shadow: 0 4px 12px rgba(57, 62, 70, 0.4); border: 3px solid white;">R</div>',
                     iconSize: [32, 32],
                     iconAnchor: [16, 16]
                 });
 
                 restaurants.forEach(r => {
                     L.marker([r.lat, r.lon], { icon: restaurantIcon }).addTo(map)
-                     .bindPopup(`<div style="padding: 0.5rem;"><strong>${r.name}</strong><br><span style="color: #64748b;">${r.address}</span></div>`);
+                     .bindPopup(`<div style="padding: 0.5rem;"><strong>${r.name}</strong><br><span style="color: #393E46;">${r.address}</span></div>`);
                 });
 
                 camps.forEach(camp => {
                     L.marker([camp.lat, camp.lon], { icon: campIcon }).addTo(map)
-                     .bindPopup(`<div style="padding: 0.5rem;"><strong>Camp: ${camp.name}</strong><br>NGO: ${camp.ngo}<br><span style="color: #64748b;">${camp.address}</span></div>`);
+                     .bindPopup(`<div style="padding: 0.5rem;"><strong>Camp: ${camp.name}</strong><br>NGO: ${camp.ngo}<br><span style="color: #393E46;">${camp.address}</span></div>`);
                 });
 
+                // Animated counter function with smooth rotation effect
                 const animateCounter = (element, target) => {
                     let current = 0;
                     const duration = 2000;

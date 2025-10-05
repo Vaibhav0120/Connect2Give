@@ -58,5 +58,6 @@
   },
   "emmet.includeLanguages": {
     "django-html": "html"
-  }
+  },
+  "cSpell.words": ["minmax", "onclick"]
 }
