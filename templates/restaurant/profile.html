@@ -15,7 +15,7 @@
     {% endif %}
 
     <div class="profile-form">
-        <form method="POST" enctype="multipart/form-data" action="{% url 'restaurant_profile' %}">
+        <form method="POST" enctype="multipart/form-data" action="{% url 'restaurant_profile' %}" id="profile-form">
             {% csrf_token %}
             {{ form.latitude }}
             {{ form.longitude }}
@@ -40,8 +40,8 @@
                                 alt="Profile Picture" class="image-preview" id="profile_picture_preview">
                         </div>
                         <input type="file" id="id_profile_picture_input" accept="image/*"
-                            onchange="openCropper(event, 1, 'id_profile_picture')" style="display: none;">
-                        <button type="button" class="upload-btn"
+                            onchange="modernCropperOpen(event, 1, 'id_profile_picture')" style="display: none;">
+                        <button type="button" class="upload-btn image-upload-btn"
                             onclick="document.getElementById('id_profile_picture_input').click()">
                             Choose Image
                         </button>
@@ -60,7 +60,7 @@
                     {{ form.address.label_tag }}
                     <div class="address-group">
                         {{ form.address }}
-                        <button type="button" onclick="findAddressOnMap()">Find Location</button>
+                        <button type="button" class="map-action-btn" onclick="findAddressOnMap()">Find Location</button>
                     </div>
                 </div>
                 <div id="location-map"></div>
@@ -69,42 +69,33 @@
                 </p>
             </div>
 
-            <div style="margin-top: 2rem; text-align: right;">
-                <button type="submit">Save Changes</button>
+            <div style="margin-top: 2rem; text-align: right; display: flex; gap: 1rem; justify-content: flex-end;">
+                <button type="button" id="edit-profile-btn" onclick="enableEditMode()">Edit Profile</button>
+                <button type="submit" id="save-changes-btn" style="display: none;">Save Changes</button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Cropper modal -->
-<div id="cropper-modal" class="cropper-modal">
-    <div class="cropper-modal-content">
-        <h3>Crop Your Image</h3>
-        <div class="cropper-container">
-            <img id="image-to-crop" src="">
-        </div>
-        <div class="cropper-actions">
-            <button type="button" class="btn-cancel" onclick="closeCropper()">Cancel</button>
-            <button type="button" class="btn-crop" onclick="cropAndApplyImage()">Crop & Use</button>
-        </div>
-    </div>
-</div>
+<!-- Include the modern image cropper component -->
+{% include 'components/image_cropper_modal.html' %}
 {% endblock restaurant_content %}
 
 {% block scripts %}
 {{ block.super }}
-<!-- Page-specific JavaScript for map and image cropper -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // --- MAP INITIALIZATION ---
+        // --- MAP INITIALIZATION (with controls removed) ---
         const initialLat = parseFloat("{{ form.instance.latitude|default:'28.6139'|escapejs }}");
         const initialLon = parseFloat("{{ form.instance.longitude|default:'77.2090'|escapejs }}");
         const initialZoom = parseInt("{{ form.instance.latitude|yesno:'15,11' }}");
 
-        const map = L.map('location-map').setView([initialLat, initialLon], initialZoom);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
+        const map = L.map('location-map', {
+            zoomControl: false,
+            attributionControl: false
+        }).setView([initialLat, initialLon], initialZoom);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
         let marker = null;
         const latField = document.getElementById('id_latitude');
@@ -151,58 +142,53 @@
                 .then(d => updateMarkerAndFields(lat, lon, d.display_name || 'Location selected'));
         });
 
+        // --- EDIT/SAVE MODE FUNCTIONALITY ---
+        const form = document.getElementById('profile-form');
+        const editBtn = document.getElementById('edit-profile-btn');
+        const saveBtn = document.getElementById('save-changes-btn');
+        const imageUploadBtns = document.querySelectorAll('.image-upload-btn');
+        const mapActionBtns = document.querySelectorAll('.map-action-btn');
 
-        // --- CROPPER LOGIC ---
-        const modal = document.getElementById('cropper-modal');
-        const image = document.getElementById('image-to-crop');
-        let cropper;
-        let targetInputFieldId;
-        let targetPreviewId;
-        let sourceFileName;
+        function setReadOnlyMode() {
+            const inputs = form.querySelectorAll('input:not([type="hidden"]):not([type="file"]), textarea, select');
+            inputs.forEach(input => {
+                input.setAttribute('readonly', 'readonly');
+                input.style.pointerEvents = 'none';
+                input.style.backgroundColor = '#f9fafb';
+            });
 
-        window.openCropper = function(event, aspectRatio, targetId) {
-            const input = event.target;
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    image.src = e.target.result;
-                    modal.style.display = 'flex';
-                    if (cropper) cropper.destroy();
-                    cropper = new Cropper(image, { aspectRatio: aspectRatio, viewMode: 1 });
-                };
-                reader.readAsDataURL(input.files[0]);
-                sourceFileName = input.files[0].name;
-                targetInputFieldId = targetId;
-                targetPreviewId = targetId.replace('id_', '') + '_preview';
-            }
+            imageUploadBtns.forEach(btn => btn.style.display = 'none');
+            mapActionBtns.forEach(btn => btn.disabled = true);
+            map.off('click');
+
+            editBtn.style.display = 'inline-block';
+            saveBtn.style.display = 'none';
         }
 
-        window.closeCropper = function() {
-            modal.style.display = 'none';
-            if (cropper) {
-                cropper.destroy();
-                cropper = null;
-            }
+        window.enableEditMode = function() {
+            const inputs = form.querySelectorAll('input:not([type="hidden"]):not([type="file"]), textarea, select');
+            inputs.forEach(input => {
+                input.removeAttribute('readonly');
+                input.style.pointerEvents = 'auto';
+                input.style.backgroundColor = 'white';
+            });
+
+            imageUploadBtns.forEach(btn => btn.style.display = 'inline-block');
+            mapActionBtns.forEach(btn => btn.disabled = false);
+            
+            map.on('click', function (e) {
+                const lat = e.latlng.lat;
+                const lon = e.latlng.lng;
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+                    .then(r => r.json())
+                    .then(d => updateMarkerAndFields(lat, lon, d.display_name || 'Location selected'));
+            });
+
+            editBtn.style.display = 'none';
+            saveBtn.style.display = 'inline-block';
         }
 
-        window.cropAndApplyImage = function() {
-            if (!cropper) return;
-            const canvas = cropper.getCroppedCanvas({ width: 1024, imageSmoothingQuality: 'high' });
-            document.getElementById(targetPreviewId).src = canvas.toDataURL('image/jpeg', 0.9);
-            canvas.toBlob(function (blob) {
-                const newFile = new File([blob], sourceFileName, { type: 'image/jpeg', lastModified: Date.now() });
-                const dataTransfer = new DataTransfer();
-                dataTransfer.items.add(newFile);
-                document.getElementById(targetInputFieldId).files = dataTransfer.files;
-                closeCropper();
-            }, 'image/jpeg', 0.9);
-        }
-        
-        modal.addEventListener('click', function (e) {
-            if (e.target === modal) {
-                closeCropper();
-            }
-        });
+        setReadOnlyMode();
     });
 </script>
 {% endblock scripts %}

@@ -169,11 +169,12 @@
         const volunteerData = JSON.parse(volunteerDataElement.textContent);
         const campData = JSON.parse(campDataElement.textContent);
 
-        deliveryMapInstance = L.map('delivery-map').setView([volunteerData.lat, volunteerData.lon], 13);
+        deliveryMapInstance = L.map('delivery-map', {
+            zoomControl: false,
+            attributionControl: false
+        }).setView([volunteerData.lat, volunteerData.lon], 13);
         
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(deliveryMapInstance);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(deliveryMapInstance);
         
         const deliveryFormAction = `/donation/deliver/to/${campData.pk}/`;
 

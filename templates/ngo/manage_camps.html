@@ -169,11 +169,13 @@
         let map; // Declare map variable in a broader scope
 
         document.addEventListener('DOMContentLoaded', function () {
-            // Initialize map centered on Delhi, as you live there
-            map = L.map('camp-map').setView([28.6139, 77.2090], 12);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors'
-            }).addTo(map);
+            // Initialize map centered on Delhi
+            map = L.map('camp-map', {
+                zoomControl: false,
+                attributionControl: false
+            }).setView([28.6139, 77.2090], 12);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
             let marker = null;
             const latField = document.getElementById('id_latitude');

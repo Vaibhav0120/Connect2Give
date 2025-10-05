@@ -81,7 +81,11 @@
     {{ block.super }}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const map = L.map('location-map').setView([28.6448, 77.2167], 11); // Delhi
+            const map = L.map('location-map', {
+                zoomControl: false,
+                attributionControl: false
+            }).setView([28.6448, 77.2167], 11);
+            
             let marker = null;
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 

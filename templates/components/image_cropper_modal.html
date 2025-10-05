@@ -1,0 +1,543 @@
+<!-- Modern Reusable Image Cropper Modal Component -->
+<div id="modern-cropper-modal" class="modern-cropper-modal">
+    <div class="modern-cropper-content">
+        <div class="modern-cropper-header">
+            <h3>Crop Your Image</h3>
+            <button type="button" class="close-button" onclick="modernCropperClose()" aria-label="Close">&times;</button>
+        </div>
+        
+        <div class="modern-cropper-body">
+            <!-- Image container with cropper -->
+            <div class="modern-cropper-image-container">
+                <img id="modern-cropper-image" src="" alt="Image to crop">
+            </div>
+            
+            <!-- Zoom controls -->
+            <div class="modern-cropper-controls">
+                <div class="zoom-control-group">
+                    <button type="button" class="zoom-btn" onclick="modernCropperZoom(-0.1)" title="Zoom Out">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 10H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                    
+                    <input type="range" 
+                           id="zoom-slider" 
+                           class="zoom-slider" 
+                           min="0" 
+                           max="200" 
+                           value="100" 
+                           step="1"
+                           oninput="modernCropperZoomTo(this.value)">
+                    
+                    <button type="button" class="zoom-btn" onclick="modernCropperZoom(0.1)" title="Zoom In">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 5V15M5 10H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="zoom-label">
+                    <span id="zoom-percentage">100%</span>
+                </div>
+            </div>
+            
+            <p class="modern-cropper-help">
+                💡 Drag the image to reposition, use the slider or buttons to zoom in/out
+            </p>
+        </div>
+        
+        <div class="modern-cropper-footer">
+            <button type="button" class="btn-modern-cancel" onclick="modernCropperClose()">Cancel</button>
+            <button type="button" class="btn-modern-crop" onclick="modernCropperApply()">Crop & Apply</button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Modern Cropper Modal Styles */
+.modern-cropper-modal {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(4px);
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.modern-cropper-modal.active {
+    display: flex;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modern-cropper-content {
+    background: white;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 700px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modern-cropper-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(to bottom, #ffffff, #f9fafb);
+}
+
+.modern-cropper-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    line-height: 1;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.close-button:hover {
+    background-color: #f3f4f6;
+    color: #111827;
+}
+
+.modern-cropper-body {
+    padding: 2rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.modern-cropper-image-container {
+    width: 100%;
+    max-height: 400px;
+    background: #f9fafb;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    position: relative;
+    border: 2px solid #e5e7eb;
+}
+
+#modern-cropper-image {
+    max-width: 100%;
+    display: block;
+}
+
+.modern-cropper-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: #f9fafb;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+}
+
+.zoom-control-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.zoom-btn {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: #374151;
+    flex-shrink: 0;
+}
+
+.zoom-btn:hover {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: white;
+    transform: scale(1.05);
+}
+
+.zoom-btn:active {
+    transform: scale(0.95);
+}
+
+.zoom-slider {
+    flex: 1;
+    height: 6px;
+    border-radius: 3px;
+    background: #e5e7eb;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.zoom-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+}
+
+.zoom-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+    box-shadow: 0 3px 8px rgba(59, 130, 246, 0.4);
+}
+
+.zoom-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+}
+
+.zoom-slider::-moz-range-thumb:hover {
+    transform: scale(1.15);
+    box-shadow: 0 3px 8px rgba(59, 130, 246, 0.4);
+}
+
+.zoom-label {
+    text-align: center;
+}
+
+.zoom-label span {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    background: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    display: inline-block;
+    border: 1px solid #e5e7eb;
+}
+
+.modern-cropper-help {
+    text-align: center;
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin: 1rem 0 0;
+    line-height: 1.6;
+}
+
+.modern-cropper-footer {
+    padding: 1.5rem 2rem;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    background: #f9fafb;
+}
+
+.btn-modern-cancel,
+.btn-modern-crop {
+    padding: 0.75rem 2rem;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    outline: none;
+}
+
+.btn-modern-cancel {
+    background: white;
+    color: #374151;
+    border: 2px solid #e5e7eb;
+}
+
+.btn-modern-cancel:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+}
+
+.btn-modern-crop {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-modern-crop:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.btn-modern-crop:active {
+    transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .modern-cropper-content {
+        width: 95%;
+        max-height: 95vh;
+    }
+    
+    .modern-cropper-header,
+    .modern-cropper-body,
+    .modern-cropper-footer {
+        padding: 1rem 1.5rem;
+    }
+    
+    .modern-cropper-header h3 {
+        font-size: 1.25rem;
+    }
+    
+    .modern-cropper-image-container {
+        max-height: 300px;
+    }
+    
+    .zoom-control-group {
+        gap: 0.75rem;
+    }
+    
+    .zoom-btn {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .modern-cropper-footer {
+        flex-direction: column;
+    }
+    
+    .btn-modern-cancel,
+    .btn-modern-crop {
+        width: 100%;
+        padding: 0.875rem;
+    }
+}
+</style>
+
+<script>
+// Modern Image Cropper JavaScript Logic
+let modernCropperInstance = null;
+let modernCropperTargetInput = null;
+let modernCropperTargetPreview = null;
+let modernCropperSourceFileName = null;
+
+/**
+ * Open the modern cropper modal
+ * @param {Event} event - The file input change event
+ * @param {number} aspectRatio - The aspect ratio for cropping (1 for square, 16/9 for banner)
+ * @param {string} targetInputId - The ID of the hidden file input field
+ */
+function modernCropperOpen(event, aspectRatio, targetInputId) {
+    const input = event.target;
+    
+    if (!input.files || !input.files[0]) {
+        return;
+    }
+    
+    const file = input.files[0];
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        const modal = document.getElementById('modern-cropper-modal');
+        const image = document.getElementById('modern-cropper-image');
+        
+        // Set image source
+        image.src = e.target.result;
+        
+        // Show modal
+        modal.classList.add('active');
+        
+        // Destroy existing cropper if any
+        if (modernCropperInstance) {
+            modernCropperInstance.destroy();
+        }
+        
+        // Initialize new Cropper instance
+        modernCropperInstance = new Cropper(image, {
+            aspectRatio: aspectRatio,
+            viewMode: 1,
+            dragMode: 'move',
+            autoCropArea: 1,
+            restore: false,
+            guides: true,
+            center: true,
+            highlight: true,
+            cropBoxMovable: false,
+            cropBoxResizable: false,
+            toggleDragModeOnDblclick: false,
+            background: false,
+            responsive: true,
+            ready: function() {
+                // Reset zoom slider
+                document.getElementById('zoom-slider').value = 100;
+                document.getElementById('zoom-percentage').textContent = '100%';
+            },
+            zoom: function(event) {
+                // Update zoom percentage display
+                const zoomRatio = event.detail.ratio;
+                const percentage = Math.round(zoomRatio * 100);
+                document.getElementById('zoom-percentage').textContent = percentage + '%';
+            }
+        });
+        
+        // Store target information
+        modernCropperSourceFileName = file.name;
+        modernCropperTargetInput = targetInputId;
+        modernCropperTargetPreview = targetInputId.replace('id_', '') + '_preview';
+    };
+    
+    reader.readAsDataURL(file);
+}
+
+/**
+ * Close the modern cropper modal
+ */
+function modernCropperClose() {
+    const modal = document.getElementById('modern-cropper-modal');
+    modal.classList.remove('active');
+    
+    if (modernCropperInstance) {
+        modernCropperInstance.destroy();
+        modernCropperInstance = null;
+    }
+    
+    // Reset variables
+    modernCropperTargetInput = null;
+    modernCropperTargetPreview = null;
+    modernCropperSourceFileName = null;
+}
+
+/**
+ * Zoom the cropper by a relative amount
+ * @param {number} ratio - The zoom ratio (positive to zoom in, negative to zoom out)
+ */
+function modernCropperZoom(ratio) {
+    if (modernCropperInstance) {
+        modernCropperInstance.zoom(ratio);
+        
+        // Update slider
+        const imageData = modernCropperInstance.getImageData();
+        const currentZoom = Math.round((imageData.width / imageData.naturalWidth) * 100);
+        document.getElementById('zoom-slider').value = currentZoom;
+    }
+}
+
+/**
+ * Zoom to a specific percentage
+ * @param {number} value - The zoom percentage (0-200)
+ */
+function modernCropperZoomTo(value) {
+    if (modernCropperInstance) {
+        const percentage = parseFloat(value);
+        const ratio = percentage / 100;
+        
+        modernCropperInstance.zoomTo(ratio);
+        document.getElementById('zoom-percentage').textContent = Math.round(percentage) + '%';
+    }
+}
+
+/**
+ * Apply the crop and update the target input and preview
+ */
+function modernCropperApply() {
+    if (!modernCropperInstance) {
+        return;
+    }
+    
+    // Get cropped canvas
+    const canvas = modernCropperInstance.getCroppedCanvas({
+        maxWidth: 2048,
+        maxHeight: 2048,
+        imageSmoothingEnabled: true,
+        imageSmoothingQuality: 'high'
+    });
+    
+    // Update preview image
+    const previewElement = document.getElementById(modernCropperTargetPreview);
+    if (previewElement) {
+        previewElement.src = canvas.toDataURL('image/jpeg', 0.9);
+    }
+    
+    // Convert canvas to blob and update file input
+    canvas.toBlob(function(blob) {
+        const newFile = new File([blob], modernCropperSourceFileName, {
+            type: 'image/jpeg',
+            lastModified: Date.now()
+        });
+        
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(newFile);
+        
+        const inputElement = document.getElementById(modernCropperTargetInput);
+        if (inputElement) {
+            inputElement.files = dataTransfer.files;
+        }
+        
+        // Close modal
+        modernCropperClose();
+    }, 'image/jpeg', 0.9);
+}
+
+// Close modal when clicking outside
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('modern-cropper-modal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modernCropperClose();
+            }
+        });
+    }
+});
+</script>

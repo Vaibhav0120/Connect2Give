@@ -1230,10 +1230,13 @@
                     }
                 });
 
-                const map = L.map('home-map').setView([28.6448, 77.2167], 11);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; OpenStreetMap contributors'
-                }).addTo(map);
+                const map = L.map('home-map', {
+                    zoomControl: false,
+                    attributionControl: false,
+                    scrollWheelZoom: false
+                }).setView([28.6448, 77.2167], 11);
+                
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
                 const camps = JSON.parse('{{ camps_map_data|safe }}');
                 const restaurants = JSON.parse('{{ restaurants_map_data|safe }}');
