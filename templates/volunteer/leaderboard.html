@@ -1,0 +1,77 @@
+{% extends 'volunteer/base.html' %}
+
+{% block title %}Leaderboard - {{ block.super }}{% endblock %}
+{% block page_title %}Volunteer Leaderboard 🏆{% endblock %}
+{% block page_description %}Top performing volunteers based on deliveries and ratings{% endblock %}
+
+{% block volunteer_content %}
+    <div class="content-card">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h2 style="font-size: 2rem; color: var(--accent-green); margin-bottom: 0.5rem;">🏆 Top Volunteers 🏆</h2>
+            <p style="color: var(--text-muted);">Rankings based on total deliveries and average ratings</p>
+        </div>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="width: 60px; text-align: center;">Rank</th>
+                    <th>Volunteer Name</th>
+                    <th style="text-align: center;">Total Deliveries</th>
+                    <th style="text-align: center;">Average Rating</th>
+                    <th style="text-align: center;">Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for volunteer in volunteers %}
+                <tr {% if volunteer.user == request.user %}style="background-color: #f0fdf4;"{% endif %}>
+                    <td data-label="Rank" style="text-align: center;">
+                        {% if forloop.counter == 1 %}
+                            <span style="font-size: 1.5rem;">🥇</span>
+                        {% elif forloop.counter == 2 %}
+                            <span style="font-size: 1.5rem;">🥈</span>
+                        {% elif forloop.counter == 3 %}
+                            <span style="font-size: 1.5rem;">🥉</span>
+                        {% else %}
+                            <strong style="color: var(--text-muted);">#{{ forloop.counter }}</strong>
+                        {% endif %}
+                    </td>
+                    <td data-label="Name">
+                        <strong>{{ volunteer.full_name }}</strong>
+                        {% if volunteer.user == request.user %}
+                            <span style="color: var(--accent-green); font-size: 0.875rem; margin-left: 0.5rem;">(You)</span>
+                        {% endif %}
+                    </td>
+                    <td data-label="Deliveries" style="text-align: center;">
+                        <span style="font-weight: 600; color: var(--accent-green);">{{ volunteer.total_deliveries }}</span>
+                    </td>
+                    <td data-label="Rating" style="text-align: center;">
+                        {% if volunteer.avg_rating > 0 %}
+                            <div style="display: inline-flex; align-items: center; gap: 0.25rem;">
+                                <span style="font-weight: 600;">{{ volunteer.avg_rating|floatformat:1 }}</span>
+                                <span style="color: #f59e0b; font-size: 1.25rem;">⭐</span>
+                            </div>
+                        {% else %}
+                            <span style="color: var(--text-muted);">No ratings yet</span>
+                        {% endif %}
+                    </td>
+                    <td data-label="Score" style="text-align: center;">
+                        <strong style="font-size: 1.125rem; color: var(--primary);">{{ volunteer.score|floatformat:1 }}</strong>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="empty-state">No volunteers with completed deliveries yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div style="margin-top: 2rem; padding: 1.5rem; background-color: #f8fafc; border-radius: 8px;">
+            <h4 style="margin-top: 0; color: var(--text-primary);">How is the score calculated?</h4>
+            <p style="color: var(--text-muted); margin: 0; line-height: 1.6;">
+                Score = Total Deliveries + (Average Rating × 2)<br>
+                <small>Complete more deliveries and maintain high ratings to climb the leaderboard!</small>
+            </p>
+        </div>
+    </div>
+{% endblock %}

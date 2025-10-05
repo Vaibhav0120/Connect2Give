@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'channels',
     'django_cleanup.apps.CleanupConfig',
+    'webpush',
     # Allauth apps
     'allauth',
     'allauth.account',
@@ -192,3 +193,10 @@ SOCIALACCOUNT_PROVIDERS = {
 # Redirect URLs
 LOGIN_REDIRECT_URL = '/'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/login/'
+
+# WebPush Configuration
+WEBPUSH_SETTINGS = {
+    "VAPID_PUBLIC_KEY": env('VAPID_PUBLIC_KEY'),
+    "VAPID_PRIVATE_KEY": env('VAPID_PRIVATE_KEY'),
+    "VAPID_ADMIN_EMAIL": env('VAPID_ADMIN_EMAIL')
+}

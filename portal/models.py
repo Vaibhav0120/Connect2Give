@@ -35,6 +35,7 @@ class VolunteerProfile(models.Model):
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     profile_picture = models.ImageField(upload_to='profile_pictures/volunteers/', null=True, blank=True)
+    webpush_subscription = models.TextField(blank=True, null=True, help_text="Web push subscription data (JSON)")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
@@ -98,5 +99,30 @@ class Donation(models.Model):
     collected_at = models.DateTimeField(null=True, blank=True)
     delivered_at = models.DateTimeField(null=True, blank=True)
     
+    # Rating and Review fields
+    rating = models.IntegerField(null=True, blank=True, choices=[(i, i) for i in range(1, 6)], help_text="Rating from 1 to 5 stars")
+    review = models.TextField(null=True, blank=True, help_text="NGO's review of the volunteer delivery")
+    
     def __str__(self):
         return f"Donation from {self.restaurant.restaurant_name} ({self.status})"
+
+# Badge System for Volunteers
+class Badge(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField()
+    icon_url = models.CharField(max_length=255, blank=True, null=True, help_text="URL or emoji for badge icon")
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.name
+
+class VolunteerBadge(models.Model):
+    volunteer = models.ForeignKey(VolunteerProfile, on_delete=models.CASCADE, related_name='badges')
+    badge = models.ForeignKey(Badge, on_delete=models.CASCADE)
+    date_awarded = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('volunteer', 'badge')
+    
+    def __str__(self):
+        return f"{self.volunteer.full_name} - {self.badge.name}"

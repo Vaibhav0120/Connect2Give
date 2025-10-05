@@ -55,6 +55,17 @@
         </div>
     </div>
 
+    <!-- Push Notifications -->
+    <div class="recent-activity-card">
+        <h3>🔔 Push Notifications</h3>
+        <p style="color: var(--text-muted); margin-bottom: 1rem;">Get instant notifications when new donations are posted!</p>
+        <button id="enableNotifications" onclick="requestNotificationPermission()" class="quick-action-btn" style="width: auto; padding: 0.75rem 1.5rem; background: var(--accent-green); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+            <span class="quick-action-icon">🔔</span>
+            <span class="quick-action-label">Enable Notifications</span>
+        </button>
+        <div id="notificationStatus" style="margin-top: 0.5rem; color: var(--text-muted); font-size: 0.875rem;"></div>
+    </div>
+
     <!-- Activity Feed -->
     <div class="activity-feed">
         <h3>📊 Recent Activity</h3>
@@ -125,6 +136,114 @@
                 L.marker([camp.lat, camp.lon], { icon: campIcon }).addTo(map)
                  .bindPopup(`<b>Camp: ${camp.name}</b><br>NGO: ${camp.ngo}<br>Address: ${camp.address}`);
             });
+        });
+    </script>
+
+    <!-- Web Push Notifications Script -->
+    <script>
+        const VAPID_PUBLIC_KEY = '{{ WEBPUSH_SETTINGS.VAPID_PUBLIC_KEY }}';
+        
+        // Convert base64 string to Uint8Array
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding)
+                .replace(/\-/g, '+')
+                .replace(/_/g, '/');
+            
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
+        
+        // Request notification permission and subscribe
+        async function requestNotificationPermission() {
+            const statusEl = document.getElementById('notificationStatus');
+            const button = document.getElementById('enableNotifications');
+            
+            if (!('serviceWorker' in navigator)) {
+                statusEl.textContent = '❌ Service workers are not supported in your browser';
+                return;
+            }
+            
+            if (!('PushManager' in window)) {
+                statusEl.textContent = '❌ Push notifications are not supported in your browser';
+                return;
+            }
+            
+            try {
+                // Request notification permission
+                const permission = await Notification.requestPermission();
+                
+                if (permission !== 'granted') {
+                    statusEl.textContent = '❌ Notification permission denied';
+                    return;
+                }
+                
+                button.disabled = true;
+                button.querySelector('.quick-action-label').textContent = 'Subscribing...';
+                
+                // Register service worker
+                const registration = await navigator.serviceWorker.register('/static/js/sw.js');
+                await navigator.serviceWorker.ready;
+                
+                // Subscribe to push notifications
+                const subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array('MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE_gWX79d3cIvbTuD99xvnMezCypTodf-NZbUqltuLlumYFwYQX5gtjuGM9x9r7Ic93RMy8TW8e4BEGf3_ir7MAg==')
+                });
+                
+                // Send subscription to server
+                const response = await fetch('/api/save-webpush-subscription/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(subscription.toJSON())
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    statusEl.textContent = '✅ Notifications enabled successfully!';
+                    statusEl.style.color = 'var(--accent-green)';
+                    button.querySelector('.quick-action-label').textContent = 'Notifications Enabled';
+                    button.disabled = true;
+                    showToast('Push notifications enabled successfully!', 'success');
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error('Error enabling notifications:', error);
+                statusEl.textContent = '❌ Failed to enable notifications: ' + error.message;
+                statusEl.style.color = 'var(--error-red)';
+                button.disabled = false;
+                button.querySelector('.quick-action-label').textContent = 'Enable Notifications';
+                showToast('Failed to enable notifications', 'error');
+            }
+        }
+        
+        // Check if notifications are already enabled
+        document.addEventListener('DOMContentLoaded', async function() {
+            const statusEl = document.getElementById('notificationStatus');
+            const button = document.getElementById('enableNotifications');
+            
+            if ('serviceWorker' in navigator && 'PushManager' in window) {
+                const registration = await navigator.serviceWorker.getRegistration();
+                if (registration) {
+                    const subscription = await registration.pushManager.getSubscription();
+                    if (subscription) {
+                        statusEl.textContent = '✅ Notifications are enabled';
+                        statusEl.style.color = 'var(--accent-green)';
+                        button.querySelector('.quick-action-label').textContent = 'Notifications Enabled';
+                        button.disabled = true;
+                    }
+                }
+            }
         });
     </script>
 {% endblock scripts %}

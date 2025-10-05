@@ -69,4 +69,9 @@ urlpatterns = [
     # --- API URLs ---
     path('api/register/', views.RegisterAPIView.as_view(), name='api_register'),
     path('api/login/', views.LoginAPIView.as_view(), name='api_login'),
+    path('api/save-webpush-subscription/', views.save_webpush_subscription, name='save_webpush_subscription'),
+    
+    # --- Gamification URLs ---
+    path('donation/rate/<int:donation_id>/', views.rate_donation, name='rate_donation'),
+    path('leaderboard/', views.volunteer_leaderboard, name='volunteer_leaderboard'),
 ]

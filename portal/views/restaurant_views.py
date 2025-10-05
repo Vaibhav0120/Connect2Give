@@ -45,6 +45,42 @@ def restaurant_donations(request):
             donation.restaurant = restaurant_profile
             donation.save()
             messages.success(request, 'New donation posted successfully!')
+            
+            # Send webpush notifications to all volunteers with subscriptions
+            try:
+                from ..models import VolunteerProfile
+                from pywebpush import webpush
+                from django.conf import settings
+                import json
+                
+                volunteers_with_subscription = VolunteerProfile.objects.exclude(
+                    webpush_subscription__isnull=True
+                ).exclude(webpush_subscription='')
+                
+                for volunteer in volunteers_with_subscription:
+                    try:
+                        subscription_info = json.loads(volunteer.webpush_subscription)
+                        message_data = {
+                            'title': 'New Donation Available! 🍱',
+                            'body': f'{restaurant_profile.restaurant_name} posted: {donation.food_description}',
+                            'url': '/dashboard/volunteer/pickups/'
+                        }
+                        
+                        webpush(
+                            subscription_info=subscription_info,
+                            data=json.dumps(message_data),
+                            vapid_private_key=settings.WEBPUSH_SETTINGS['VAPID_PRIVATE_KEY'],
+                            vapid_claims={
+                                "sub": f"mailto:{settings.WEBPUSH_SETTINGS['VAPID_ADMIN_EMAIL']}"
+                            }
+                        )
+                    except Exception as e:
+                        # Log error but don't break the flow
+                        print(f"Failed to send notification to volunteer {volunteer.full_name}: {str(e)}")
+            except Exception as e:
+                # If webpush fails, just log it and continue
+                print(f"Webpush error: {str(e)}")
+            
             return redirect('restaurant_donations')
     else:
         form = DonationForm(initial={'pickup_address': restaurant_profile.address})

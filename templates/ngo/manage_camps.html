@@ -94,27 +94,50 @@
             </div>
 
             <div class="content-card">
-                <h3 style="margin-bottom: 1.5rem; color: var(--text-primary);">Completed Camps</h3>
+                <h3 style="margin-bottom: 1.5rem; color: var(--text-primary);">Completed Deliveries - Rate Volunteers</h3>
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Camp Name</th>
-                            <th>Location</th>
-                            <th>Completed At</th>
-                            <th>Status</th>
+                            <th>Restaurant</th>
+                            <th>Food Description</th>
+                            <th>Volunteer</th>
+                            <th>Delivered To</th>
+                            <th>Delivered At</th>
+                            <th>Rating</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for camp in completed_camps %}
+                        {% for donation in delivered_donations %}
                         <tr>
-                            <td data-label="Camp Name"><strong>{{ camp.name }}</strong></td>
-                            <td data-label="Location">{{ camp.location_address }}</td>
-                            <td data-label="Completed At">{{ camp.completed_at|date:"d M Y, H:i" }}</td>
-                            <td data-label="Status"><span style="color: var(--text-muted); font-weight: 500;">Completed</span></td>
+                            <td data-label="Restaurant"><strong>{{ donation.restaurant.restaurant_name }}</strong></td>
+                            <td data-label="Food Description">{{ donation.food_description }}</td>
+                            <td data-label="Volunteer">{{ donation.assigned_volunteer.full_name }}</td>
+                            <td data-label="Delivered To">{{ donation.target_camp.name }}</td>
+                            <td data-label="Delivered At">{{ donation.delivered_at|date:"d M Y, H:i" }}</td>
+                            <td data-label="Rating">
+                                {% if donation.rating %}
+                                    <span style="color: #f59e0b;">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= donation.rating %}⭐{% endif %}
+                                        {% endfor %}
+                                        ({{ donation.rating }}/5)
+                                    </span>
+                                {% else %}
+                                    <span style="color: var(--text-muted);">Not rated</span>
+                                {% endif %}
+                            </td>
+                            <td data-label="Action">
+                                {% if not donation.rating %}
+                                    <button type="button" class="action-button" onclick="openRatingModal({{ donation.pk }}, '{{ donation.assigned_volunteer.full_name|escapejs }}')">Rate Volunteer</button>
+                                {% else %}
+                                    <button type="button" class="action-button" style="opacity: 0.6; cursor: not-allowed;" disabled>Already Rated</button>
+                                {% endif %}
+                            </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="4" class="empty-state">You have no completed camps yet.</td>
+                            <td colspan="7" class="empty-state">No completed deliveries to rate yet.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -161,10 +184,124 @@
             </div>
         </div>
     </div>
+
+    <!-- Rating Modal -->
+    <div id="ratingModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
+        <div style="background: white; padding: 2rem; border-radius: 12px; max-width: 500px; width: 90%;">
+            <h3 style="margin-top: 0;">Rate Volunteer Performance</h3>
+            <p id="volunteerName" style="color: var(--text-muted); margin-bottom: 1.5rem;"></p>
+            
+            <form id="ratingForm" method="POST">
+                {% csrf_token %}
+                <input type="hidden" id="donationId" name="donation_id">
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Rating (1-5 stars)</label>
+                    <div id="starRating" style="font-size: 2rem; cursor: pointer;">
+                        <span data-rating="1">☆</span>
+                        <span data-rating="2">☆</span>
+                        <span data-rating="3">☆</span>
+                        <span data-rating="4">☆</span>
+                        <span data-rating="5">☆</span>
+                    </div>
+                    <input type="hidden" id="ratingValue" name="rating" required>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <label for="review" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Review (Optional)</label>
+                    <textarea id="review" name="review" rows="4" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-family: inherit;"></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" onclick="closeRatingModal()" style="padding: 0.75rem 1.5rem; border: 1px solid #ddd; background: white; border-radius: 6px; cursor: pointer;">Cancel</button>
+                    <button type="submit" style="padding: 0.75rem 1.5rem; background: var(--accent-green); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Submit Rating</button>
+                </div>
+            </form>
+        </div>
+    </div>
 {% endblock %}
 
 {% block scripts %}
     {{ block.super }}
+    <script>
+        let currentRating = 0;
+        
+        function openRatingModal(donationId, volunteerName) {
+            document.getElementById('ratingModal').style.display = 'flex';
+            document.getElementById('donationId').value = donationId;
+            document.getElementById('volunteerName').textContent = 'Rating delivery by: ' + volunteerName;
+            currentRating = 0;
+            updateStars(0);
+        }
+        
+        function closeRatingModal() {
+            document.getElementById('ratingModal').style.display = 'none';
+            document.getElementById('ratingForm').reset();
+            currentRating = 0;
+            updateStars(0);
+        }
+        
+        function updateStars(rating) {
+            const stars = document.querySelectorAll('#starRating span');
+            stars.forEach((star, index) => {
+                star.textContent = index < rating ? '★' : '☆';
+                star.style.color = index < rating ? '#f59e0b' : '#d1d5db';
+            });
+        }
+        
+        // Star rating interaction
+        document.querySelectorAll('#starRating span').forEach(star => {
+            star.addEventListener('click', function() {
+                currentRating = parseInt(this.getAttribute('data-rating'));
+                document.getElementById('ratingValue').value = currentRating;
+                updateStars(currentRating);
+            });
+            
+            star.addEventListener('mouseenter', function() {
+                const hoverRating = parseInt(this.getAttribute('data-rating'));
+                updateStars(hoverRating);
+            });
+        });
+        
+        document.getElementById('starRating').addEventListener('mouseleave', function() {
+            updateStars(currentRating);
+        });
+        
+        // Form submission
+        document.getElementById('ratingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (currentRating === 0) {
+                alert('Please select a rating');
+                return;
+            }
+            
+            const donationId = document.getElementById('donationId').value;
+            const formData = new FormData(this);
+            
+            fetch(`/donation/rate/${donationId}/`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    closeRatingModal();
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showToast(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('An error occurred. Please try again.', 'error');
+            });
+        });
+    </script>
     <script>
         let map; // Declare map variable in a broader scope
 

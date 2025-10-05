@@ -63,3 +63,41 @@ def confirm_delivery(request, donation_id):
         donation.save()
     redirect_url = reverse('ngo_manage_camps') + '?view=verification'
     return redirect(redirect_url)
+
+@login_required(login_url='login_page')
+def rate_donation(request, donation_id):
+    """NGO rates a completed donation delivery"""
+    from django.http import JsonResponse
+    from django.contrib import messages
+    
+    if request.user.user_type != 'NGO':
+        return JsonResponse({'success': False, 'message': 'Unauthorized'}, status=403)
+    
+    donation = get_object_or_404(Donation, pk=donation_id, target_camp__ngo=request.user.ngo_profile, status='DELIVERED')
+    
+    if request.method == 'POST':
+        rating = request.POST.get('rating')
+        review = request.POST.get('review', '')
+        
+        try:
+            rating = int(rating)
+            if rating < 1 or rating > 5:
+                raise ValueError("Rating must be between 1 and 5")
+            
+            donation.rating = rating
+            donation.review = review
+            donation.save()
+            
+            # Check if it's an AJAX request
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': True, 'message': 'Rating submitted successfully'})
+            
+            messages.success(request, 'Rating submitted successfully!')
+            return redirect(reverse('ngo_manage_camps') + '?view=history')
+        except (ValueError, TypeError) as e:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'message': str(e)}, status=400)
+            messages.error(request, 'Invalid rating value')
+            return redirect('ngo_manage_camps')
+    
+    return redirect('ngo_manage_camps')

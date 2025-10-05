@@ -47,6 +47,17 @@ def volunteer_manage_pickups(request):
     active_donations = Donation.objects.filter(assigned_volunteer=volunteer_profile, status__in=['ACCEPTED', 'COLLECTED']).order_by('accepted_at')
     delivery_history = Donation.objects.filter(assigned_volunteer=volunteer_profile, status__in=['VERIFYING', 'DELIVERED']).order_by('-delivered_at')
     available_donations = Donation.objects.filter(status='PENDING').select_related('restaurant').order_by('-created_at')
+    
+    # Get search query
+    search_query = request.GET.get('q', '').strip()
+    
+    # Apply search filter
+    if search_query:
+        from django.db.models import Q
+        available_donations = available_donations.filter(
+            Q(restaurant__restaurant_name__icontains=search_query) |
+            Q(pickup_address__icontains=search_query)
+        )
 
     context = {
         'active_donations': active_donations,
@@ -96,9 +107,21 @@ def volunteer_manage_camps(request):
     volunteer_profile = request.user.volunteer_profile
     registered_ngos = volunteer_profile.registered_ngos.all()
     
+    # Get search query
+    search_query = request.GET.get('q', '').strip()
+    available_ngos = NGOProfile.objects.exclude(pk__in=[n.pk for n in registered_ngos])
+    
+    # Apply search filter
+    if search_query:
+        from django.db.models import Q
+        available_ngos = available_ngos.filter(
+            Q(ngo_name__icontains=search_query) | 
+            Q(address__icontains=search_query)
+        )
+    
     context = {
         'registered_ngos': registered_ngos,
-        'available_ngos': NGOProfile.objects.exclude(pk__in=[n.pk for n in registered_ngos]),
+        'available_ngos': available_ngos,
     }
     return render(request, 'volunteer/manage_camps.html', context)
 
@@ -134,6 +157,12 @@ def register_with_ngo(request, ngo_id):
     ngo = get_object_or_404(NGOProfile, pk=ngo_id)
     volunteer = request.user.volunteer_profile
     ngo.volunteers.add(volunteer)
+    
+    # Check if it's an AJAX request
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.content_type == 'application/json':
+        from django.http import JsonResponse
+        return JsonResponse({'success': True, 'message': f'Successfully registered with {ngo.ngo_name}.'})
+    
     messages.success(request, f"Successfully registered with {ngo.ngo_name}.")
     return redirect('volunteer_manage_camps')
 
@@ -143,16 +172,28 @@ def unregister_from_ngo(request, ngo_id):
     ngo = get_object_or_404(NGOProfile, pk=ngo_id)
     volunteer = request.user.volunteer_profile
     ngo.volunteers.remove(volunteer)
+    
+    # Check if it's an AJAX request
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.content_type == 'application/json':
+        from django.http import JsonResponse
+        return JsonResponse({'success': True, 'message': f'Successfully unregistered from {ngo.ngo_name}.'})
+    
     messages.success(request, f"Successfully unregistered from {ngo.ngo_name}.")
     return redirect('volunteer_manage_camps')
 
 @login_required(login_url='login_page')
 def accept_donation(request, donation_id):
-    if request.user.user_type != 'VOLUNTEER' or request.method != 'POST': return redirect('index')
+    from django.http import JsonResponse
+    
+    if request.user.user_type != 'VOLUNTEER' or request.method != 'POST': 
+        return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)
+    
     donation = get_object_or_404(Donation, pk=donation_id)
     volunteer = request.user.volunteer_profile
 
     if Donation.objects.filter(assigned_volunteer=volunteer, status__in=['ACCEPTED', 'COLLECTED']).count() >= 10:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.content_type == 'application/json':
+            return JsonResponse({'success': False, 'message': 'You cannot accept more than 10 donations at a time.'})
         messages.error(request, 'You cannot accept more than 10 donations at a time.')
         return redirect('volunteer_manage_pickups')
 
@@ -161,8 +202,13 @@ def accept_donation(request, donation_id):
         donation.status = 'ACCEPTED'
         donation.accepted_at = timezone.now()
         donation.save()
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.content_type == 'application/json':
+            return JsonResponse({'success': True, 'message': 'Donation accepted. Please pick it up within 30 minutes.'})
         messages.success(request, 'Donation accepted. Please pick it up within 30 minutes.')
     else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.content_type == 'application/json':
+            return JsonResponse({'success': False, 'message': 'This donation is no longer available.'})
         messages.error(request, 'This donation is no longer available.')
     return redirect('volunteer_manage_pickups')
 
@@ -186,3 +232,41 @@ def mark_as_delivered(request, camp_id):
         messages.warning(request, 'You had no active pickups to deliver.')
 
     return redirect('volunteer_manage_pickups')
+
+@login_required(login_url='login_page')
+def save_webpush_subscription(request):
+    """API endpoint to save webpush subscription data"""
+    from django.http import JsonResponse
+    import json
+    
+    if request.method != 'POST' or request.user.user_type != 'VOLUNTEER':
+        return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)
+    
+    try:
+        data = json.loads(request.body)
+        volunteer_profile = request.user.volunteer_profile
+        volunteer_profile.webpush_subscription = json.dumps(data)
+        volunteer_profile.save()
+        return JsonResponse({'success': True, 'message': 'Subscription saved successfully'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=500)
+
+@login_required(login_url='login_page')
+def volunteer_leaderboard(request):
+    """Display volunteer leaderboard with rankings based on deliveries and ratings"""
+    from django.db.models import Count, Avg, F, Q, Value, FloatField
+    from django.db.models.functions import Coalesce
+    
+    # Calculate volunteer scores: total deliveries + weighted average rating
+    volunteers = VolunteerProfile.objects.annotate(
+        total_deliveries=Count('assigned_donations', filter=Q(assigned_donations__status='DELIVERED')),
+        avg_rating=Coalesce(Avg('assigned_donations__rating', filter=Q(assigned_donations__rating__isnull=False)), Value(0.0), output_field=FloatField()),
+        score=F('total_deliveries') + F('avg_rating') * 2  # Weight rating with factor of 2
+    ).filter(
+        total_deliveries__gt=0  # Only show volunteers with at least 1 delivery
+    ).order_by('-score', '-total_deliveries')[:20]  # Top 20
+    
+    context = {
+        'volunteers': volunteers
+    }
+    return render(request, 'volunteer/leaderboard.html', context)

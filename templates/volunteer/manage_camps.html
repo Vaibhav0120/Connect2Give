@@ -6,6 +6,19 @@
 {% block page_description %}Join NGOs to see their available donation camps.{% endblock %}
 
 {% block volunteer_content %}
+    <!-- Search Form -->
+    <div class="content-card">
+        <form method="GET" action="{% url 'volunteer_manage_camps' %}" style="margin-bottom: 1rem;">
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <input type="text" name="q" placeholder="Search by NGO name or address..." value="{{ request.GET.q }}" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                <button type="submit" class="action-button">Search</button>
+                {% if request.GET.q %}
+                <a href="{% url 'volunteer_manage_camps' %}" class="action-button-danger">Clear</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
     <div class="content-card">
         <h3>Available NGOs to Join</h3>
         <table class="data-table">
@@ -16,16 +29,13 @@
                     <th>Action</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="available-ngos-tbody">
                 {% for ngo in available_ngos %}
-                <tr>
+                <tr id="available-ngo-{{ ngo.pk }}">
                     <td data-label="NGO Name"><strong>{{ ngo.ngo_name }}</strong></td>
                     <td data-label="Address">{{ ngo.address }}</td>
                     <td data-label="Action">
-                        <form action="{% url 'register_with_ngo' ngo.pk %}" method="POST" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="action-button">Join</button>
-                        </form>
+                        <button type="button" class="action-button" onclick="joinNGO({{ ngo.pk }}, '{{ ngo.ngo_name|escapejs }}', '{{ ngo.address|escapejs }}')">Join</button>
                     </td>
                 </tr>
                 {% empty %}
@@ -47,24 +57,117 @@
                     <th>Action</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="registered-ngos-tbody">
                 {% for ngo in registered_ngos %}
-                <tr>
+                <tr id="registered-ngo-{{ ngo.pk }}">
                     <td data-label="NGO Name"><strong>{{ ngo.ngo_name }}</strong></td>
                     <td data-label="Date Joined">{{ ngo.date_joined|date:"d M Y" }}</td>
                     <td data-label="Action">
-                        <form action="{% url 'unregister_from_ngo' ngo.pk %}" method="POST" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="action-button-danger">Leave</button>
-                        </form>
+                        <button type="button" class="action-button-danger" onclick="leaveNGO({{ ngo.pk }})">Leave</button>
                     </td>
                 </tr>
                 {% empty %}
-                <tr>
+                <tr id="registered-empty">
                     <td colspan="3" class="empty-state">You are not registered with any NGOs yet.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+    function joinNGO(ngoId, ngoName, ngoAddress) {
+        const csrftoken = getCookie('csrftoken');
+        
+        fetch(`/register_with_ngo/${ngoId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Remove from available NGOs table
+                const availableRow = document.getElementById(`available-ngo-${ngoId}`);
+                if (availableRow) {
+                    availableRow.remove();
+                }
+                
+                // Add to registered NGOs table
+                const registeredTbody = document.getElementById('registered-ngos-tbody');
+                const emptyRow = document.getElementById('registered-empty');
+                if (emptyRow) {
+                    emptyRow.remove();
+                }
+                
+                const today = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                const newRow = document.createElement('tr');
+                newRow.id = `registered-ngo-${ngoId}`;
+                newRow.innerHTML = `
+                    <td data-label="NGO Name"><strong>${ngoName}</strong></td>
+                    <td data-label="Date Joined">${today}</td>
+                    <td data-label="Action">
+                        <button type="button" class="action-button-danger" onclick="leaveNGO(${ngoId})">Leave</button>
+                    </td>
+                `;
+                registeredTbody.appendChild(newRow);
+                
+                showToast(`Successfully registered with ${ngoName}`, 'success');
+            } else {
+                showToast(data.message || 'Failed to join NGO', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('An error occurred. Please try again.', 'error');
+        });
+    }
+    
+    function leaveNGO(ngoId) {
+        const csrftoken = getCookie('csrftoken');
+        
+        fetch(`/unregister_from_ngo/${ngoId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Remove from registered NGOs table
+                const registeredRow = document.getElementById(`registered-ngo-${ngoId}`);
+                if (registeredRow) {
+                    registeredRow.remove();
+                }
+                
+                // Check if table is now empty
+                const registeredTbody = document.getElementById('registered-ngos-tbody');
+                if (registeredTbody.children.length === 0) {
+                    const emptyRow = document.createElement('tr');
+                    emptyRow.id = 'registered-empty';
+                    emptyRow.innerHTML = '<td colspan="3" class="empty-state">You are not registered with any NGOs yet.</td>';
+                    registeredTbody.appendChild(emptyRow);
+                }
+                
+                showToast(data.message || 'Successfully unregistered from NGO', 'success');
+                
+                // Reload page to show the NGO in available list
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showToast(data.message || 'Failed to leave NGO', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('An error occurred. Please try again.', 'error');
+        });
+    }
+</script>
 {% endblock %}

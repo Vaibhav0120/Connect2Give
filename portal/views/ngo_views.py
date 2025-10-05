@@ -39,12 +39,14 @@ def ngo_manage_camps(request):
     active_camps = DonationCamp.objects.filter(ngo=ngo_profile, is_active=True).order_by('start_time')
     completed_camps = DonationCamp.objects.filter(ngo=ngo_profile, is_active=False).order_by('-completed_at')
     donations_to_verify = Donation.objects.filter(target_camp__ngo=ngo_profile, status='VERIFYING').order_by('delivered_at')
+    delivered_donations = Donation.objects.filter(target_camp__ngo=ngo_profile, status='DELIVERED').select_related('restaurant', 'assigned_volunteer', 'target_camp').order_by('-delivered_at')[:50]  # Last 50 deliveries
     
     context = {
         'form': form, 
         'active_camps': active_camps, 
         'completed_camps': completed_camps, 
         'donations_to_verify': donations_to_verify,
+        'delivered_donations': delivered_donations,
         'active_tab': view_param
     }
     return render(request, 'ngo/manage_camps.html', context)

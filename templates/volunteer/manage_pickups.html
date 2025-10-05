@@ -63,24 +63,32 @@
         {% else %}
             {# PICKUP MODE: Show available donations #}
             <div class="content-card">
+                <!-- Search Form -->
+                <form method="GET" action="{% url 'volunteer_manage_pickups' %}" style="margin-bottom: 1.5rem;">
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="text" name="q" placeholder="Search by restaurant name or pickup address..." value="{{ request.GET.q }}" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        <button type="submit" class="action-button">Search</button>
+                        {% if request.GET.q %}
+                        <a href="{% url 'volunteer_manage_pickups' %}" class="action-button-danger">Clear</a>
+                        {% endif %}
+                    </div>
+                </form>
+                
                 <h3>Available Donations for Pickup</h3>
                 {% if available_donations %}
                 <table class="data-table">
                     <thead>
                         <tr><th>Restaurant</th><th>Food Description</th><th>Address</th><th>Action</th></tr>
                     </thead>
-                    <tbody>
+                    <tbody id="available-donations-tbody">
                         {% for donation in available_donations %}
-                        <tr>
+                        <tr id="donation-row-{{ donation.pk }}">
                             <td data-label="Restaurant"><strong>{{ donation.restaurant.restaurant_name }}</strong></td>
                             <td data-label="Food Description">{{ donation.food_description }}</td>
                             <td data-label="Address">{{ donation.pickup_address }}</td>
                             <td data-label="Action">
                                 {% if active_donations.count < 10 %}
-                                <form action="{% url 'accept_donation' donation.pk %}" method="POST" style="display:inline;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="action-button">Accept</button>
-                                </form>
+                                <button type="button" class="action-button" id="accept-btn-{{ donation.pk }}" onclick="acceptDonation({{ donation.pk }})">Accept</button>
                                 {% else %}
                                 <button class="action-button" disabled>Pickup limit reached</button>
                                 {% endif %}
@@ -205,6 +213,59 @@
             url.searchParams.delete('view');
         }
         window.location.href = url.toString();
+    }
+    
+    // AJAX function to accept donation
+    function acceptDonation(donationId) {
+        const csrftoken = getCookie('csrftoken');
+        const acceptBtn = document.getElementById(`accept-btn-${donationId}`);
+        
+        // Disable button to prevent double-click
+        acceptBtn.disabled = true;
+        acceptBtn.textContent = 'Accepting...';
+        
+        fetch(`/donation/accept/${donationId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update button to show accepted state
+                acceptBtn.textContent = 'Accepted!';
+                acceptBtn.classList.remove('action-button');
+                acceptBtn.style.backgroundColor = '#10b981';
+                acceptBtn.style.cursor = 'default';
+                
+                // Remove row after animation
+                setTimeout(() => {
+                    const row = document.getElementById(`donation-row-${donationId}`);
+                    if (row) {
+                        row.style.transition = 'opacity 0.3s';
+                        row.style.opacity = '0';
+                        setTimeout(() => row.remove(), 300);
+                    }
+                }, 1000);
+                
+                showToast(data.message || 'Donation accepted. Please pick it up within 30 minutes.', 'success');
+                
+                // Reload page after 2 seconds to update active pickups count
+                setTimeout(() => location.reload(), 2000);
+            } else {
+                acceptBtn.disabled = false;
+                acceptBtn.textContent = 'Accept';
+                showToast(data.message || 'Failed to accept donation', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            acceptBtn.disabled = false;
+            acceptBtn.textContent = 'Accept';
+            showToast('An error occurred. Please try again.', 'error');
+        });
     }
 </script>
 {% endblock scripts %}
