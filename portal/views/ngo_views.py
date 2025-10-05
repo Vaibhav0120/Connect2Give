@@ -1,3 +1,4 @@
+# portal/views/ngo_views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Count
@@ -22,7 +23,7 @@ def ngo_dashboard_overview(request):
 def ngo_manage_camps(request):
     if request.user.user_type != 'NGO': return redirect('index')
     ngo_profile = request.user.ngo_profile
-    view_param = request.GET.get('view', None) # --- FIX: Get view from URL ---
+    view_param = request.GET.get('view', None)
 
     if request.method == 'POST':
         form = DonationCampForm(request.POST)
@@ -44,7 +45,7 @@ def ngo_manage_camps(request):
         'active_camps': active_camps, 
         'completed_camps': completed_camps, 
         'donations_to_verify': donations_to_verify,
-        'active_tab': view_param # --- FIX: Pass active tab to template ---
+        'active_tab': view_param
     }
     return render(request, 'ngo/manage_camps.html', context)
 

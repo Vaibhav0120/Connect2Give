@@ -1,4 +1,5 @@
 from django.urls import path
+from django.contrib.auth import views as auth_views
 from . import views
 
 urlpatterns = [
@@ -8,6 +9,34 @@ urlpatterns = [
     path('register/step-2/', views.register_step_2, name='register_step_2'),
     path('login/', views.login_page, name='login_page'),
     path('logout/', views.logout_view, name='logout'),
+    
+    # --- Password Reset URLs ---
+    path('password-reset/', 
+         auth_views.PasswordResetView.as_view(
+             template_name='auth/password_reset.html',
+             email_template_name='auth/password_reset_email.html',
+             subject_template_name='auth/password_reset_subject.txt',
+         ), 
+         name='password_reset'),
+    path('password-reset/done/', 
+         auth_views.PasswordResetDoneView.as_view(
+             template_name='auth/password_reset_done.html'
+         ), 
+         name='password_reset_done'),
+    path('password-reset-confirm/<uidb64>/<token>/', 
+         auth_views.PasswordResetConfirmView.as_view(
+             template_name='auth/password_reset_confirm.html'
+         ), 
+         name='password_reset_confirm'),
+    path('password-reset-complete/', 
+         auth_views.PasswordResetCompleteView.as_view(
+             template_name='auth/password_reset_complete.html'
+         ), 
+         name='password_reset_complete'),
+    
+    # --- Google OAuth Callback ---
+    path('accounts/google/login/callback/', views.google_callback, name='google_callback'),
+    path('accounts/google/select-user-type/', views.google_select_user_type, name='google_select_user_type'),
     
     # --- Restaurant Dashboard URLs ---
     path('dashboard/restaurant/', views.restaurant_dashboard, name='restaurant_dashboard'),

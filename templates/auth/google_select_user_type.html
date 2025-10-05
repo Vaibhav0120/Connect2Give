@@ -1,0 +1,39 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Your Role - Connect2Give</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+</head>
+<body>
+    <div class="auth-page-wrapper">
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <h1>Welcome! 👋</h1>
+                    <p>Please select your role to continue</p>
+                </div>
+
+                <form action="{% url 'google_select_user_type' %}" method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="user_type">I am a:</label>
+                        <select name="user_type" id="user_type" required>
+                            <option value="">Choose your role...</option>
+                            <option value="RESTAURANT">🍽️ Restaurant (Donor)</option>
+                            <option value="NGO">🏢 NGO</option>
+                            <option value="VOLUNTEER">🤝 Volunteer</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="auth-submit-btn">Continue</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

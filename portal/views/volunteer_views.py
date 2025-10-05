@@ -1,5 +1,4 @@
 # portal/views/volunteer_views.py
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
@@ -76,7 +75,6 @@ def volunteer_manage_pickups(request):
         
         context['nearest_camp'] = nearest_camp
         
-        # --- FIX IS HERE: Pass the dictionaries directly, without json.dumps() ---
         if nearest_camp:
             context['nearest_camp_data'] = {
                 'name': nearest_camp.name,
@@ -88,7 +86,6 @@ def volunteer_manage_pickups(request):
             'lat': volunteer_profile.latitude,
             'lon': volunteer_profile.longitude
         }
-        # --- END FIX ---
 
     return render(request, 'volunteer/manage_pickups.html', context)
 

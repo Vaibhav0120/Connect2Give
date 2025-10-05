@@ -14,7 +14,7 @@ from ..models import User, DonationCamp, RestaurantProfile, Donation
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
-from django.urls import reverse # --- FIX: Add import for reverse ---
+from django.urls import reverse
 
 
 def get_user_dashboard_redirect(user):
@@ -44,7 +44,6 @@ def mark_camp_as_completed(request, camp_id):
         camp.is_active = False
         camp.completed_at = timezone.now()
         camp.save()
-    # --- FIX: Redirect with parameter to stay on history tab ---
     redirect_url = reverse('ngo_manage_camps') + '?view=history'
     return redirect(redirect_url)
 

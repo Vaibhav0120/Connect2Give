@@ -8,12 +8,6 @@
 
 {% block restaurant_content %}
 <div class="profile-container">
-    {% if messages %}
-        {% for message in messages %}
-            <div class="success-message">{{ message }}</div>
-        {% endfor %}
-    {% endif %}
-
     <div class="profile-form">
         <form method="POST" enctype="multipart/form-data" action="{% url 'restaurant_profile' %}" id="profile-form">
             {% csrf_token %}

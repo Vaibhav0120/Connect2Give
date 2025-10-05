@@ -1,84 +1,96 @@
-{% extends 'base.html' %}
 {% load static %}
-
-{% block title %}Register (Step 2 of 2) - Connect2Give{% endblock %}
-
-{% block head %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Registration - Connect2Give</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'css/auth.css' %}">
-{% endblock %}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+    <div class="auth-page-wrapper">
+        <div class="auth-container" style="max-width: 600px;">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <span class="step-indicator">Step 2 of 2</span>
+                    <h1>Complete Your Profile ✨</h1>
+                    <p>Tell us more about yourself</p>
+                </div>
 
-{% block content %}
-    <div class="form-container">
-        <h1>Complete Your Profile</h1>
-        <p>Step 2 of 2: Profile Information</p>
-        <hr>
+                <!-- Registration Form Step 2 -->
+                <form action="{% url 'register_step_2' %}" method="POST">
+                    {% csrf_token %}
+                    
+                    <input type="hidden" name="latitude" id="id_latitude">
+                    <input type="hidden" name="longitude" id="id_longitude">
 
-        <form action="{% url 'register_step_2' %}" method="POST">
-            {% csrf_token %}
-            
-            <input type="hidden" name="latitude" id="id_latitude">
-            <input type="hidden" name="longitude" id="id_longitude">
+                    {% if user_type == 'RESTAURANT' %}
+                        <h3 style="margin-bottom: 1.5rem; color: #334155;">🍽️ Restaurant Information</h3>
+                        <div class="form-group">
+                            <label for="restaurant_name">Restaurant Name</label>
+                            <input type="text" name="restaurant_name" id="restaurant_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="restaurant_phone_number">Phone Number</label>
+                            <input type="tel" name="restaurant_phone_number" id="restaurant_phone_number" required>
+                        </div>
+                    {% elif user_type == 'NGO' %}
+                        <h3 style="margin-bottom: 1.5rem; color: #334155;">🏢 NGO Information</h3>
+                        <div class="form-group">
+                            <label for="ngo_name">NGO Name</label>
+                            <input type="text" name="ngo_name" id="ngo_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registration_number">Registration Number</label>
+                            <input type="text" name="registration_number" id="registration_number" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact_person">Contact Person</label>
+                            <input type="text" name="contact_person" id="contact_person" required>
+                        </div>
+                    {% elif user_type == 'VOLUNTEER' %}
+                        <h3 style="margin-bottom: 1.5rem; color: #334155;">🤝 Volunteer Information</h3>
+                        <div class="form-group">
+                            <label for="full_name">Full Name</label>
+                            <input type="text" name="full_name" id="full_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone_number">Phone Number</label>
+                            <input type="tel" name="phone_number" id="phone_number">
+                        </div>
+                        <div class="form-group">
+                            <label for="skills">Skills (e.g., Driving, Cooking)</label>
+                            <input type="text" name="skills" id="skills" placeholder="Your skills...">
+                        </div>
+                    {% endif %}
 
-            {% if user_type == 'RESTAURANT' %}
-                <h3>Restaurant Information</h3>
-                <div class="form-group">
-                    <label for="restaurant_name">Restaurant Name:</label>
-                    <input type="text" name="restaurant_name" required>
-                </div>
-                <div class="form-group">
-                    <label for="restaurant_phone_number">Phone Number:</label>
-                    <input type="text" name="restaurant_phone_number" required>
-                </div>
-            {% elif user_type == 'NGO' %}
-                <h3>NGO Information</h3>
-                <div class="form-group">
-                    <label for="ngo_name">NGO Name:</label>
-                    <input type="text" name="ngo_name" required>
-                </div>
-                <div class="form-group">
-                    <label for="registration_number">Registration Number:</label>
-                    <input type="text" name="registration_number" required>
-                </div>
-                <div class="form-group">
-                    <label for="contact_person">Contact Person:</label>
-                    <input type="text" name="contact_person" required>
-                </div>
-            {% elif user_type == 'VOLUNTEER' %}
-                <h3>Volunteer Information</h3>
-                <div class="form-group">
-                    <label for="full_name">Full Name:</label>
-                    <input type="text" name="full_name" required>
-                </div>
-                <div class="form-group">
-                    <label for="phone_number">Phone Number:</label>
-                    <input type="text" name="phone_number">
-                </div>
-                <div class="form-group">
-                    <label for="skills">Skills (e.g., Driving, Cooking):</label>
-                    <input type="text" name="skills">
-                </div>
-            {% endif %}
+                    <hr style="margin: 2rem 0;">
+                    <h3 style="margin-bottom: 1.5rem; color: #334155;">📍 Location & Address</h3>
+                    
+                    <div class="form-group">
+                        <label for="id_address">Address</label>
+                        <div class="address-group">
+                            <textarea name="address" id="id_address" rows="3" required></textarea>
+                            <button type="button" onclick="findAddressOnMap()">Find</button>
+                        </div>
+                        <small class="map-help-text">Type your address and click "Find", or click on the map to set your location</small>
+                    </div>
+                    
+                    <div id="location-map"></div>
 
-            <hr>
-            <h3>Set Your Primary Address & Location</h3>
-            <div class="form-group">
-                <label for="address">Address:</label>
-                <div class="address-group">
-                    <textarea name="address" id="id_address" rows="3" required></textarea>
-                    <button type="button" onclick="findAddressOnMap()">Find</button>
+                    <button type="submit" class="auth-submit-btn">Complete Registration 🎉</button>
+                </form>
+
+                <div class="auth-links">
+                    <a href="{% url 'register_step_1' %}">← Back to Step 1</a>
                 </div>
             </div>
-            <div id="location-map"></div>
-            <small>Type your address and click "Find", or click on the map to set your location.</small>
-
-            <br><br>
-            <button type="submit">Complete Registration</button>
-        </form>
+        </div>
     </div>
-{% endblock %}
 
-{% block scripts %}
-    {{ block.super }}
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const map = L.map('location-map', {
@@ -125,6 +137,14 @@
                         }
                     });
             }
+
+            // Add loading state on form submit
+            document.querySelector('form').addEventListener('submit', function(e) {
+                const submitBtn = this.querySelector('.auth-submit-btn');
+                submitBtn.classList.add('loading');
+                submitBtn.disabled = true;
+            });
         });
     </script>
-{% endblock %}
+</body>
+</html>

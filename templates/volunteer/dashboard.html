@@ -6,7 +6,13 @@
 {% block page_title %}Dashboard Overview{% endblock %}
 {% block page_description %}A summary of your volunteer activity.{% endblock %}
 
+{% block head %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'css/dashboard_enhancements.css' %}">
+{% endblock %}
+
 {% block volunteer_content %}
+    <!-- Stats Grid -->
     <div class="stats-grid">
         <div class="stat-card">
             <h3>Active Pickups</h3>
@@ -26,8 +32,61 @@
         </div>
     </div>
 
+    <!-- Quick Actions -->
+    <div class="recent-activity-card">
+        <h3>🚀 Quick Actions</h3>
+        <div class="quick-actions">
+            <a href="{% url 'volunteer_manage_pickups' %}" class="quick-action-btn">
+                <span class="quick-action-icon">📦</span>
+                <span class="quick-action-label">View Donations</span>
+            </a>
+            <a href="{% url 'volunteer_manage_camps' %}" class="quick-action-btn">
+                <span class="quick-action-icon">🏕️</span>
+                <span class="quick-action-label">Find NGOs</span>
+            </a>
+            <a href="{% url 'volunteer_profile' %}" class="quick-action-btn">
+                <span class="quick-action-icon">👤</span>
+                <span class="quick-action-label">Update Profile</span>
+            </a>
+            <a href="{% url 'volunteer_manage_pickups' %}?view=delivery_route" class="quick-action-btn">
+                <span class="quick-action-icon">🗺️</span>
+                <span class="quick-action-label">Plan Route</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Activity Feed -->
+    <div class="activity-feed">
+        <h3>📊 Recent Activity</h3>
+        {% if stats.completed_deliveries > 0 or stats.active_pickups > 0 %}
+            <div class="activity-item">
+                <strong>🎉 Great work!</strong> You've completed {{ stats.completed_deliveries }} deliveries.
+                <div class="activity-time">Keep up the amazing work</div>
+            </div>
+            {% if stats.active_pickups > 0 %}
+            <div class="activity-item">
+                <strong>⏰ Active Pickups</strong> You have {{ stats.active_pickups }} active pickup(s) to deliver.
+                <div class="activity-time">Don't forget to complete them!</div>
+            </div>
+            {% endif %}
+            {% if stats.available_donations > 0 %}
+            <div class="activity-item">
+                <strong>📦 New Donations</strong> {{ stats.available_donations }} donation(s) available for pickup.
+                <div class="activity-time">Check the pickups page</div>
+            </div>
+            {% endif %}
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <p>No activity yet</p>
+                <a href="{% url 'volunteer_manage_pickups' %}" class="btn">Start by accepting a donation</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Map Section -->
     <div class="content-card">
-        <h3>Nearby Donations and Camps</h3>
+        <h3>🗺️ Nearby Donations and Camps</h3>
         <div id="dashboard-map"></div>
     </div>
 {% endblock volunteer_content %}

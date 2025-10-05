@@ -1,5 +1,4 @@
 # portal/views/auth_views.py
-
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -101,3 +100,51 @@ def login_page(request):
 def logout_view(request):
     logout(request)
     return redirect('index')
+
+def google_callback(request):
+    """Handle Google OAuth callback"""
+    if request.user.is_authenticated:
+        # Check if user has a user_type set
+        if request.user.user_type == User.UserType.ADMIN:
+            # User needs to select a type
+            return redirect('google_select_user_type')
+        return get_user_dashboard_redirect(request.user)
+    return redirect('login_page')
+
+def google_select_user_type(request):
+    """Allow Google OAuth users to select their user type"""
+    if not request.user.is_authenticated:
+        return redirect('login_page')
+    
+    if request.method == 'POST':
+        user_type = request.POST.get('user_type')
+        if user_type in [User.UserType.RESTAURANT, User.UserType.NGO, User.UserType.VOLUNTEER]:
+            request.user.user_type = user_type
+            request.user.save()
+            
+            # Create profile based on user type
+            if user_type == User.UserType.RESTAURANT and not hasattr(request.user, 'restaurant_profile'):
+                RestaurantProfile.objects.create(
+                    user=request.user,
+                    restaurant_name=request.user.get_full_name() or request.user.username,
+                    address='',
+                    phone_number=''
+                )
+            elif user_type == User.UserType.NGO and not hasattr(request.user, 'ngo_profile'):
+                NGOProfile.objects.create(
+                    user=request.user,
+                    ngo_name=request.user.get_full_name() or request.user.username,
+                    registration_number='',
+                    address='',
+                    contact_person=request.user.get_full_name() or request.user.username
+                )
+            elif user_type == User.UserType.VOLUNTEER and not hasattr(request.user, 'volunteer_profile'):
+                VolunteerProfile.objects.create(
+                    user=request.user,
+                    full_name=request.user.get_full_name() or request.user.username,
+                )
+            
+            messages.success(request, 'Profile created successfully! Please complete your profile information.')
+            return get_user_dashboard_redirect(request.user)
+    
+    return render(request, 'auth/google_select_user_type.html')
