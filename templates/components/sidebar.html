@@ -8,7 +8,15 @@
 </head>
 <body>
     {% block body %}
-        <aside class="sidebar">
+        <!-- Mobile sidebar toggle button -->
+        <button class="mobile-sidebar-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">
+            ☰
+        </button>
+        
+        <!-- Sidebar overlay for mobile -->
+        <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+        
+        <aside class="sidebar" id="dashboard-sidebar">
             <div class="sidebar-header">
                 <h1>{% block sidebar_title %}Dashboard{% endblock %}</h1>
                 <p>{% block sidebar_subtitle %}Main Menu{% endblock %}</p>
@@ -20,6 +28,35 @@
                 {% endblock nav_links %}
             </nav>
         </aside>
+
+        <script>
+            // Mobile sidebar toggle functionality
+            function toggleSidebar() {
+                const sidebar = document.getElementById('dashboard-sidebar');
+                const overlay = document.querySelector('.sidebar-overlay');
+                sidebar.classList.toggle('open');
+                overlay.classList.toggle('active');
+            }
+
+            function closeSidebar() {
+                const sidebar = document.getElementById('dashboard-sidebar');
+                const overlay = document.querySelector('.sidebar-overlay');
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+            }
+
+            // Close sidebar when clicking on a nav link on mobile
+            document.addEventListener('DOMContentLoaded', function() {
+                const navLinks = document.querySelectorAll('.nav-link');
+                navLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        if (window.innerWidth <= 768) {
+                            closeSidebar();
+                        }
+                    });
+                });
+            });
+        </script>
     {% endblock body %}
 </body>
 </html>

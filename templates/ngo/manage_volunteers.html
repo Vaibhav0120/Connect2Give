@@ -20,10 +20,10 @@
             <tbody>
                 {% for volunteer in volunteers %}
                 <tr>
-                    <td>{{ volunteer.full_name }}</td>
-                    <td>{{ volunteer.user.email }}</td>
-                    <td>{{ volunteer.skills|default:"Not specified" }}</td>
-                    <td>
+                    <td data-label="Full Name">{{ volunteer.full_name }}</td>
+                    <td data-label="Email">{{ volunteer.user.email }}</td>
+                    <td data-label="Skills">{{ volunteer.skills|default:"Not specified" }}</td>
+                    <td data-label="Current Status">
                         {% if volunteer.active_deliveries > 0 %}
                             <span class="status-active">Handling {{ volunteer.active_deliveries }} deliver{{ volunteer.active_deliveries|pluralize:"y,ies" }}</span>
                         {% else %}

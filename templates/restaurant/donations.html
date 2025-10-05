@@ -67,10 +67,10 @@
                 <tbody>
                     {% for donation in donations %}
                     <tr>
-                        <td>{{ donation.food_description }}</td>
-                        <td>{{ donation.quantity }}</td>
-                        <td><span class="status-badge status-{{ donation.status|lower }}">{{ donation.get_status_display }}</span></td>
-                        <td>{{ donation.created_at|date:"d M Y, H:i" }}</td>
+                        <td data-label="Description">{{ donation.food_description }}</td>
+                        <td data-label="Quantity">{{ donation.quantity }}</td>
+                        <td data-label="Status"><span class="status-badge status-{{ donation.status|lower }}">{{ donation.get_status_display }}</span></td>
+                        <td data-label="Date Posted">{{ donation.created_at|date:"d M Y, H:i" }}</td>
                     </tr>
                     {% empty %}
                     <tr><td colspan="4" class="empty-state">You have not posted any donations yet.</td></tr>

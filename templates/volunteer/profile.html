@@ -116,21 +116,14 @@
             }
         }
 
-        // Use requestAnimationFrame to ensure the map refresh happens after the browser
-        // has finished its rendering and layout calculations. This is more reliable
-        // than a fixed timeout.
         if (window.requestAnimationFrame) {
             window.requestAnimationFrame(refreshMapSize);
         } else {
             // Fallback for older browsers
             setTimeout(refreshMapSize, 150);
         }
-
-        // For extra safety, also attach the refresh to the window's load event.
-        // This handles any slow-loading resources that might affect the layout.
         window.addEventListener('load', refreshMapSize);
 
-        // --- END: ROBUST FIX ---
     });
 </script>
 {% endblock scripts %}

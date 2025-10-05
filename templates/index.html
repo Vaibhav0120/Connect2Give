@@ -761,15 +761,78 @@
             }
         }
 
+        /* Mobile menu toggle */
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 70px;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem;
+            flex-direction: column;
+            gap: 0.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            z-index: 999;
+        }
+
+        .mobile-menu.active {
+            display: flex;
+        }
+
+        .mobile-menu .navbar-btn {
+            width: 100%;
+            text-align: center;
+        }
+
         /* Responsive design improvements */
+        @media (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .steps-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+
+            .cta-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: block;
+            }
+
+            .navbar-actions {
+                display: none;
+            }
+
             .mission-grid {
                 grid-template-columns: 1fr;
-                gap: 3rem;
+                gap: 2rem;
             }
 
             .impact-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .hero-section {
+                min-height: 80vh;
+                padding-top: 70px;
             }
 
             .hero-buttons {
@@ -779,28 +842,29 @@
 
             .btn-hero {
                 width: 100%;
+                padding: 1rem 2rem;
             }
 
             #home-map {
-                height: 400px;
+                height: 350px;
             }
 
             .navbar-container {
-                padding: 0.875rem 1.5rem;
+                padding: 0.875rem 1rem;
             }
 
             .navbar-brand {
-                font-size: 1.25rem;
+                font-size: 1.125rem;
             }
 
             .navbar-logo {
                 width: 36px;
                 height: 36px;
-                font-size: 1.125rem;
+                font-size: 1rem;
             }
 
             .navbar-btn {
-                padding: 0.5rem 1.125rem;
+                padding: 0.5rem 1rem;
                 font-size: 0.875rem;
             }
 
@@ -809,12 +873,87 @@
             }
 
             .welcome-card {
-                margin-top: 6rem;
-                padding: 3rem 2rem;
+                margin-top: 5rem;
+                padding: 2rem 1.5rem;
             }
 
             .welcome-card h1 {
+                font-size: 1.75rem;
+            }
+
+            .welcome-icon {
+                width: 60px;
+                height: 60px;
                 font-size: 2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .stat-card {
+                padding: 1.5rem;
+            }
+
+            .how-section,
+            .map-section,
+            .mission-section,
+            .cta-section {
+                padding: 3rem 0;
+            }
+
+            .content-wrapper {
+                padding: 0 1rem;
+            }
+
+            .section-title {
+                font-size: 1.75rem;
+            }
+
+            .section-subtitle {
+                font-size: 1rem;
+            }
+
+            .step-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                padding: 0 1rem;
+            }
+
+            .footer {
+                padding: 3rem 0 1.5rem;
+            }
+
+            .footer-bottom {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-content h1 {
+                font-size: 2rem;
+            }
+
+            .hero-content p {
+                font-size: 1rem;
+            }
+
+            .stat-number {
+                font-size: 2.5rem;
+            }
+
+            .cta-card {
+                padding: 2rem 1.5rem;
+            }
+
+            #home-map {
+                height: 300px;
             }
         }
     </style>
@@ -841,8 +980,18 @@
                     <a href="{% get_dashboard_url user %}" class="navbar-btn navbar-btn-login">Dashboard</a>
                     <a href="{% url 'logout' %}" class="navbar-btn navbar-btn-signup">Logout</a>
                 </div>
+                <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="Toggle menu">☰</button>
+                <div class="mobile-menu" id="mobile-menu">
+                    <a href="{% get_dashboard_url user %}" class="navbar-btn navbar-btn-login">Dashboard</a>
+                    <a href="{% url 'logout' %}" class="navbar-btn navbar-btn-signup">Logout</a>
+                </div>
             {% else %}
                 <div class="navbar-actions">
+                    <a href="{% url 'login_page' %}" class="navbar-btn navbar-btn-login">Login</a>
+                    <a href="{% url 'register_step_1' %}" class="navbar-btn navbar-btn-signup">Sign Up</a>
+                </div>
+                <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="Toggle menu">☰</button>
+                <div class="mobile-menu" id="mobile-menu">
                     <a href="{% url 'login_page' %}" class="navbar-btn navbar-btn-login">Login</a>
                     <a href="{% url 'register_step_1' %}" class="navbar-btn navbar-btn-signup">Sign Up</a>
                 </div>
@@ -1052,6 +1201,23 @@
 
 {% block scripts %}
     {{ block.super }}
+    <script>
+        // Mobile menu toggle function
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('active');
+        }
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('mobile-menu');
+            const toggle = document.querySelector('.mobile-menu-toggle');
+            if (menu && toggle && !menu.contains(event.target) && !toggle.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+    </script>
+
     {% if not user.is_authenticated %}
         <script>
             document.addEventListener('DOMContentLoaded', function () {

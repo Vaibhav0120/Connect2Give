@@ -19,9 +19,9 @@
             <tbody>
                 {% for ngo in available_ngos %}
                 <tr>
-                    <td><strong>{{ ngo.ngo_name }}</strong></td>
-                    <td>{{ ngo.address }}</td>
-                    <td>
+                    <td data-label="NGO Name"><strong>{{ ngo.ngo_name }}</strong></td>
+                    <td data-label="Address">{{ ngo.address }}</td>
+                    <td data-label="Action">
                         <form action="{% url 'register_with_ngo' ngo.pk %}" method="POST" style="display:inline;">
                             {% csrf_token %}
                             <button type="submit" class="action-button">Join</button>
@@ -50,9 +50,9 @@
             <tbody>
                 {% for ngo in registered_ngos %}
                 <tr>
-                    <td><strong>{{ ngo.ngo_name }}</strong></td>
-                    <td>{{ ngo.date_joined|date:"d M Y" }}</td>
-                    <td>
+                    <td data-label="NGO Name"><strong>{{ ngo.ngo_name }}</strong></td>
+                    <td data-label="Date Joined">{{ ngo.date_joined|date:"d M Y" }}</td>
+                    <td data-label="Action">
                         <form action="{% url 'unregister_from_ngo' ngo.pk %}" method="POST" style="display:inline;">
                             {% csrf_token %}
                             <button type="submit" class="action-button-danger">Leave</button>

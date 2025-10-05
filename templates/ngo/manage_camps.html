@@ -73,11 +73,11 @@
                     <tbody>
                         {% for camp in active_camps %}
                         <tr>
-                            <td><strong>{{ camp.name }}</strong></td>
-                            <td>{{ camp.location_address }}</td>
-                            <td>{{ camp.start_time|date:"d M Y, H:i" }}</td>
-                            <td><span style="color: var(--accent-green); font-weight: 500;">Active</span></td>
-                            <td>
+                            <td data-label="Camp Name"><strong>{{ camp.name }}</strong></td>
+                            <td data-label="Location">{{ camp.location_address }}</td>
+                            <td data-label="Start Time">{{ camp.start_time|date:"d M Y, H:i" }}</td>
+                            <td data-label="Status"><span style="color: var(--accent-green); font-weight: 500;">Active</span></td>
+                            <td data-label="Action">
                                 <form action="{% url 'mark_camp_as_completed' camp.pk %}" method="POST" style="display:inline;">
                                     {% csrf_token %}
                                     <button type="submit" class="action-button">Mark as Completed</button>
@@ -107,10 +107,10 @@
                     <tbody>
                         {% for camp in completed_camps %}
                         <tr>
-                            <td><strong>{{ camp.name }}</strong></td>
-                            <td>{{ camp.location_address }}</td>
-                            <td>{{ camp.completed_at|date:"d M Y, H:i" }}</td>
-                            <td><span style="color: var(--text-muted); font-weight: 500;">Completed</span></td>
+                            <td data-label="Camp Name"><strong>{{ camp.name }}</strong></td>
+                            <td data-label="Location">{{ camp.location_address }}</td>
+                            <td data-label="Completed At">{{ camp.completed_at|date:"d M Y, H:i" }}</td>
+                            <td data-label="Status"><span style="color: var(--text-muted); font-weight: 500;">Completed</span></td>
                         </tr>
                         {% empty %}
                         <tr>
@@ -139,12 +139,12 @@
                     <tbody>
                         {% for donation in donations_to_verify %}
                         <tr>
-                            <td><strong>{{ donation.restaurant.restaurant_name }}</strong></td>
-                            <td>{{ donation.food_description }}</td>
-                            <td>{{ donation.assigned_volunteer.full_name }}</td>
-                            <td>{{ donation.target_camp.name }}</td>
-                            <td>{{ donation.delivered_at|date:"d M Y, H:i" }}</td>
-                            <td>
+                            <td data-label="Restaurant"><strong>{{ donation.restaurant.restaurant_name }}</strong></td>
+                            <td data-label="Food Description">{{ donation.food_description }}</td>
+                            <td data-label="Volunteer">{{ donation.assigned_volunteer.full_name }}</td>
+                            <td data-label="Delivered To">{{ donation.target_camp.name }}</td>
+                            <td data-label="Delivered At">{{ donation.delivered_at|date:"d M Y, H:i" }}</td>
+                            <td data-label="Action">
                                 <form action="{% url 'confirm_delivery' donation.pk %}" method="POST" style="display:inline;">
                                     {% csrf_token %}
                                     <button type="submit" class="action-button">Confirm Delivery</button>

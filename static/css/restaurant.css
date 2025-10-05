@@ -313,14 +313,142 @@
 /* =================================
    RESPONSIVE STYLES
 ==================================== */
+@media (max-width: 1024px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
 @media (max-width: 992px) {
     .dashboard-grid {
-        grid-template-columns: 1fr; /* Stack map and chart on smaller screens */
+        grid-template-columns: 1fr;
     }
 }
 
 @media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .stat-card {
+        padding: 1.5rem;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+    }
+
+    .tab-navigation {
+        flex-direction: column;
+        padding: 0.25rem;
+    }
+
+    .tab-button {
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    .content-card {
+        padding: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .address-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .address-buttons button {
+        width: 100%;
+        font-size: 0.875rem;
+    }
+
+    .address-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
+    }
+
+    /* Mobile-friendly table: Convert to card layout */
+    .data-table {
+        border: none;
+    }
+
+    .data-table thead {
+        display: none;
+    }
+
+    .data-table tbody {
+        display: block;
+    }
+
+    .data-table tr {
+        display: block;
+        margin-bottom: 1rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--bg-card);
+        padding: 1rem;
+    }
+
+    .data-table tr:hover {
+        background: var(--bg-card);
+    }
+
+    .data-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+        border: none;
+        text-align: right;
+    }
+
+    .data-table td:before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-align: left;
+        margin-right: 1rem;
+    }
+
     .form-grid {
         grid-template-columns: 1fr;
+    }
+
+    #location-map, #dashboard-map {
+        height: 300px;
+    }
+
+    .chart-canvas {
+        max-height: 250px;
+    }
+
+    .cropper-modal-content {
+        width: 95%;
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .stat-card {
+        padding: 1.25rem;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+    }
+
+    .content-card {
+        padding: 1rem;
+    }
+
+    .status-badge {
+        font-size: 0.6875rem;
+        padding: 0.25em 0.5em;
     }
 }

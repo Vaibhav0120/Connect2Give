@@ -72,10 +72,10 @@
                     <tbody>
                         {% for donation in available_donations %}
                         <tr>
-                            <td><strong>{{ donation.restaurant.restaurant_name }}</strong></td>
-                            <td>{{ donation.food_description }}</td>
-                            <td>{{ donation.pickup_address }}</td>
-                            <td>
+                            <td data-label="Restaurant"><strong>{{ donation.restaurant.restaurant_name }}</strong></td>
+                            <td data-label="Food Description">{{ donation.food_description }}</td>
+                            <td data-label="Address">{{ donation.pickup_address }}</td>
+                            <td data-label="Action">
                                 {% if active_donations.count < 10 %}
                                 <form action="{% url 'accept_donation' donation.pk %}" method="POST" style="display:inline;">
                                     {% csrf_token %}
@@ -107,11 +107,11 @@
                 <tbody>
                     {% for donation in delivery_history %}
                     <tr>
-                        <td>{{ donation.food_description }}</td>
-                        <td>{{ donation.restaurant.restaurant_name }}</td>
-                        <td>{{ donation.target_camp.name|default:"N/A" }}</td>
-                        <td><span class="status-badge status-{{ donation.status|lower }}">{{ donation.get_status_display }}</span></td>
-                        <td>{{ donation.delivered_at|date:"d M Y, H:i" }}</td>
+                        <td data-label="Description">{{ donation.food_description }}</td>
+                        <td data-label="From">{{ donation.restaurant.restaurant_name }}</td>
+                        <td data-label="Delivered To">{{ donation.target_camp.name|default:"N/A" }}</td>
+                        <td data-label="Status"><span class="status-badge status-{{ donation.status|lower }}">{{ donation.get_status_display }}</span></td>
+                        <td data-label="Date">{{ donation.delivered_at|date:"d M Y, H:i" }}</td>
                     </tr>
                     {% empty %}
                     <tr><td colspan="5" class="empty-state">You have no completed deliveries.</td></tr>
