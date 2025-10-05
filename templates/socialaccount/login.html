@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In via {{ provider.name }} - Connect2Give</title>
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+</head>
+<body>
+    <div class="auth-page-wrapper">
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="auth-header">
+                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 1rem;">
+                        <path d="M21.818 10.2273C21.818 9.41818 21.7545 8.68182 21.6273 8H12V12.3636H17.4545C17.2273 13.7455 16.4364 14.9455 15.2364 15.7545V18.2727H18.0909C19.8545 16.6364 20.8909 14.1818 20.8909 11.2364C20.8909 10.8818 20.8545 10.5545 20.8182 10.2273H21.818Z" fill="#4285F4"/>
+                        <path d="M12 22C14.9455 22 17.4545 21.0182 19.3364 19.3364L16.4818 16.8182C15.5 17.4545 14.2364 17.8182 12 17.8182C9.16364 17.8182 6.76364 15.9818 5.89091 13.3636H3V15.9455C4.88182 19.4182 8.18182 22 12 22Z" fill="#34A853"/>
+                        <path d="M5.89091 13.3636C5.66364 12.6818 5.53636 11.9455 5.53636 11.1818C5.53636 10.4182 5.66364 9.68182 5.89091 9L3 6.41818C2.12727 8.05455 1.63636 9.98182 1.63636 11.1818C1.63636 12.3818 2.12727 14.3091 3 15.9455L5.89091 13.3636Z" fill="#FBBC05"/>
+                        <path d="M12 4.18182C13.5818 4.18182 15.0182 4.76364 16.1091 5.78182L18.9636 3C17.4545 1.52727 14.9455 0 12 0C8.18182 0 4.88182 2.58182 3 6.05455L5.89091 8.63636C6.76364 6 9.16364 4.18182 12 4.18182Z" fill="#EA4335"/>
+                     </svg>
+                    <h1>Sign In via {{ provider.name }}</h1>
+                    <p>You are about to sign in using your {{ provider.name }} account.</p>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="auth-submit-btn">Continue to {{ provider.name }}</button>
+                    <a href="{% url 'login_page' %}" class="btn btn-secondary" style="width: 100%; text-align: center; margin-top: 1rem;">Cancel</a>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -2,6 +2,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
+from django.contrib.messages import get_messages
 from ..models import User, RestaurantProfile, NGOProfile, VolunteerProfile
 
 def get_user_dashboard_redirect(user):
@@ -12,7 +13,8 @@ def get_user_dashboard_redirect(user):
     elif user.user_type == User.UserType.VOLUNTEER:
         return redirect('volunteer_dashboard')
     else:
-        return redirect('index')
+        # If user type is not set, redirect to select user type page
+        return redirect('google_select_user_type')
 
 def register_step_1(request):
     if request.user.is_authenticated:
@@ -92,59 +94,86 @@ def login_page(request):
         user = authenticate(request, username=request.POST.get('username'), password=request.POST.get('password'))
         if user is not None:
             login(request, user)
+            # Add the success message right after a successful login
+            messages.success(request, f'Successfully signed in as {user.username}.')
             return get_user_dashboard_redirect(user)
         else:
             return render(request, 'auth/login.html', {'error': 'Invalid username or password.'})
     return render(request, 'auth/login.html')
 
 def logout_view(request):
+    # Clear any existing messages before logging out
+    storage = get_messages(request)
+    for message in storage:
+        pass  # This iterates through and clears the messages
+    if hasattr(storage, 'used'):
+        storage.used = True # type: ignore
+
     logout(request)
     return redirect('index')
 
 def google_callback(request):
     """Handle Google OAuth callback"""
     if request.user.is_authenticated:
-        # Check if user has a user_type set
-        if request.user.user_type == User.UserType.ADMIN:
-            # User needs to select a type
+        # If the user is new (user_type is still ADMIN), redirect them to select a user type
+        if request.user.user_type == User.UserType.ADMIN and not hasattr(request.user, 'restaurant_profile') and not hasattr(request.user, 'ngo_profile') and not hasattr(request.user, 'volunteer_profile'):
             return redirect('google_select_user_type')
         return get_user_dashboard_redirect(request.user)
     return redirect('login_page')
 
 def google_select_user_type(request):
-    """Allow Google OAuth users to select their user type"""
+    """Allow Google OAuth users to select their user type and complete their profile"""
     if not request.user.is_authenticated:
         return redirect('login_page')
-    
+
     if request.method == 'POST':
         user_type = request.POST.get('user_type')
+        latitude = request.POST.get('latitude') or None
+        longitude = request.POST.get('longitude') or None
+        address = request.POST.get('address')
+        
         if user_type in [User.UserType.RESTAURANT, User.UserType.NGO, User.UserType.VOLUNTEER]:
-            request.user.user_type = user_type
-            request.user.save()
+            user = request.user
+            user.user_type = user_type
+            user.save()
+
+            if user_type == User.UserType.RESTAURANT:
+                RestaurantProfile.objects.update_or_create(
+                    user=user,
+                    defaults={
+                        'restaurant_name': request.POST.get('restaurant_name'),
+                        'address': address,
+                        'phone_number': request.POST.get('restaurant_phone_number'),
+                        'latitude': latitude,
+                        'longitude': longitude
+                    }
+                )
+            elif user_type == User.UserType.NGO:
+                NGOProfile.objects.update_or_create(
+                    user=user,
+                    defaults={
+                        'ngo_name': request.POST.get('ngo_name'),
+                        'registration_number': request.POST.get('registration_number'),
+                        'address': address,
+                        'contact_person': request.POST.get('contact_person'),
+                        'latitude': latitude,
+                        'longitude': longitude
+                    }
+                )
+            elif user_type == User.UserType.VOLUNTEER:
+                VolunteerProfile.objects.update_or_create(
+                    user=user,
+                    defaults={
+                        'full_name': request.POST.get('full_name'),
+                        'phone_number': request.POST.get('phone_number'),
+                        'skills': request.POST.get('skills'),
+                        'address': address,
+                        'latitude': latitude,
+                        'longitude': longitude
+                    }
+                )
             
-            # Create profile based on user type
-            if user_type == User.UserType.RESTAURANT and not hasattr(request.user, 'restaurant_profile'):
-                RestaurantProfile.objects.create(
-                    user=request.user,
-                    restaurant_name=request.user.get_full_name() or request.user.username,
-                    address='',
-                    phone_number=''
-                )
-            elif user_type == User.UserType.NGO and not hasattr(request.user, 'ngo_profile'):
-                NGOProfile.objects.create(
-                    user=request.user,
-                    ngo_name=request.user.get_full_name() or request.user.username,
-                    registration_number='',
-                    address='',
-                    contact_person=request.user.get_full_name() or request.user.username
-                )
-            elif user_type == User.UserType.VOLUNTEER and not hasattr(request.user, 'volunteer_profile'):
-                VolunteerProfile.objects.create(
-                    user=request.user,
-                    full_name=request.user.get_full_name() or request.user.username,
-                )
-            
-            messages.success(request, 'Profile created successfully! Please complete your profile information.')
-            return get_user_dashboard_redirect(request.user)
-    
+            messages.success(request, 'Profile created successfully! You can now access your dashboard.')
+            return get_user_dashboard_redirect(user)
+
     return render(request, 'auth/google_select_user_type.html')

@@ -157,7 +157,6 @@ SITE_ID = 1
 
 # --- Allauth settings (Corrected and Final) ---
 ACCOUNT_LOGIN_METHODS = ['username', 'email']
-ACCOUNT_SIGNUP_FIELDS = ['email', 'username', 'password1']
 
 # All other settings are modern and correct
 ACCOUNT_EMAIL_VERIFICATION = 'none'  # Set to 'mandatory' in production
