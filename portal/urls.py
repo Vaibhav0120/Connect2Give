@@ -4,6 +4,9 @@ from django.contrib.auth import views as auth_views
 from . import views
 
 urlpatterns = [
+    # --- Service Worker URL ---
+    path('sw.js', views.serve_sw, name='sw'),
+
     # --- Main Site & Auth URLs ---
     path('', views.index, name='index'),
     path('register/step-1/', views.register_step_1, name='register_step_1'),

@@ -263,16 +263,29 @@ def save_webpush_subscription(request):
     """API endpoint to save webpush subscription data"""
     import json
     
+    # ADD THIS: Log that the view was called
+    print("--- Received request to save webpush subscription ---")
+
     if request.method != 'POST':
+        # ADD THIS: Log invalid method
+        print("ERROR: Invalid request method:", request.method)
         return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)
     
     try:
         data = json.loads(request.body)
+        # ADD THIS: Log the data received from the frontend
+        print("Subscription data received:", data)
+        
         volunteer_profile = request.user.volunteer_profile
         volunteer_profile.webpush_subscription = json.dumps(data)
         volunteer_profile.save()
+        
+        # ADD THIS: Log success
+        print("Successfully saved subscription for:", volunteer_profile.full_name)
         return JsonResponse({'success': True, 'message': 'Subscription saved successfully'})
     except Exception as e:
+        # ADD THIS: Log any exceptions that occur
+        print(f"ERROR saving subscription: {e}")
         return JsonResponse({'success': False, 'message': str(e)}, status=500)
 
 @login_required(login_url='login_page')

@@ -16,6 +16,9 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.http import JsonResponse
+from django.http import HttpResponse
+from django.conf import settings
+import os
 
 
 # FIX 1: Update this function to correctly redirect new users
@@ -96,3 +99,12 @@ def rate_donation(request, donation_id):
         return JsonResponse({'success': False, 'message': 'Donation not found or already rated.'}, status=404)
     except Exception as e:
         return JsonResponse({'success': False, 'message': 'An unexpected error occurred.'}, status=500)
+
+# --- NEW SERVICE WORKER VIEW ---
+def serve_sw(request):
+    try:
+        sw_path = os.path.join(settings.BASE_DIR, 'static', 'js', 'sw.js')
+        with open(sw_path, 'r') as f:
+            return HttpResponse(f.read(), content_type='application/javascript')
+    except FileNotFoundError:
+        return HttpResponse("Service worker not found.", status=404, content_type='text/plain')
