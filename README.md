@@ -120,22 +120,20 @@ GOOGLE_OAUTH_CLIENT_SECRET='your-client-secret'
 
 #### **Web Push Notifications (Optional)**
 For browser push notifications, generate VAPID keys:
-```bash
-# Install py-vapid if not already installed
-pip install py-vapid
 
-# Generate keys
-vapid --gen
+1.  **Run the script** from your activated virtual environment:
 
-# Or using Python
-python -c "from py_vapid import Vapid; vapid = Vapid(); vapid.generate_keys(); print('Public Key:', vapid.public_key.export_public().decode()); print('Private Key:', vapid.private_key.export().decode())"
-```
+    ```bash
+    python generate_keys.py
+    ```
 
-```bash
-VAPID_PUBLIC_KEY='your-public-key'
-VAPID_PRIVATE_KEY='your-private-key'
-VAPID_ADMIN_EMAIL='admin@yourdomain.com'
-```
+2.  **Copy the output** into your `.env` file and add your email:
+
+    ```ini
+    VAPID_PUBLIC_KEY='your-generated-public-key'
+    VAPID_PRIVATE_KEY='your-generated-private-key'
+    VAPID_ADMIN_EMAIL='your-email@example.com'
+    ```
 
 **⚠️ Important:** Never commit the `.env` file to version control. It's already included in `.gitignore`.
 
@@ -199,24 +197,6 @@ The server will be running at **http://127.0.0.1:8000/**
 
 - **Main site:** http://127.0.0.1:8000/
 - **Admin panel:** http://127.0.0.1:8000/admin/
-
-**9. Running Tests**
-
-To run the test suite:
-
-```bash
-# Run all tests
-python manage.py test
-
-# Run tests for a specific app
-python manage.py test portal
-
-# Run tests with verbose output
-python manage.py test --verbosity=2
-
-# Run specific test class
-python manage.py test portal.tests.TestDonationModel
-```
 
 ## **Project Structure**
 
