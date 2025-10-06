@@ -10,12 +10,12 @@ from django.contrib import messages
 from geopy.distance import geodesic
 from django.http import JsonResponse
 from django.db import transaction
+from ..decorators import user_type_required
 
 
 @login_required(login_url='login_page')
+@user_type_required('VOLUNTEER')
 def volunteer_dashboard(request):
-    if request.user.user_type != 'VOLUNTEER': return redirect('index')
-    
     volunteer_profile = request.user.volunteer_profile
     
     stats = {
@@ -25,8 +25,12 @@ def volunteer_dashboard(request):
         'available_donations': Donation.objects.filter(status='PENDING').count(),
     }
 
+    # Optimized queries with select_related
     available_donations = Donation.objects.filter(status='PENDING').select_related('restaurant').order_by('-created_at')
-    upcoming_camps = DonationCamp.objects.filter(ngo__in=volunteer_profile.registered_ngos.all(), is_active=True).order_by('start_time')
+    upcoming_camps = DonationCamp.objects.filter(
+        ngo__in=volunteer_profile.registered_ngos.all(), 
+        is_active=True
+    ).select_related('ngo').order_by('start_time')
 
     donations_map_data = [{"lat": d.restaurant.latitude, "lon": d.restaurant.longitude, "name": d.restaurant.restaurant_name, "food": d.food_description, "id": d.pk} for d in available_donations if d.restaurant.latitude and d.restaurant.longitude]
     camps_map_data = [{"lat": c.latitude, "lon": c.longitude, "name": c.name, "ngo": c.ngo.ngo_name, "address": c.location_address} for c in upcoming_camps if c.latitude and c.longitude]
@@ -39,17 +43,28 @@ def volunteer_dashboard(request):
     return render(request, 'volunteer/dashboard.html', context)
 
 @login_required(login_url='login_page')
+@user_type_required('VOLUNTEER')
 def volunteer_manage_pickups(request):
-    if request.user.user_type != 'VOLUNTEER': return redirect('index')
     volunteer_profile = request.user.volunteer_profile
     view = request.GET.get('view')
     
     thirty_minutes_ago = timezone.now() - timedelta(minutes=30)
     Donation.objects.filter(status='ACCEPTED', accepted_at__lt=thirty_minutes_ago).update(status='PENDING', assigned_volunteer=None, accepted_at=None)
 
-    active_donations = Donation.objects.filter(assigned_volunteer=volunteer_profile, status__in=['ACCEPTED', 'COLLECTED']).order_by('accepted_at')
-    delivery_history = Donation.objects.filter(assigned_volunteer=volunteer_profile, status__in=['VERIFYING', 'DELIVERED']).order_by('-delivered_at')
-    available_donations = Donation.objects.filter(status='PENDING').select_related('restaurant').order_by('-created_at')
+    # Optimized queries with select_related for foreign keys
+    active_donations = Donation.objects.filter(
+        assigned_volunteer=volunteer_profile, 
+        status__in=['ACCEPTED', 'COLLECTED']
+    ).select_related('restaurant').order_by('accepted_at')
+    
+    delivery_history = Donation.objects.filter(
+        assigned_volunteer=volunteer_profile, 
+        status__in=['VERIFYING', 'DELIVERED']
+    ).select_related('restaurant', 'target_camp').order_by('-delivered_at')
+    
+    available_donations = Donation.objects.filter(
+        status='PENDING'
+    ).select_related('restaurant').order_by('-created_at')
     
     # Get search query
     search_query = request.GET.get('q', '').strip()
@@ -105,8 +120,8 @@ def volunteer_manage_pickups(request):
 
 
 @login_required(login_url='login_page')
+@user_type_required('VOLUNTEER')
 def volunteer_manage_camps(request):
-    if request.user.user_type != 'VOLUNTEER': return redirect('index')
     volunteer_profile = request.user.volunteer_profile
     registered_ngos = volunteer_profile.registered_ngos.all()
     
@@ -129,10 +144,8 @@ def volunteer_manage_camps(request):
     return render(request, 'volunteer/manage_camps.html', context)
 
 @login_required(login_url='login_page')
+@user_type_required('VOLUNTEER')
 def volunteer_profile(request):
-    if request.user.user_type != 'VOLUNTEER':
-        return redirect('index')
-    
     profile = get_object_or_404(VolunteerProfile, user=request.user)
     if request.method == 'POST':
         form = VolunteerProfileForm(request.POST, request.FILES, instance=profile)
@@ -147,16 +160,17 @@ def volunteer_profile(request):
     return render(request, 'volunteer/profile.html', context)
 
 @login_required(login_url='login_page')
+@user_type_required('VOLUNTEER')
 def volunteer_settings(request):
-    if request.user.user_type != 'VOLUNTEER': return redirect('index')
     return render(request, 'volunteer/settings.html')
 
 
 # --- ACTION VIEWS ---
 
 @login_required(login_url='login_page')
+@user_type_required('VOLUNTEER')
 def register_with_ngo(request, ngo_id):
-    if request.user.user_type != 'VOLUNTEER' or request.method != 'POST':
+    if request.method != 'POST':
         return JsonResponse({'success': False, 'message': 'Invalid request.'}, status=400)
     
     try:
@@ -169,8 +183,9 @@ def register_with_ngo(request, ngo_id):
 
 
 @login_required(login_url='login_page')
+@user_type_required('VOLUNTEER')
 def unregister_from_ngo(request, ngo_id):
-    if request.user.user_type != 'VOLUNTEER' or request.method != 'POST':
+    if request.method != 'POST':
         return JsonResponse({'success': False, 'message': 'Invalid request.'}, status=400)
         
     try:
@@ -183,8 +198,9 @@ def unregister_from_ngo(request, ngo_id):
 
 
 @login_required(login_url='login_page')
+@user_type_required('VOLUNTEER')
 def accept_donation(request, donation_id):
-    if request.user.user_type != 'VOLUNTEER' or request.method != 'POST':
+    if request.method != 'POST':
         return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)
     
     try:
@@ -213,8 +229,10 @@ def accept_donation(request, donation_id):
         return JsonResponse({'success': False, 'message': 'An unexpected error occurred.'}, status=500)
 
 @login_required(login_url='login_page')
+@user_type_required('VOLUNTEER')
 def mark_as_delivered(request, camp_id):
-    if request.user.user_type != 'VOLUNTEER' or request.method != 'POST': return redirect('index')
+    if request.method != 'POST': 
+        return redirect('index')
     donations = Donation.objects.filter(assigned_volunteer=request.user.volunteer_profile, status__in=['ACCEPTED', 'COLLECTED'])
     camp = get_object_or_404(DonationCamp, pk=camp_id)
     
@@ -234,11 +252,12 @@ def mark_as_delivered(request, camp_id):
     return redirect('volunteer_manage_pickups')
 
 @login_required(login_url='login_page')
+@user_type_required('VOLUNTEER')
 def save_webpush_subscription(request):
     """API endpoint to save webpush subscription data"""
     import json
     
-    if request.method != 'POST' or request.user.user_type != 'VOLUNTEER':
+    if request.method != 'POST':
         return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)
     
     try:

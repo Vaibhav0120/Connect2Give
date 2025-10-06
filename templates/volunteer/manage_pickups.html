@@ -7,7 +7,7 @@
 {% block volunteer_content %}
     <div class="tab-navigation">
         {# This is the main dynamic tab for Pickup/Delivery #}
-        <button class="tab-button {% if view != 'history' %}active{% endif %}" onclick="switchTab(event, 'main-content')">
+        <button class="tab-button {% if view != 'history' %}active{% endif %}" onclick="switchPickupTab(event, 'main-content')">
             {% if view == 'delivery_route' %}
                 Delivery
             {% else %}
@@ -15,7 +15,7 @@
             {% endif %}
         </button>
         {# The history tab remains consistent #}
-        <button class="tab-button {% if view == 'history' %}active{% endif %}" onclick="switchTab(event, 'history')">Delivery History</button>
+        <button class="tab-button {% if view == 'history' %}active{% endif %}" onclick="switchPickupTab(event, 'history')">Delivery History</button>
     </div>
 
     {# --- Main Content Area for Pickup or Delivery --- #}
@@ -87,9 +87,9 @@
                             <td data-label="Address">{{ donation.pickup_address }}</td>
                             <td data-label="Action">
                                 {% if active_donations.count < 10 %}
-                                <button type="button" class="action-button" id="accept-btn-{{ donation.pk }}" onclick="acceptDonation({{ donation.pk }})">Accept</button>
+                                <button type="button" class="action-button" id="accept-btn-{{ donation.pk }}" data-testid="accept-donation-btn-{{ donation.pk }}" onclick="acceptDonation({{ donation.pk }})">Accept</button>
                                 {% else %}
-                                <button class="action-button" disabled>Pickup limit reached</button>
+                                <button class="action-button" data-testid="pickup-limit-reached-btn" disabled>Pickup limit reached</button>
                                 {% endif %}
                             </td>
                         </tr>
@@ -132,6 +132,12 @@
 {% block scripts %}
 {{ block.super }}
 
+{# Load common utilities #}
+{% load static %}
+<script src="{% static 'js/common.js' %}"></script>
+<script src="{% static 'js/volunteer_pickups.js' %}"></script>
+
+{# Pass Django template data to JavaScript #}
 {% if view == 'delivery_route' %}
     {{ volunteer_location_data|json_script:"volunteer-location-data" }}
     {% if nearest_camp_data %}
@@ -139,132 +145,8 @@
     {% endif %}
 {% endif %}
 
+{# Set current view as data attribute for JavaScript #}
 <script>
-    let deliveryMapInstance = null; 
-
-    document.addEventListener('DOMContentLoaded', function () {
-        // If the page loads in delivery mode, initialize the map
-        if ("{{ view }}" === "delivery_route") {
-            initializeDeliveryRouteMap();
-        }
-
-        // If the page loads with a specific view, ensure the correct tab is shown
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('view') === 'history') {
-            document.getElementById('main-content').classList.remove('active');
-            document.getElementById('history').classList.add('active');
-        }
-    });
-
-    function initializeDeliveryRouteMap() {
-        const volunteerDataElement = document.getElementById('volunteer-location-data');
-        const campDataElement = document.getElementById('nearest-camp-data');
-        const mapContainer = document.getElementById('delivery-map');
-
-        if (!volunteerDataElement || !mapContainer || !campDataElement) {
-            if(mapContainer) {
-                mapContainer.innerHTML = '<p class="empty-state">Cannot display route due to missing location data. Please set your location in your profile or check for active camps.</p>';
-            }
-            return;
-        }
-
-        if (typeof L === 'undefined' || typeof L.Routing === 'undefined') {
-            mapContainer.innerHTML = '<p class="empty-state">Error: Mapping library failed to load. Please refresh the page.</p>';
-            return;
-        }
-
-        const volunteerData = JSON.parse(volunteerDataElement.textContent);
-        const campData = JSON.parse(campDataElement.textContent);
-
-        deliveryMapInstance = L.map('delivery-map', {
-            zoomControl: false,
-            attributionControl: false
-        }).setView([volunteerData.lat, volunteerData.lon], 13);
-        
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(deliveryMapInstance);
-        
-        const deliveryFormAction = `/donation/deliver/to/${campData.pk}/`;
-
-        L.Routing.control({
-            waypoints: [
-                L.latLng(volunteerData.lat, volunteerData.lon),
-                L.latLng(campData.latitude, campData.longitude)
-            ],
-            routeWhileDragging: false,
-            createMarker: (i, waypoint) => L.marker(waypoint.latLng, { draggable: false }).bindPopup(i === 0 ? "<strong>Your Location</strong>" : "<strong>Nearest Camp:</strong><br>" + campData.name)
-        })
-        .on('routesfound', function(e) {
-            const summary = e.routes[0].summary;
-            const deliveryInfo = document.getElementById('delivery-info');
-            const distance = (summary.totalDistance / 1000).toFixed(2);
-            const time = Math.round(summary.totalTime / 60);
-            deliveryInfo.innerHTML = `<div class="route-summary"><p><strong>Distance:</strong> ${distance} km</p><p><strong>Estimated Time:</strong> ${time} minutes</p><form action="${deliveryFormAction}" method="POST" style="margin-top: 1rem;">{% csrf_token %}<button type="submit" class="btn">Confirm & Mark All as Delivered</button></form></div>`;
-        })
-        .addTo(deliveryMapInstance);
-    }
-
-    // A simplified function to switch between the main content and history tabs
-    function switchTab(event, tabId) {
-        const url = new URL(window.location);
-        if (tabId === 'history') {
-            url.searchParams.set('view', 'history');
-        } else {
-            url.searchParams.delete('view');
-        }
-        window.location.href = url.toString();
-    }
-    
-    // AJAX function to accept donation
-    function acceptDonation(donationId) {
-        const csrftoken = getCookie('csrftoken');
-        const acceptBtn = document.getElementById(`accept-btn-${donationId}`);
-        
-        // Disable button to prevent double-click
-        acceptBtn.disabled = true;
-        acceptBtn.textContent = 'Accepting...';
-        
-        fetch(`/donation/accept/${donationId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrftoken,
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Update button to show accepted state
-                acceptBtn.textContent = 'Accepted!';
-                acceptBtn.classList.remove('action-button');
-                acceptBtn.style.backgroundColor = '#10b981';
-                acceptBtn.style.cursor = 'default';
-                
-                // Remove row after animation
-                setTimeout(() => {
-                    const row = document.getElementById(`donation-row-${donationId}`);
-                    if (row) {
-                        row.style.transition = 'opacity 0.3s';
-                        row.style.opacity = '0';
-                        setTimeout(() => row.remove(), 300);
-                    }
-                }, 1000);
-                
-                showToast(data.message || 'Donation accepted. Please pick it up within 30 minutes.', 'success');
-                
-                // Reload page after 2 seconds to update active pickups count
-                setTimeout(() => location.reload(), 2000);
-            } else {
-                acceptBtn.disabled = false;
-                acceptBtn.textContent = 'Accept';
-                showToast(data.message || 'Failed to accept donation', 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            acceptBtn.disabled = false;
-            acceptBtn.textContent = 'Accept';
-            showToast('An error occurred. Please try again.', 'error');
-        });
-    }
+    document.body.dataset.currentView = "{{ view }}";
 </script>
 {% endblock scripts %}

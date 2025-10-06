@@ -12,6 +12,7 @@ env = environ.Env(
     # set casting, default value
     DEBUG=(bool, True),
     SECRET_KEY=(str, 'django-insecure-a-default-secret-key-for-dev'),
+    ALLOWED_HOSTS=(list, ['localhost', '127.0.0.1']),
     
     # Email Settings
     EMAIL_BACKEND=(str, 'django.core.mail.backends.smtp.EmailBackend'),
@@ -35,7 +36,8 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = ['192.168.0.167', '127.0.0.1', 'localhost', 'vaibhav0120.pythonanywhere.com', '.pythonanywhere.com', ".ngrok-free.dev"]
+# Parse ALLOWED_HOSTS from environment variable (comma-separated string)
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 
 # Application definition
 INSTALLED_APPS = [

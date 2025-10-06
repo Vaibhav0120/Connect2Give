@@ -3,14 +3,16 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 import json
-from ..models import Donation, DonationCamp, RestaurantProfile
+from ..models import Donation, DonationCamp, RestaurantProfile, VolunteerProfile
 from ..forms import DonationForm, RestaurantProfileForm
+from ..decorators import user_type_required
+from django.conf import settings
+from pywebpush import webpush
+
 
 @login_required(login_url='login_page')
+@user_type_required('RESTAURANT')
 def restaurant_dashboard(request):
-    if request.user.user_type != 'RESTAURANT':
-        return redirect('index')
-    
     restaurant_profile = request.user.restaurant_profile
     stats = {
         'total_donations': Donation.objects.filter(restaurant=restaurant_profile).count(),
@@ -32,10 +34,8 @@ def restaurant_dashboard(request):
     return render(request, 'restaurant/dashboard.html', context)
 
 @login_required(login_url='login_page')
+@user_type_required('RESTAURANT')
 def restaurant_donations(request):
-    if request.user.user_type != 'RESTAURANT':
-        return redirect('index')
-    
     restaurant_profile = request.user.restaurant_profile
     
     if request.method == 'POST':
@@ -46,19 +46,18 @@ def restaurant_donations(request):
             donation.save()
             messages.success(request, 'New donation posted successfully!')
             
-            # Send webpush notifications to all volunteers with subscriptions
+            # Send webpush notifications
             try:
-                from ..models import VolunteerProfile
-                from pywebpush import webpush
-                from django.conf import settings
-                import json
-                
                 volunteers_with_subscription = VolunteerProfile.objects.exclude(
                     webpush_subscription__isnull=True
                 ).exclude(webpush_subscription='')
                 
                 for volunteer in volunteers_with_subscription:
                     try:
+                        # FIX: Check if subscription data exists before parsing
+                        if not volunteer.webpush_subscription:
+                            continue
+
                         subscription_info = json.loads(volunteer.webpush_subscription)
                         message_data = {
                             'title': 'New Donation Available! 🍱',
@@ -75,11 +74,9 @@ def restaurant_donations(request):
                             }
                         )
                     except Exception as e:
-                        # Log error but don't break the flow
-                        print(f"Failed to send notification to volunteer {volunteer.full_name}: {str(e)}")
+                        print(f"Failed to send notification to {volunteer.full_name}: {e}")
             except Exception as e:
-                # If webpush fails, just log it and continue
-                print(f"Webpush error: {str(e)}")
+                print(f"Webpush notification error: {e}")
             
             return redirect('restaurant_donations')
     else:
@@ -94,10 +91,8 @@ def restaurant_donations(request):
     return render(request, 'restaurant/donations.html', context)
 
 @login_required(login_url='login_page')
+@user_type_required('RESTAURANT')
 def restaurant_profile(request):
-    if request.user.user_type != 'RESTAURANT':
-        return redirect('index')
-    
     profile = get_object_or_404(RestaurantProfile, user=request.user)
     
     if request.method == 'POST':
@@ -113,7 +108,6 @@ def restaurant_profile(request):
     return render(request, 'restaurant/profile.html', context)
 
 @login_required(login_url='login_page')
+@user_type_required('RESTAURANT')
 def restaurant_settings(request):
-    if request.user.user_type != 'RESTAURANT':
-        return redirect('index')
     return render(request, 'restaurant/settings.html')

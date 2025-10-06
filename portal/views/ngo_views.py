@@ -5,10 +5,11 @@ from django.db.models import Q, Count
 from django.contrib import messages
 from ..models import DonationCamp, Donation, NGOProfile
 from ..forms import DonationCampForm, NGOProfileForm
+from ..decorators import user_type_required
 
 @login_required(login_url='login_page')
+@user_type_required('NGO')
 def ngo_dashboard_overview(request):
-    if request.user.user_type != 'NGO': return redirect('index')
     ngo_profile = request.user.ngo_profile
     stats = {
         'active_camps': DonationCamp.objects.filter(ngo=ngo_profile, is_active=True).count(),
@@ -20,8 +21,8 @@ def ngo_dashboard_overview(request):
     return render(request, 'ngo/dashboard_overview.html', context)
 
 @login_required(login_url='login_page')
+@user_type_required('NGO')
 def ngo_manage_camps(request):
-    if request.user.user_type != 'NGO': return redirect('index')
     ngo_profile = request.user.ngo_profile
     view_param = request.GET.get('view', None)
 
@@ -36,10 +37,17 @@ def ngo_manage_camps(request):
     else:
         form = DonationCampForm()
 
+    # Optimized queries with select_related for foreign keys
     active_camps = DonationCamp.objects.filter(ngo=ngo_profile, is_active=True).order_by('start_time')
     completed_camps = DonationCamp.objects.filter(ngo=ngo_profile, is_active=False).order_by('-completed_at')
-    donations_to_verify = Donation.objects.filter(target_camp__ngo=ngo_profile, status='VERIFYING').order_by('delivered_at')
-    delivered_donations = Donation.objects.filter(target_camp__ngo=ngo_profile, status='DELIVERED').select_related('restaurant', 'assigned_volunteer', 'target_camp').order_by('-delivered_at')[:50]  # Last 50 deliveries
+    donations_to_verify = Donation.objects.filter(
+        target_camp__ngo=ngo_profile, 
+        status='VERIFYING'
+    ).select_related('restaurant', 'assigned_volunteer', 'target_camp').order_by('delivered_at')
+    delivered_donations = Donation.objects.filter(
+        target_camp__ngo=ngo_profile, 
+        status='DELIVERED'
+    ).select_related('restaurant', 'assigned_volunteer', 'target_camp').order_by('-delivered_at')[:50]
     
     context = {
         'form': form, 
@@ -52,18 +60,22 @@ def ngo_manage_camps(request):
     return render(request, 'ngo/manage_camps.html', context)
 
 @login_required(login_url='login_page')
+@user_type_required('NGO')
 def ngo_manage_volunteers(request):
-    if request.user.user_type != 'NGO': return redirect('index')
     ngo_profile = request.user.ngo_profile
-    registered_volunteers = ngo_profile.volunteers.annotate(active_deliveries=Count('assigned_donations', filter=Q(assigned_donations__status__in=['ACCEPTED', 'COLLECTED']))).order_by('full_name')
+    # Optimized query with annotation for active deliveries count
+    registered_volunteers = ngo_profile.volunteers.annotate(
+        active_deliveries=Count(
+            'assigned_donations', 
+            filter=Q(assigned_donations__status__in=['ACCEPTED', 'COLLECTED'])
+        )
+    ).order_by('full_name')
     context = {'volunteers': registered_volunteers}
     return render(request, 'ngo/manage_volunteers.html', context)
 
 @login_required(login_url='login_page')
+@user_type_required('NGO')
 def ngo_profile(request):
-    if request.user.user_type != 'NGO':
-        return redirect('index')
-    
     profile = get_object_or_404(NGOProfile, user=request.user)
 
     if request.method == 'POST':
@@ -79,6 +91,6 @@ def ngo_profile(request):
     return render(request, 'ngo/profile.html', context)
 
 @login_required(login_url='login_page')
+@user_type_required('NGO')
 def ngo_settings(request):
-    if request.user.user_type != 'NGO': return redirect('index')
     return render(request, 'ngo/settings.html')
