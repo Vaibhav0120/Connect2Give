@@ -202,17 +202,23 @@
 ==================================== */
 
 .profile-container {
-  max-width: 900px;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
 .profile-form {
   padding: 2rem;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
 }
 
 .form-grid {
   display: grid;
-  grid-template-columns: 1fr 250px;
-  gap: 2rem;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 2.5rem;
+  align-items: start;
 }
 
 .image-upload-section {
@@ -271,6 +277,20 @@
   text-align: center;
   padding: 3rem 2rem;
   color: var(--text-muted);
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.6;
+}
+
+.empty-state p {
+  margin: 0.5rem 0;
+}
+
+.empty-state .btn {
+  margin-top: 1rem;
 }
 
 /* =================================

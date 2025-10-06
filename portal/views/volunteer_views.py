@@ -11,6 +11,7 @@ from geopy.distance import geodesic
 from django.http import JsonResponse
 from django.db import transaction
 from ..decorators import user_type_required
+from django.conf import settings
 
 
 @login_required(login_url='login_page')
@@ -35,10 +36,15 @@ def volunteer_dashboard(request):
     donations_map_data = [{"lat": d.restaurant.latitude, "lon": d.restaurant.longitude, "name": d.restaurant.restaurant_name, "food": d.food_description, "id": d.pk} for d in available_donations if d.restaurant.latitude and d.restaurant.longitude]
     camps_map_data = [{"lat": c.latitude, "lon": c.longitude, "name": c.name, "ngo": c.ngo.ngo_name, "address": c.location_address} for c in upcoming_camps if c.latitude and c.longitude]
     
+    # Check if user is already subscribed to push notifications
+    is_subscribed = bool(volunteer_profile.webpush_subscription)
+    
     context = {
         'stats': stats,
         'donations_map_data': json.dumps(donations_map_data),
-        'camps_map_data': json.dumps(camps_map_data)
+        'camps_map_data': json.dumps(camps_map_data),
+        'is_subscribed_to_notifications': is_subscribed,
+        'WEBPUSH_SETTINGS': settings.WEBPUSH_SETTINGS
     }
     return render(request, 'volunteer/dashboard.html', context)
 

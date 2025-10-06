@@ -39,7 +39,13 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="3" class="empty-state">There are no new NGOs to join at the moment.</td>
+                    <td colspan="3">
+                        <div class="empty-state">
+                            <div class="empty-state-icon" style="font-size: 3rem; margin-bottom: 1rem;">🏢</div>
+                            <p style="font-size: 1.125rem; font-weight: 500; color: var(--text-secondary); margin-bottom: 0.5rem;">No New NGOs Available</p>
+                            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">All NGOs in the platform are already in your registered list.</p>
+                        </div>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -67,7 +73,13 @@
                 </tr>
                 {% empty %}
                 <tr id="registered-empty">
-                    <td colspan="3" class="empty-state">You are not registered with any NGOs yet.</td>
+                    <td colspan="3">
+                        <div class="empty-state">
+                            <div class="empty-state-icon" style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
+                            <p style="font-size: 1.125rem; font-weight: 500; color: var(--text-secondary); margin-bottom: 0.5rem;">Not Registered with Any NGOs</p>
+                            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Join an NGO from the list above to start receiving deliveries to their camps.</p>
+                        </div>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

@@ -153,6 +153,81 @@
                         }
                     });
                 });
+
+                // Swipeable sidebar functionality
+                const sidebar = document.getElementById('dashboard-sidebar');
+                const overlay = document.querySelector('.sidebar-overlay');
+                let touchStartX = 0;
+                let touchCurrentX = 0;
+                let touchStartY = 0;
+                let touchCurrentY = 0;
+                let isSwiping = false;
+                const swipeThreshold = 50; // Minimum distance for a swipe
+                const edgeThreshold = 30; // Distance from left edge to start swipe
+
+                // Touch start handler
+                document.addEventListener('touchstart', function(e) {
+                    touchStartX = e.touches[0].clientX;
+                    touchStartY = e.touches[0].clientY;
+                    
+                    // Check if swipe starts from left edge to open sidebar
+                    if (touchStartX < edgeThreshold && !sidebar.classList.contains('open')) {
+                        isSwiping = true;
+                    }
+                    
+                    // Check if swipe starts on sidebar to close it
+                    if (sidebar.classList.contains('open')) {
+                        const sidebarRect = sidebar.getBoundingClientRect();
+                        if (touchStartX >= sidebarRect.left && touchStartX <= sidebarRect.right) {
+                            isSwiping = true;
+                        }
+                    }
+                }, { passive: true });
+
+                // Touch move handler
+                document.addEventListener('touchmove', function(e) {
+                    if (!isSwiping) return;
+                    
+                    touchCurrentX = e.touches[0].clientX;
+                    touchCurrentY = e.touches[0].clientY;
+                    
+                    const deltaX = touchCurrentX - touchStartX;
+                    const deltaY = touchCurrentY - touchStartY;
+                    
+                    // Only handle horizontal swipes (not vertical scrolling)
+                    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                        // Prevent vertical scrolling during horizontal swipe
+                        if (Math.abs(deltaX) > 10) {
+                            e.preventDefault();
+                        }
+                    }
+                }, { passive: false });
+
+                // Touch end handler
+                document.addEventListener('touchend', function(e) {
+                    if (!isSwiping) return;
+                    
+                    const deltaX = touchCurrentX - touchStartX;
+                    const deltaY = touchCurrentY - touchStartY;
+                    
+                    // Only handle horizontal swipes
+                    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                        // Swipe right to open (from left edge)
+                        if (deltaX > swipeThreshold && !sidebar.classList.contains('open')) {
+                            toggleSidebar();
+                        }
+                        // Swipe left to close (when sidebar is open)
+                        else if (deltaX < -swipeThreshold && sidebar.classList.contains('open')) {
+                            closeSidebar();
+                        }
+                    }
+                    
+                    isSwiping = false;
+                    touchStartX = 0;
+                    touchCurrentX = 0;
+                    touchStartY = 0;
+                    touchCurrentY = 0;
+                }, { passive: true });
             });
         </script>
     {% endblock body %}
