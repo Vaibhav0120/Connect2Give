@@ -297,12 +297,63 @@
    RESPONSIVE STYLES
 ==================================== */
 
+/* iPad/Tablet (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+
+  .stat-card {
+    padding: 1.75rem;
+  }
+
+  .stat-number {
+    font-size: 2.75rem;
+  }
+
+  .tab-navigation {
+    gap: 0.5rem;
+  }
+
+  .tab-button {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.875rem;
+  }
+
+  .content-card {
+    padding: 1.75rem;
+  }
+
+  .pickup-list {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  #dashboard-map,
+  #delivery-map,
+  #location-map {
+    height: 380px;
+  }
+
+  .route-summary {
+    padding: 1rem;
+  }
+}
+
+/* Desktop/Large Tablet (up to 1024px) */
 @media (max-width: 1024px) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
+/* Mobile (up to 768px) */
 @media (max-width: 768px) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);

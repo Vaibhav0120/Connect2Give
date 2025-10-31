@@ -287,16 +287,36 @@
    RESPONSIVE STYLES
 ==================================== */
 
-@media (max-width: 1024px) {
+/* iPad/Tablet Portrait & Landscape (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
   .sidebar {
-    width: 260px;
+    width: 240px;
   }
 
   .main-content {
-    margin-left: 260px;
+    margin-left: 240px;
+    padding: 1.5rem;
+  }
+
+  .main-header h2 {
+    font-size: 1.625rem;
+  }
+
+  .sidebar-header h1 {
+    font-size: 1.375rem;
+  }
+
+  .nav-link {
+    padding: 0.75rem 0.875rem;
+    font-size: 0.875rem;
+  }
+
+  .toast-container {
+    max-width: 350px;
   }
 }
 
+/* Mobile (up to 768px) */
 @media (max-width: 768px) {
   .mobile-sidebar-toggle {
     display: flex;

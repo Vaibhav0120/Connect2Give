@@ -393,6 +393,60 @@
    RESPONSIVE DESIGN
 ==================================== */
 
+/* iPad/Tablet (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .auth-page-wrapper {
+    padding: 1.5rem;
+  }
+
+  .auth-container {
+    max-width: 600px;
+  }
+
+  .auth-card {
+    padding: 2.5rem 2rem;
+    border-radius: var(--radius-lg);
+  }
+
+  .auth-header h1 {
+    font-size: 1.875rem;
+  }
+
+  .auth-header p {
+    font-size: 0.9375rem;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 0.875rem 1rem;
+    font-size: 15px;
+  }
+
+  .auth-submit-btn {
+    padding: 1rem;
+    font-size: 1rem;
+  }
+
+  .google-signin-btn {
+    padding: 1rem;
+    font-size: 1rem;
+  }
+
+  #location-map {
+    height: 320px;
+  }
+
+  .address-group {
+    gap: 0.875rem;
+  }
+
+  .address-group button {
+    padding: 0.875rem 1.5rem;
+  }
+}
+
+/* Small Tablets & Mobile (up to 640px) */
 @media (max-width: 640px) {
   .auth-page-wrapper {
     padding: 1rem;
