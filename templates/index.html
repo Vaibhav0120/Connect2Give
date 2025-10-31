@@ -164,19 +164,89 @@
             box-shadow: 0 4px 12px rgba(0, 173, 181, 0.25);
         }
 
-        /* Modern hero section */
+        /* === MODIFIED HERO SECTION === */
         .hero-section {
             position: relative;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #00ADB5 0%, #393E46 100%);
+            background: #222831; /* Fallback background */
             color: white;
             overflow: hidden;
             padding-top: 80px;
         }
+        
+        /* Container for all background slides */
+        .hero-background-slider {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
 
+        /* Individual slide styling */
+        .hero-bg-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0; /* Hidden by default */
+            transition: opacity 1.5s ease-in-out; /* Beautiful 1.5s fade effect */
+        }
+        
+        /* Dark overlay for readability (applies to all slides by default) */
+        .hero-bg-slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4); /* 40% black overlay */
+            z-index: 1;
+            /* Add transition for the overlay itself (optional) */
+            transition: background-color 1.5s ease-in-out;
+        }
+
+        /* * === THIS IS THE CHANGE YOU REQUESTED ===
+         * Override the overlay for the cyan slide, making it transparent
+         */
+        .hero-bg-slide.hero-bg-0::before {
+            background-color: transparent; /* No overlay for the cyan gradient */
+        }
+
+        /* Active slide is visible */
+        .hero-bg-slide.active {
+            opacity: 1;
+        }
+
+        /* Specific styles for each slide */
+        .hero-bg-0 {
+            background-image: linear-gradient(135deg, #00ADB5 0%, #393E46 100%);
+        }
+        .hero-bg-1 {
+            background-image: url("{% static 'images/1.jpg' %}");
+        }
+        .hero-bg-2 {
+            background-image: url("{% static 'images/2.jpg' %}");
+        }
+        .hero-bg-3 {
+            background-image: url("{% static 'images/3.jpg' %}");
+        }
+        .hero-bg-4 {
+            background-image: url("{% static 'images/4.jpg' %}");
+        }
+        .hero-bg-5 {
+            background-image: url("{% static 'images/5.jpg' %}");
+        }
+
+        /* Subtle pattern overlay (optional, but looks good) */
         .hero-section::before {
             content: '';
             position: absolute;
@@ -184,17 +254,20 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: radial-gradient(circle at 30% 50%, rgba(238, 238, 238, 0.08) 0%, transparent 50%);
+            background: radial-gradient(circle at 30% 50%, rgba(238, 238, 238, 0.05) 0%, transparent 40%);
+            z-index: 2; /* On top of slides, below content */
         }
 
+        /* Hero content must be on top of everything */
         .hero-content {
             position: relative;
-            z-index: 1;
+            z-index: 3; /* On top of slides and pattern */
             text-align: center;
             max-width: 900px;
             padding: 2rem;
             animation: fadeInUp 0.8s ease-out;
         }
+        /* === END OF MODIFIED HERO SECTION === */
 
         .hero-content h1 {
             font-size: clamp(2.5rem, 6vw, 4.5rem);
@@ -203,6 +276,8 @@
             color: white;
             line-height: 1.1;
             letter-spacing: -0.02em;
+            /* Added text-shadow for extra readability */
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
         }
 
         .hero-content p {
@@ -213,6 +288,8 @@
             max-width: 700px;
             margin-left: auto;
             margin-right: auto;
+            /* Added text-shadow for extra readability */
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
         }
 
         .hero-buttons {
@@ -1039,8 +1116,11 @@
 
     {% else %}
         <div class="full-width">
-             {% comment %} Hero section with modern gradient design  {% endcomment %}
+             {% comment %} Hero section with dynamic background  {% endcomment %}
             <section class="hero-section">
+                <div class="hero-background-slider">
+                    <div class="hero-bg-slide hero-bg-0 active"></div> <div class="hero-bg-slide hero-bg-1"></div> <div class="hero-bg-slide hero-bg-2"></div> <div class="hero-bg-slide hero-bg-3"></div> <div class="hero-bg-slide hero-bg-4"></div> <div class="hero-bg-slide hero-bg-5"></div> </div>
+
                 <div class="hero-content">
                     <h1>Turn Surplus into Support</h1>
                     <p>Connect2Give bridges restaurants with excess food to NGOs and volunteers. Together, we fight hunger and reduce waste in our community.</p>
@@ -1247,7 +1327,51 @@
 
     {% if not user.is_authenticated %}
         <script>
+            // --- UPDATED HERO BACKGROUND SLIDER LOGIC ---
             document.addEventListener('DOMContentLoaded', function () {
+                // Get all the slide elements
+                const slides = document.querySelectorAll('.hero-bg-slide');
+                
+                // Define the duration for each slide in milliseconds
+                // 3s for cyan, 5s for each image
+                const slideDurations = [
+                    3000, // hero-bg-0 (cyan)
+                    5000, // hero-bg-1 (1.jpg)
+                    5000, // hero-bg-2 (2.jpg)
+                    5000, // hero-bg-3 (3.jpg)
+                    5000, // hero-bg-4 (4.jpg)
+                    5000  // hero-bg-5 (5.jpg)
+                ];
+                
+                let currentSlideIndex = 0;
+
+                function changeSlide() {
+                    if (slides.length === 0) return;
+
+                    // Remove 'active' class from the current slide
+                    slides[currentSlideIndex].classList.remove('active');
+
+                    // Calculate the next slide index
+                    currentSlideIndex = (currentSlideIndex + 1) % slides.length;
+
+                    // Add 'active' class to the new slide
+                    slides[currentSlideIndex].classList.add('active');
+                    
+                    // Get the duration for the *current* slide (which is now active)
+                    const duration = slideDurations[currentSlideIndex];
+                    
+                    // Set timeout for the next slide change
+                    setTimeout(changeSlide, duration);
+                }
+
+                if (slides.length > 0) {
+                    // Start the cycle. The first timeout will be after the first slide's duration (3000ms).
+                    setTimeout(changeSlide, slideDurations[0]);
+                }
+                
+                
+                // --- (existing map and intersection observer logic below) ---
+
                 const navbar = document.querySelector('.navbar');
                 window.addEventListener('scroll', () => {
                     if (window.scrollY > 50) {
