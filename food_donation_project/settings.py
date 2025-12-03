@@ -3,6 +3,7 @@
 from pathlib import Path
 import environ
 import os
+import sys
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,6 +27,18 @@ env = environ.Env(
     # Google OAuth Settings
     GOOGLE_OAUTH_CLIENT_ID=(str, ''),
     GOOGLE_OAUTH_CLIENT_SECRET=(str, ''),
+
+    # DB
+    DB_NAME=(str, 'connect2give_db'),
+    DB_USER=(str, 'root'),
+    DB_PASSWORD=(str, ''),
+    DB_HOST=(str, 'localhost'),
+    DB_PORT=(str, '3306'),
+
+    # VAPID
+    VAPID_PUBLIC_KEY=(str, ''),
+    VAPID_PRIVATE_KEY=(str, ''),
+    VAPID_ADMIN_EMAIL=(str, ''),
 )
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
@@ -99,16 +112,25 @@ WSGI_APPLICATION = 'food_donation_project.wsgi.application'
 ASGI_APPLICATION = 'food_donation_project.asgi.application'
 
 # Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': env('DB_NAME'),
-        'USER': env('DB_USER'),
-        'PASSWORD': env('DB_PASSWORD'),
-        'HOST': env('DB_HOST'),
-        'PORT': env('DB_PORT'),
+# Check if running tests
+if 'test' in sys.argv or 'test_coverage' in sys.argv:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': env('DB_NAME'),
+            'USER': env('DB_USER'),
+            'PASSWORD': env('DB_PASSWORD'),
+            'HOST': env('DB_HOST'),
+            'PORT': env('DB_PORT'),
+        }
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [

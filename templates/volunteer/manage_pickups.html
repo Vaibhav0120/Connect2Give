@@ -27,10 +27,19 @@
             {% if active_donations %}
                 <div class="pickup-list">
                     {% for donation in active_donations %}
-                        <div class="pickup-item">
-                            <p><strong>{{ donation.restaurant.restaurant_name }}</strong></p>
-                            <p>{{ donation.food_description }}</p>
-                            <p><small>{{ donation.pickup_address }}</small></p>
+                        <div class="pickup-item pickup-item-content">
+                            <div>
+                                <p><strong>{{ donation.restaurant.restaurant_name }}</strong></p>
+                                <p>{{ donation.food_description }}</p>
+                                <p><small>{{ donation.pickup_address }}</small></p>
+                            </div>
+                            <div>
+                                {% if donation.status == 'ACCEPTED' %}
+                                    <button class="btn btn-sm" id="collect-btn-{{ donation.pk }}" onclick="markAsCollected({{ donation.pk }})">Mark as Picked Up</button>
+                                {% elif donation.status == 'COLLECTED' %}
+                                    <span class="status-badge status-collected">Picked Up</span>
+                                {% endif %}
+                            </div>
                         </div>
                     {% endfor %}
                 </div>

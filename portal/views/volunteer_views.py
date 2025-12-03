@@ -236,6 +236,30 @@ def accept_donation(request, donation_id):
 
 @login_required(login_url='login_page')
 @user_type_required('VOLUNTEER')
+def mark_as_collected(request, donation_id):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Invalid request.'}, status=400)
+
+    try:
+        donation = get_object_or_404(Donation, pk=donation_id)
+        if donation.assigned_volunteer != request.user.volunteer_profile:
+             return JsonResponse({'success': False, 'message': 'Unauthorized.'}, status=403)
+
+        if donation.status != 'ACCEPTED':
+            return JsonResponse({'success': False, 'message': 'Invalid donation status.'}, status=400)
+
+        donation.status = 'COLLECTED'
+        donation.collected_at = timezone.now()
+        donation.save()
+
+        return JsonResponse({'success': True, 'message': 'Marked as collected!'})
+    except Exception as e:
+        print(f"Error in mark_as_collected: {e}")
+        return JsonResponse({'success': False, 'message': 'An error occurred.'}, status=500)
+
+
+@login_required(login_url='login_page')
+@user_type_required('VOLUNTEER')
 def mark_as_delivered(request, camp_id):
     if request.method != 'POST': 
         return redirect('index')
