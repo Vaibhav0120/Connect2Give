@@ -256,6 +256,12 @@
   background-color: var(--bg-primary);
 }
 
+.pickup-item-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .route-summary {
   padding: 1rem;
   background-color: var(--bg-primary);

@@ -191,6 +191,47 @@ function acceptDonation(donationId) {
 }
 
 /**
+ * Mark a donation as collected via AJAX
+ * @param {number} donationId - ID of the donation to mark as collected
+ */
+function markAsCollected(donationId) {
+    const csrftoken = getCookie('csrftoken');
+    const collectBtn = document.getElementById(`collect-btn-${donationId}`);
+
+    if (!collectBtn) return;
+
+    // Show loading state
+    collectBtn.disabled = true;
+    collectBtn.textContent = 'Updating...';
+
+    fetch(`/donation/collected/${donationId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast(data.message, 'success');
+            // Reload page to reflect changes (button should disappear or change to "Picked Up" badge)
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            collectBtn.disabled = false;
+            collectBtn.textContent = 'Mark as Picked Up';
+            showToast(data.message || 'Failed to update status', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        collectBtn.disabled = false;
+        collectBtn.textContent = 'Mark as Picked Up';
+        showToast('An error occurred. Please try again.', 'error');
+    });
+}
+
+/**
  * Register with an NGO via AJAX
  * @param {number} ngoId - ID of the NGO to register with
  */

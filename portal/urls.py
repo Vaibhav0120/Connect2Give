@@ -65,6 +65,7 @@ urlpatterns = [
     path('register_with_ngo/<int:ngo_id>/', views.register_with_ngo, name='register_with_ngo'),
     path('unregister_from_ngo/<int:ngo_id>/', views.unregister_from_ngo, name='unregister_from_ngo'),
     path('donation/accept/<int:donation_id>/', views.accept_donation, name='accept_donation'),
+    path('donation/collected/<int:donation_id>/', views.mark_as_collected, name='mark_as_collected'),
     path('donation/deliver/to/<int:camp_id>/', views.mark_as_delivered, name='mark_as_delivered'),
     path('camp/complete/<int:camp_id>/', views.mark_camp_as_completed, name='mark_camp_as_completed'),
     path('donation/confirm_delivery/<int:donation_id>/', views.confirm_delivery, name='confirm_delivery'),
